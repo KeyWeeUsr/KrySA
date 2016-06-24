@@ -1,0 +1,587 @@
+# -*- coding: utf-8 -*-
+# KrySA - Statistical analysis for rats
+# Version: 0.1.0
+# Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
+# License: GNU GPL v3.0
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# More info in LICENSE.txt
+#
+# The above copyright notice, warning and additional info together with
+# LICENSE.txt file shall be included in all copies or substantial portions
+# of the Software.
+
+from kivy.config import Config
+# Config.set('graphics', 'window_state', 'maximized')
+import math
+import re
+import types  # remove?
+import numpy
+import scipy
+import string
+import sqlite3
+import os.path as op
+import unicodecsv as csv  # remove when done export_data for sqlite
+from kivy.app import App
+from kivy.clock import Clock
+from functools import partial
+from kivy.uix.popup import Popup
+from kivy.uix.image import Image
+from kivy.uix.label import Label
+from kivy.uix.button import Button
+from kivy.core.window import Window
+from kivy.graphics import Color, Line
+from kivy.uix.dropdown import DropDown
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
+from kivy.uix.scrollview import ScrollView
+from kivy.uix.gridlayout import GridLayout
+from kivy.properties import NumericProperty
+from kivy.uix.recycleview import RecycleView
+from kivy.uix.floatlayout import FloatLayout
+from kivy.uix.stencilview import StencilView
+from kivy.uix.recyclegridlayout import RecycleGridLayout
+from kivy.uix.tabbedpanel import TabbedPanelItem
+from kivy.factory import Factory
+from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
+
+
+class SmallLargeLayout(BoxLayout):
+    def __init__(self, **kw):
+        super(SmallLargeLayout, self).__init__(**kw)
+
+
+class CountLayout(BoxLayout):
+    def __init__(self, **kw):
+        super(CountLayout, self).__init__(**kw)
+
+
+class Task(Popup):
+    run = ObjectProperty(None)
+
+    def __init__(self, **kw):
+        super(Task, self).__init__(**kw)
+        self.run = kw.get('run', None)
+        wdg = kw.get('wdg', None)
+        if wdg:
+            self.ids.container.add_widget(wdg)
+
+    def get_table_pos(self, text, values, *args):
+        print values
+        gen = (i for i, val in enumerate(values) if val == text)
+        for i in gen:
+            return i
+
+
+class Dialog(Popup):
+    confirm = StringProperty('')
+    run = ObjectProperty(None)
+    dirs = BooleanProperty(False)
+
+    def __init__(self, **kw):
+        super(Dialog, self).__init__(**kw)
+        self.confirm = kw.get('confirm', '')
+        self.run = kw.get('run', None)
+        self.dirs = kw.get('dirs', False)
+
+
+class SideItem(BoxLayout):
+    pass
+
+
+class TableItem(TextInput):
+    def update_value(self, txt, *args):
+        data = []
+        cols = self.cols - 1
+        for i in self.origin.data:
+            if 'cell' in i:
+                data.append(i)
+        chunks = [data[x:x+cols] for x in xrange(0, len(data), cols)]
+
+        orig_type = type(chunks[self.r][self.c-1])
+        self.origin.data[self.cols*(self.r+1)-(self.cols-self.c)]['text'] = txt
+        self.origin.refresh_from_data()
+
+
+class Table(ScrollView):
+    # use with ....add_widget(Table(max_cols=3, max_rows=3))
+    # Grid -> Scroll, grid as container - better for sizing and placing
+
+    # set "address" for table pos in grid to item
+    number_size = (30, 30)
+    default_size = (100, 30)
+
+    def __init__(self, **kw):
+        self.rv = RecycleView(bar_width='10dp',
+                              scroll_type=['bars', 'content'])
+        container = RecycleGridLayout(size_hint=(None, None))
+        container.viewclass = TableItem
+        container.bind(minimum_size=container.setter('size'))
+        self.max_rows = kw.get('max_rows', 1)
+        self.rows = self.max_rows + 1
+        self.max_cols = kw.get('max_cols', 1)
+        self.cols = self.max_cols + 1
+        self.values = kw.get('values', [])
+        container.rows = self.rows
+        container.cols = self.cols
+        self.labels = kw.get('labels', None)
+        if self.labels is None:
+            self.labels = self.get_letters()
+            self.max_rows += 1
+            self.rows = self.max_rows + 1
+            container.rows = self.rows
+        self.rv.add_widget(container)
+        if 'item_size' not in kw:
+            item_size = self.default_size
+        super(Table, self).__init__(**kw)
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if r == 0:
+                    if c == 0:
+                        self.rv.data.append({'text': '', 'disabled': True,
+                                             'size': self.number_size,
+                                             'origin': self.rv})
+                    else:
+                        self.rv.data.append({'text': self.labels[c-1],
+                                             'disabled': True,
+                                             'cell': 'label' + str(c-1),
+                                             'type': type(''),
+                                             'size': self.default_size,
+                                             'origin': self.rv})
+                else:
+                    if c == 0:
+                        self.rv.data.append({'text': str(r),
+                                             'disabled': True,
+                                             'size': self.number_size,
+                                             'origin': self.rv})
+                    else:
+                        try:
+                            val = self.values.pop(0)
+                            text_type = type(val)
+                        except IndexError:
+                            print 'values < space'
+                            val = '.'
+                        self.rv.data.append({'text': str(val),
+                                             'disabled': False,
+                                             'cell': self.labels[c-1]+str(r),
+                                             'r': r,
+                                             'rows': self.rows,
+                                             'c': c,
+                                             'cols': self.cols,
+                                             'type': text_type,
+                                             'size': self.default_size,
+                                             'origin': self.rv})
+        if self.values:
+            raise Exception('Not enough space for all values! \
+                            Increase rows/cols!')
+        self.add_widget(self.rv)
+
+    def get_letters(self):
+        letters = [chr(letter+65) for letter in range(26)]
+        result = []
+        label = []
+        cols = range(self.cols+1)
+        for i in cols:
+            if i != 0:
+                while i:
+                    i, rem = divmod(i-1, 26)
+                    label[:0] = letters[rem]
+                result.append(''.join(label))
+                label = []
+        return result
+
+    def lock(self, disabled=True):
+        for i in self.rv.data:
+            if 'cell' in i and 'label' not in i['cell']:
+                i['disabled'] = disabled
+        self.rv.refresh_from_data()
+
+    def clean(self, *args):
+        self.rv.data = []
+
+
+class ProcessFlow(BoxLayout, StencilView):
+    def __init__(self, **kw):
+        super(ProcessFlow, self).__init__(**kw)
+        self.texture = Image(source='grid.png').texture
+        self.texture.wrap = 'repeat'
+
+
+class SizedButton(Button):
+    def correct_width(self, *args):
+        self.width = self.texture_size[0] + 8
+        self.parent.parent.width = max([c.width for c in self.parent.children])
+        for child in self.parent.children:
+            child.width = self.parent.parent.width
+
+
+class MenuDrop(DropDown):
+    def __init__(self, **kw):
+        app = App.get_running_app()
+        app.drop = self
+        super(MenuDrop, self).__init__(**kw)
+
+    def click(self, instance, values):
+        for value in values:
+            btn = SizedButton(text=value[0])
+            btn.bind(on_release=value[1])
+            self.add_widget(btn)
+        self.open(instance)
+
+    def on_dismiss(self, *args):
+        self.clear_widgets()
+
+
+class Body(FloatLayout):
+    def __init__(self, **kw):
+        self.app = App.get_running_app()
+        self.tables = []
+        self.app.menu = {'file': (['_New...', self.new],
+                                  ['_Open', self.open],
+                                  ['Close Project', self.close_project],
+                                  ['_Save Project', self.save_project],
+                                  ['_Save Project As...',
+                                   self.save_project_as],
+                                  ['Import Data', self.import_data],
+                                  ['_Export Data', self.export_data],
+                                  ['_Recent Projects', self.test],
+                                  ['Exit', self.app.stop],),
+                         'edit': (['_Undo', self.test],
+                                  ['_Redo', self.test],
+                                  ['_Cut', self.test],
+                                  ['_Copy', self.test],
+                                  ['_Paste', self.test],
+                                  ['_Delete', self.test],
+                                  ['_Find...', self.test],
+                                  ['_Replace...', self.test],
+                                  ['_Protect Data', self.test],
+                                  ['_Go To...', self.test],),
+                         'tasks': (['Basic', self.basic],
+                                   ['Averages', self.avgs],),
+                         'help': (['_KrySA Help', self.test],
+                                  ['_Getting Started Tutorial', self.test],
+                                  ['About KrySA', self.about],),
+                         }
+        super(Body, self).__init__(**kw)
+
+    def new(self, button, *args):
+        d = DropDown(allow_sides=True, auto_width=False)
+        buttons = []
+        buttons.append(SizedButton(text='_Project'))
+        buttons.append(SizedButton(text='_Data'))
+        for b in buttons:
+            d.add_widget(b)
+        d.open(button)
+
+    def open(self, *args): pass
+
+    def close_project(self, *args):
+        # call this before a new project
+        tp = self.ids.tabpanel
+        while len(tp.tab_list) > 1:
+            tp.remove_widget(tp.tab_list[0])
+        self.ids.flow.clear_widgets()
+
+    def save_project(self, *args): pass
+
+    def save_project_as(self, *args): pass
+
+    def import_data(self, *args):
+        self.opendlg = Dialog(title='Import Data',
+                              confirm='Import',
+                              run=self._import_data)
+        self.opendlg.open()
+
+    def _import_data(self, selection, labels=False, *args):
+        # limit table name and column name to [a-zA-Z]
+
+        # CREATE TABLE test(
+        #                   Column INTEGER NOT NULL CHECK(
+        #                               typeof(Column) = 'integer'))
+        conn = sqlite3.connect(op.join(selection))
+        c = conn.cursor()
+        # get tables first!
+        c.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = [tab[0] for tab in c.fetchall()]
+        for table in tables:
+            c.execute("pragma table_info(%s)" % table)
+            table_info = c.fetchall()
+            labels = [lbl[1] for lbl in table_info]
+            types = [type[2][0] for type in table_info]
+            # allow only: INTEGER, REAL, TEXT
+
+            tabletab = TabbedPanelItem(text=table)
+            self.ids.tabpanel.add_widget(tabletab)
+            c.execute('select * from %s' % table)
+            values = [item for item in c.fetchone()]
+            max_cols = len(values)
+            values += [item for sublist in c.fetchall() for item in sublist]
+            max_rows = int(math.ceil(len(values)/float(max_cols)))
+            self.tables.append((table,
+                                Table(max_cols=max_cols,
+                                      max_rows=max_rows,
+                                      pos=self.pos,
+                                      size=self.size,
+                                      values=values,
+                                      labels=labels)))
+            tabletab.content = self.tables[-1][1]
+            self.opendlg.dismiss()
+        conn.close()
+
+    def export_data(self, *args):
+        self.savedlg = Dialog(title='Export Data',
+                              confirm='Export',
+                              run=self.test,  # self._export_data,
+                              dirs=True)
+        self.savedlg.open()
+    '''
+    def _extract_rows(self, data):
+        rows = []
+        for item in data:
+            try:
+                item['cell']
+                if item['type'] == type(True):
+                    rows.append(bool(item['text']))
+                elif item['type'] == type(1.0):
+                    rows.append(float(item['text']))
+                elif item['type'] == type(5):
+                    rows.append(int(item['text']))
+                else:
+                    rows.append(item['text'])
+            except KeyError:
+                pass
+        data = []
+        return rows
+
+    def _export_data(self, selection, fname, *args):
+        return  # fix for sqlite
+        try:
+            self.table
+        except AttributeError:
+            # throw an error popup
+            print 'Table is not present!'
+            return
+        with open(op.join(selection, fname), 'wb') as f:
+            import csv as _csv
+            w = csv.writer(f, encoding='utf-8', quoting=_csv.QUOTE_NONNUMERIC)
+            rows = self._extract_rows(self.table.children[0].data)
+            while rows:
+                row = rows[:self.table.max_cols]
+                _row = []
+                for r in row:
+                    if type(r) == type(2):
+                        row_type = 'int'
+                    elif type(r) == type(2.0):
+                        row_type = 'flt'
+                    elif type(r) == type(True):
+                        row_type = 'boo'
+                    else:
+                        row_type = 'str'
+                    _row.append(row_type+'::'+str(r))
+                w.writerow(_row)
+                del rows[:self.table.max_cols]
+        self.savedlg.dismiss()
+    '''
+
+    def basic(self, button, *args):
+        d = DropDown(allow_sides=True, auto_width=False)
+        buttons = []
+        buttons.append(SizedButton(text='Count'))
+        buttons[0].bind(on_release=self.basic_count)
+        buttons.append(SizedButton(text='_Count if'))
+        buttons.append(SizedButton(text='Minimum'))
+        buttons[2].bind(on_release=self.basic_min)
+        buttons.append(SizedButton(text='Maximum'))
+        buttons[3].bind(on_release=self.basic_max)
+        buttons.append(SizedButton(text='Small'))
+        buttons[4].bind(on_release=self.basic_small)
+        buttons.append(SizedButton(text='Large'))
+        buttons[5].bind(on_release=self.basic_large)
+        buttons.append(SizedButton(text='_Frequency'))
+        for b in buttons:
+            d.add_widget(b)
+        d.open(button)
+
+    def basic_count(self, *args):
+        widget = CountLayout()
+        task = Task(title='Count', wdg=widget)
+        task.run = partial(self._basic_count,
+                           task,
+                           task.ids.container.children[0].ids.name)
+        task.open()
+
+    def _basic_count(self, task, address, *args):
+        values = self.from_address(task.tablenum, address.text)
+        print len(values)
+
+    def basic_countifs(self, *args): pass
+
+    def basic_min(self, *args):
+        widget = CountLayout()
+        task = Task(title='Minimum', wdg=widget)
+        task.run = partial(self._basic_min,
+                           task,
+                           task.ids.container.children[0].ids.name)
+        task.open()
+
+    def _basic_min(self, task, address, *args):
+        values = self.from_address(task.tablenum, address.text)
+        print values
+        print min(values)
+
+    def basic_max(self, *args):
+        widget = CountLayout()
+        task = Task(title='Maximum', wdg=widget)
+        task.run = partial(self._basic_max,
+                           task,
+                           task.ids.container.children[0].ids.name)
+        task.open()
+
+    def _basic_max(self, task, address, *args):
+        values = self.from_address(task.tablenum, address.text)
+        print values
+        print max(values)
+
+    def basic_small(self, *args):
+        widget = SmallLargeLayout()
+        task = Task(title='Small', wdg=widget)
+        task.run = partial(self._basic_small,
+                           task,
+                           task.ids.container.children[0].ids.name,
+                           task.ids.container.children[0].ids.order)
+        task.open()
+
+    def _basic_small(self, task, address, k, *args):
+        values = self.from_address(task.tablenum, address.text)
+        values = sorted(values)
+        print values
+        try:
+            print values[int(k.text)-1]
+        except:
+            pass
+
+    def basic_large(self, *args):
+        widget = SmallLargeLayout()
+        task = Task(title='Large', wdg=widget)
+        task.run = partial(self._basic_large,
+                           task,
+                           task.ids.container.children[0].ids.name,
+                           task.ids.container.children[0].ids.order)
+        task.open()
+
+    def _basic_large(self, task, address, k, *args):
+        values = self.from_address(task.tablenum, address.text)
+        values = sorted(values, reverse=True)
+        print values
+        try:
+            print values[int(k.text)-1]
+        except:
+            pass  # throw error k out of len(values) bounds, same for *_small
+
+    def basic_freq(self, *args): pass
+
+    def avgs(self, button, *args):
+        d = DropDown(allow_sides=True, auto_width=False)
+        buttons = []
+        buttons.append(SizedButton(text='N - ic'))
+        buttons.append(SizedButton(text='Quadratic'))
+        # statistics.mean()
+        buttons.append(SizedButton(text='Arithmetic'))
+        # numpy.mean(values)
+        buttons.append(SizedButton(text='Geometric'))
+        # scipy.stats.gmean(values)
+        buttons.append(SizedButton(text='Harmonic'))
+        # scipy.stats.hmean(values)
+        buttons.append(SizedButton(text='Interquartile'))
+        # 1/2 * ( max(x) + min(x) )
+        buttons.append(SizedButton(text='Midrange'))
+        buttons.append(SizedButton(text='Generalized'))
+        buttons.append(SizedButton(text='Trimmed'))
+        # scipy.stats.tmean(values, limits)
+        buttons.append(SizedButton(text='Median'))
+        buttons.append(SizedButton(text='Mode'))
+        buttons.append(SizedButton(text='Harmonic'))
+        for b in buttons:
+            d.add_widget(b)
+        d.open(button)
+
+    def about(self, *args):
+        aboutdlg = Popup(title='About')
+        text = ('Copyright (C) 2016, KeyWeeUsr(Peter Badida)\n'
+                'License: GNU GPL v3.0\n'
+                'Find me @ https://github.com/KeyWeeUsr')
+        aboutdlg.content = Label(text=text)
+        aboutdlg.open()
+
+    # non-menu functions
+    def get_column(self, address):
+        col = 0
+        for c in address:
+            if c in string.ascii_letters:
+                col = col * 26 + (ord(c.upper()) - ord('A')) + 1
+        return col
+
+    def from_address(self, table, address, *args):
+        # allow using column name as address?
+        values = []
+        col_row = []  # [column, row] such as [x, y] |_
+        if ':' not in address:
+            match = re.findall(r'([a-zA-Z]+)([0-9]+)', address)
+            col_row.append([self.get_column(match[0][0]), match[0][1]])
+        else:
+            addresses = address.split(':')
+            match = re.findall(r'([a-zA-Z]+)([0-9]+)', ' '.join(addresses))
+            start_col = self.get_column(match[0][0])
+            start_row = int(match[0][1])
+            end_col = self.get_column(match[1][0])
+            end_row = int(match[1][1])
+            col_range = end_col - start_col
+            row_range = end_row - start_row
+            for col in range(start_col-1, end_col):
+                for row in range(start_row-1, end_row):
+                    col_row.append([col + 1, row + 1])
+                start_row = int(match[0][1])
+        while col_row:
+            c, r = col_row.pop(0)
+            c = int(c)
+            r = int(r)
+            table_cols = self.tables[table][1].cols
+            table_rows = self.tables[table][1].rows
+
+            if r > 0 and c > 0 and r < table_rows and c <= table_cols:
+                key = table_cols * (r + 1) - (table_cols - c)
+                item = self.tables[table][1].rv.data[key]
+                if item['r'] == r and item['c'] == c:
+                    if issubclass(item['type'], bool):
+                        values.append(bool(item['text']))
+                    elif issubclass(item['type'], float):
+                        values.append(float(item['text']))
+                    elif issubclass(item['type'], int):
+                        values.append(int(item['text']))
+                    else:
+                        values.append(item['text'])
+        return values
+
+    def test(self, *args):
+        print 'ping: ', args
+
+
+class KrySA(App):
+    path = op.dirname(op.abspath(__file__))
+    icon = path+'/icon.png'
+    title = 'KrySA'
+
+    def build(self):
+        a = MenuDrop()
+        return Body()
+
+if __name__ == '__main__':
+    KrySA().run()

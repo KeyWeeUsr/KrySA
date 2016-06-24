@@ -1,0 +1,212 @@
+#:import dp kivy.metrics.dp
+#:import isdir os.path.isdir
+#:import join os.path.join
+
+<Body>:
+    ActionBar:
+        pos_hint: {'top': 1.0}
+        height: '37dp'
+        ActionView:
+            ActionPrevious:
+                title: ''
+                size_hint_x: None
+                with_previous: False
+                app_icon_width: 0.001
+                width: 0
+
+            ActionButton:
+                text: 'File'
+                on_release: app.drop.click(self, app.menu['file'])
+
+            ActionButton:
+                text: 'Edit'
+                on_release: app.drop.click(self, app.menu['edit'])
+
+            ActionButton:
+                text: 'Tasks'
+                on_release: app.drop.click(self, app.menu['tasks'])
+
+            ActionButton:
+                text: 'Help'
+                on_release: app.drop.click(self, app.menu['help'])
+
+    BoxLayout:
+        Splitter:
+            size_hint: 0.1, None
+            height: root.height - dp(37)
+            sizable_from: 'right'
+            rescale_with_parent: True
+            BoxLayout:
+                orientation: 'vertical'
+                ScrollView:
+                    GridLayout:
+                        size_hint_y: None
+                        height: self.minimum_height
+                        cols: 1
+                        SideItem:
+                        SideItem:
+                        SideItem:
+                Splitter:
+                    sizable_from: 'top'
+                    BoxLayout:
+                        orientation: 'vertical'
+                        ScrollView:
+                            GridLayout:
+                                size_hint_y: None
+                                height: self.minimum_height
+                                cols: 1
+                                SideItem:
+                                SideItem:
+                                SideItem:
+
+        TabbedPanel:
+            id: tabpanel
+            tab_pos: 'right_mid'
+            do_default_tab: False
+            size_hint_y: None
+            height: root.height - dp(37)
+            TabbedPanelItem:
+                text: 'Process Flow'
+                ProcessFlow:
+                    id: flow
+
+<MenuDrop>:
+    auto_width: False
+    canvas:
+        Color:
+            rgba: 0, 0, 0, 0
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<SizedButton>:
+    size_hint: None, None
+    height: '30dp'
+    halign: 'left'
+    on_texture_size: root.correct_width()
+
+<ProcessFlow>:
+    canvas:
+        Color:
+            rgba: 1, 1, 1, 0.9
+        Rectangle:
+            texture: root.texture
+            size: self.size
+            pos: self.pos
+            tex_coords:
+                [0, 0, self.width/10, 0, self.width/10,
+                self.height/10, 0, self.height/10]
+
+<Table>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 0.9
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<TableItem>:
+    size_hint: None, None
+    multiline: False
+    on_text_validate: self.update_value(self.text)
+
+<SideItem>:
+    size_hint_y: None
+    height: key.height
+    name: 'name '*5
+    value: 'value'
+    AnchorLayout:
+        size_hint_x: 0.3
+        anchor_x: 'center'
+        anchor_y: 'center'
+        Label:
+            id: key
+            size_hint_y: None
+            text_size: self.width, None
+            height: self.texture_size[1] + dp(8)
+            text: root.name
+
+    TextInput:
+        size_hint: 0.7, None
+        height: key.height
+        text: root.value
+        multiline: False
+
+<Dialog>:
+    view: view
+    BoxLayout:
+        orientation: 'vertical'
+        FileChooserListView:
+            id: view
+            on_selection: if self.selection: select.text = self.selection[0]
+            dirselect: root.dirs
+            filters:
+                [lambda d, f: isdir(join(d, f))] if root.dirs else []
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(30)
+
+            TextInput:
+                id: select
+                disabled: True
+
+            TextInput:
+                id: name
+                disabled: not root.dirs
+
+            CheckBox:
+                id: lbl
+                disabled: root.dirs
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            Button:
+                text: 'Cancel'
+                on_release: root.dismiss()
+
+            Button:
+                text: root.confirm
+                on_release:
+                    if name.text: root.run(view.selection[0], name.text)
+                    elif name.disabled: root.run(view.selection[0], lbl.active)
+
+<Task>:
+    size_hint: 0.5, 0.5
+    pos_hint: {'center': [0.5, 0.5]}
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            Spinner:
+                id: tablesel
+                values: [child[0] for child in app.root.tables]
+                on_text:
+                    root.tablenum = root.get_table_pos(self.text, self.values)
+
+        BoxLayout:
+            id: container
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            Button:
+                text: 'Cancel'
+                on_release: root.dismiss()
+
+            Button:
+                text: 'Run'
+                disabled: True if tablesel.text == '' else False
+                on_release: root.run()
+
+<CountLayout>:
+    orientation: 'vertical'
+    TextInput:
+        id: name
+
+<SmallLargeLayout>:
+    orientation: 'vertical'
+    TextInput:
+        id: name
+    TextInput:
+        id: order
