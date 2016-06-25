@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.0
+# Version: 0.1.1
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -21,36 +21,30 @@
 
 from kivy.config import Config
 # Config.set('graphics', 'window_state', 'maximized')
-import math
 import re
-import types  # remove?
+import os
+import math
 import numpy
 import scipy
 import string
 import sqlite3
 import os.path as op
-import unicodecsv as csv  # remove when done export_data for sqlite
 from kivy.app import App
-from kivy.clock import Clock
 from functools import partial
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.core.window import Window
-from kivy.graphics import Color, Line
 from kivy.uix.dropdown import DropDown
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
-from kivy.properties import NumericProperty
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stencilview import StencilView
-from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.uix.tabbedpanel import TabbedPanelItem
-from kivy.factory import Factory
+from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
 
 
@@ -133,11 +127,8 @@ class Table(ScrollView):
         container.rows = self.rows
         container.cols = self.cols
         self.labels = kw.get('labels', None)
-        if self.labels is None:
-            self.labels = self.get_letters()
-            self.max_rows += 1
-            self.rows = self.max_rows + 1
-            container.rows = self.rows
+        # labels need a rewrite
+        ltr = [' (' + letter + ')' for letter in self.get_letters()]
         self.rv.add_widget(container)
         if 'item_size' not in kw:
             item_size = self.default_size
@@ -150,7 +141,8 @@ class Table(ScrollView):
                                              'size': self.number_size,
                                              'origin': self.rv})
                     else:
-                        self.rv.data.append({'text': self.labels[c-1],
+                        self.rv.data.append({'text': self.labels[c-1]+ltr[c-1],
+                                             '_text': self.labels[c-1],
                                              'disabled': True,
                                              'cell': 'label' + str(c-1),
                                              'type': type(''),
@@ -163,12 +155,18 @@ class Table(ScrollView):
                                              'size': self.number_size,
                                              'origin': self.rv})
                     else:
+                        filter = None
                         try:
                             val = self.values.pop(0)
                             text_type = type(val)
+                            filter_val = repr(text_type)[7:-2]
+                            if filter_val == 'int' or filter_val == 'float':
+                                filter = filter_val
                         except IndexError:
                             print 'values < space'
                             val = '.'
+                        if 'e+' in str(val) or 'e-' in str(val):
+                            val = '{0:.10f}'.format(val)
                         self.rv.data.append({'text': str(val),
                                              'disabled': False,
                                              'cell': self.labels[c-1]+str(r),
@@ -178,6 +176,7 @@ class Table(ScrollView):
                                              'cols': self.cols,
                                              'type': text_type,
                                              'size': self.default_size,
+                                             'input_filter': filter,
                                              'origin': self.rv})
         if self.values:
             raise Exception('Not enough space for all values! \
@@ -251,7 +250,7 @@ class Body(FloatLayout):
                                   ['_Save Project As...',
                                    self.save_project_as],
                                   ['Import Data', self.import_data],
-                                  ['_Export Data', self.export_data],
+                                  ['Export Data', self.export_data],
                                   ['_Recent Projects', self.test],
                                   ['Exit', self.app.stop],),
                          'edit': (['_Undo', self.test],
@@ -289,6 +288,7 @@ class Body(FloatLayout):
         while len(tp.tab_list) > 1:
             tp.remove_widget(tp.tab_list[0])
         self.ids.flow.clear_widgets()
+        tp.switch_to(tp.tab_list[0])
 
     def save_project(self, *args): pass
 
@@ -339,20 +339,18 @@ class Body(FloatLayout):
     def export_data(self, *args):
         self.savedlg = Dialog(title='Export Data',
                               confirm='Export',
-                              run=self.test,  # self._export_data,
+                              run=self._export_data,
                               dirs=True)
         self.savedlg.open()
-    '''
+
     def _extract_rows(self, data):
         rows = []
         for item in data:
             try:
                 item['cell']
-                if item['type'] == type(True):
-                    rows.append(bool(item['text']))
-                elif item['type'] == type(1.0):
+                if issubclass(item['type'], float):
                     rows.append(float(item['text']))
-                elif item['type'] == type(5):
+                elif issubclass(item['type'], int):
                     rows.append(int(item['text']))
                 else:
                     rows.append(item['text'])
@@ -362,34 +360,53 @@ class Body(FloatLayout):
         return rows
 
     def _export_data(self, selection, fname, *args):
-        return  # fix for sqlite
-        try:
-            self.table
-        except AttributeError:
-            # throw an error popup
-            print 'Table is not present!'
+        col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL'}
+        if not selection:
             return
-        with open(op.join(selection, fname), 'wb') as f:
-            import csv as _csv
-            w = csv.writer(f, encoding='utf-8', quoting=_csv.QUOTE_NONNUMERIC)
-            rows = self._extract_rows(self.table.children[0].data)
-            while rows:
-                row = rows[:self.table.max_cols]
-                _row = []
-                for r in row:
-                    if type(r) == type(2):
-                        row_type = 'int'
-                    elif type(r) == type(2.0):
-                        row_type = 'flt'
-                    elif type(r) == type(True):
-                        row_type = 'boo'
+        else:
+            selection = selection[0]
+        if op.exists(op.join(selection, fname)):
+            os.remove(op.join(selection, fname))
+
+        conn = sqlite3.connect(op.join(selection, fname))
+        c = conn.cursor()
+
+        for table in self.tables:
+            col_string = ''
+            max_cols = table[1].max_cols
+            columns = table[1].rv.data[1:max_cols+1]  # types need whole dict!
+            types = table[1].rv.data[max_cols+2:2*(max_cols+1)]
+
+            for i, col in enumerate(columns):
+                try:
+                    type = col_types[repr(types[i]['type'])]
+                except KeyError:
+                    type = 'TEXT'
+                # force column to check inserted values
+                col_string += (
+                               col['_text'] + " " + type +
+                               " NOT NULL CHECK(typeof(" + col['_text'] +
+                               ") = '" + type.lower() + "'),"
+                               )
+
+            if col_string.endswith(','):
+                col_string = col_string[:-1]
+            c.execute("CREATE TABLE "+table[0]+"("+col_string+")")
+            rows = self._extract_rows(table[1].rv.data)[max_cols:]
+
+            cnks = [rows[x:x+max_cols] for x in xrange(0, len(rows), max_cols)]
+            for chunk in cnks:
+                _chunk = []
+                for cnk in chunk:
+                    if not isinstance(cnk, (str, unicode)):
+                        _chunk.append(str(cnk))
                     else:
-                        row_type = 'str'
-                    _row.append(row_type+'::'+str(r))
-                w.writerow(_row)
-                del rows[:self.table.max_cols]
+                        _chunk.append('\''+cnk+'\'')
+                values = ','.join(_chunk)
+                c.execute("INSERT INTO "+table[0]+" VALUES("+values+")")
+            conn.commit()
+        conn.close()
         self.savedlg.dismiss()
-    '''
 
     def basic(self, button, *args):
         d = DropDown(allow_sides=True, auto_width=False)
@@ -556,13 +573,11 @@ class Body(FloatLayout):
             table_cols = self.tables[table][1].cols
             table_rows = self.tables[table][1].rows
 
-            if r > 0 and c > 0 and r < table_rows and c <= table_cols:
+            if r > 0 and c > 0 and r < table_rows and c < table_cols:
                 key = table_cols * (r + 1) - (table_cols - c)
                 item = self.tables[table][1].rv.data[key]
                 if item['r'] == r and item['c'] == c:
-                    if issubclass(item['type'], bool):
-                        values.append(bool(item['text']))
-                    elif issubclass(item['type'], float):
+                    if issubclass(item['type'], float):
                         values.append(float(item['text']))
                     elif issubclass(item['type'], int):
                         values.append(int(item['text']))
