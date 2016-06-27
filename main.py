@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.1
+# Version: 0.1.2
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -23,6 +23,7 @@ from kivy.config import Config
 # Config.set('graphics', 'window_state', 'maximized')
 import re
 import os
+import json
 import math
 import numpy
 import scipy
@@ -46,6 +47,14 @@ from kivy.uix.stencilview import StencilView
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
+
+
+class ErrorPop(Popup):
+    message = StringProperty('')
+
+    def __init__(self, **kw):
+        self.message = kw.get('msg', '')
+        super(ErrorPop, self).__init__(**kw)
 
 
 class SmallLargeLayout(BoxLayout):
@@ -79,12 +88,18 @@ class Dialog(Popup):
     confirm = StringProperty('')
     run = ObjectProperty(None)
     dirs = BooleanProperty(False)
+    project = BooleanProperty(False)
 
     def __init__(self, **kw):
         super(Dialog, self).__init__(**kw)
         self.confirm = kw.get('confirm', '')
         self.run = kw.get('run', None)
         self.dirs = kw.get('dirs', False)
+        self.project = kw.get('project', False)
+        if self.project:
+            self.ids.name.hint_text = 'project.krysa'
+        else:
+            self.ids.name.hint_text = 'example.sqlite'
 
 
 class SideItem(BoxLayout):
@@ -275,10 +290,20 @@ class Body(FloatLayout):
         d = DropDown(allow_sides=True, auto_width=False)
         buttons = []
         buttons.append(SizedButton(text='_Project'))
+        buttons[0].bind(on_release=self._new_project)
         buttons.append(SizedButton(text='_Data'))
         for b in buttons:
             d.add_widget(b)
         d.open(button)
+
+    def _new_project(self, *args):
+        self.close_project()
+        self.savedlg = Dialog(title='New Project',
+                              confirm='Save',
+                              run=self._save_project,
+                              dirs=True,
+                              project=True)
+        self.savedlg.open()
 
     def open(self, *args): pass
 
@@ -292,6 +317,34 @@ class Body(FloatLayout):
 
     def save_project(self, *args): pass
 
+    def _save_project(self, selection, fname, *args):
+        if not selection:
+            return
+        else:
+            selection = selection[0]
+
+        try:
+            os.mkdir(op.join(selection, fname.split('.')[0]))
+            selection = op.join(selection, fname.split('.')[0])
+            data = op.join(selection, 'data')
+            results = op.join(selection, 'results')
+            os.mkdir(data)
+            os.mkdir(results)
+            if op.exists(op.join(selection, fname)):
+                os.remove(op.join(selection, fname))
+        except OSError:
+            error = ErrorPop(msg='Project folder already exists!')
+            error.open()
+            return
+
+        # dump widgets' properties from process flow to dict, then to json
+        project = {'test': 'blah'}
+        with open(op.join(selection, fname), 'wb') as f:
+            f.write(json.dumps(project, indent=4))
+
+        # let user set table columns, add to tab, then:
+        self._export_data([data], 'data.sqlite')
+
     def save_project_as(self, *args): pass
 
     def import_data(self, *args):
@@ -300,12 +353,16 @@ class Body(FloatLayout):
                               run=self._import_data)
         self.opendlg.open()
 
-    def _import_data(self, selection, labels=False, *args):
+    def _import_data(self, selection, *args):
         # limit table name and column name to [a-zA-Z]
 
         # CREATE TABLE test(
         #                   Column INTEGER NOT NULL CHECK(
         #                               typeof(Column) = 'integer'))
+        if not selection:
+            return
+        else:
+            selection = selection[0]
         conn = sqlite3.connect(op.join(selection))
         c = conn.cursor()
         # get tables first!

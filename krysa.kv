@@ -154,12 +154,7 @@
 
             TextInput:
                 id: name
-                hint_text: 'example.sqlite' if root.dirs else ''
                 disabled: not root.dirs
-
-            CheckBox:
-                id: lbl
-                disabled: root.dirs
 
         BoxLayout:
             size_hint_y: None
@@ -172,7 +167,7 @@
                 text: root.confirm
                 on_release:
                     if name.text: root.run(view.selection, name.text)
-                    elif name.disabled: root.run(view.selection[0], lbl.active)
+                    elif name.disabled: root.run(view.selection)
 
 <Task>:
     size_hint: 0.5, 0.5
@@ -214,10 +209,40 @@
     TextInput:
         id: order
 
-<StripLayout>
+<TabbedPanelHeader>:
+    background_down: 'atlas://data/images/defaulttheme/tab_btn'
+    background_disabled_down: 'atlas://data/images/defaulttheme/tab_btn'
+    canvas:
+        Color:
+            rgba: 0.2, 0.67, 0.85, 1
+        Line:
+            width: 2
+            cap: 'none'
+            points:
+                [self.pos[0] + 1,
+                self.pos[1]+self.height,
+                self.pos[0]+self.width,
+                self.pos[1]+self.height] if self.state == 'down' else []
+
+<StripLayout>:
     canvas:
         Color:
             rgba: 1, 1, 1, 0.8
         Rectangle:
             size: self.size
             pos: self.pos
+
+<ErrorPop>:
+    title: 'Warning!'
+    pos_hint: {'center': (0.5, 0.5)}
+    size_hint: 0.5, 0.5
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: root.message
+        BoxLayout:
+            height: dp(60)
+            size_hint_y: None
+            Button:
+                text: 'Dismiss!'
+                on_release: root.dismiss()
