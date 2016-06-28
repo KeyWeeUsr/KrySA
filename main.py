@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.2
+# Version: 0.1.3
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -57,6 +57,15 @@ class ErrorPop(Popup):
         super(ErrorPop, self).__init__(**kw)
 
 
+class NewDataLayout(BoxLayout):
+    def __init__(self, **kw):
+        self.app = App.get_running_app()
+        super(NewDataLayout, self).__init__(**kw)
+        if not op.exists(op.join(self.app.project_dir, 'data', 'data.sqlite')):
+            # create table file
+            pass
+
+
 class SmallLargeLayout(BoxLayout):
     def __init__(self, **kw):
         super(SmallLargeLayout, self).__init__(**kw)
@@ -82,6 +91,17 @@ class Task(Popup):
         gen = (i for i, val in enumerate(values) if val == text)
         for i in gen:
             return i
+
+
+class CreateWizard(Popup):
+    run = ObjectProperty(None)
+
+    def __init__(self, **kw):
+        super(CreateWizard, self).__init__(**kw)
+        self.run = kw.get('run', None)
+        wdg = kw.get('wdg', None)
+        if wdg:
+            self.ids.container.add_widget(wdg)
 
 
 class Dialog(Popup):
@@ -292,6 +312,7 @@ class Body(FloatLayout):
         buttons.append(SizedButton(text='_Project'))
         buttons[0].bind(on_release=self._new_project)
         buttons.append(SizedButton(text='_Data'))
+        buttons[1].bind(on_release=self._new_data)
         for b in buttons:
             d.add_widget(b)
         d.open(button)
@@ -305,17 +326,31 @@ class Body(FloatLayout):
                               project=True)
         self.savedlg.open()
 
+    def _new_data(self, *args):
+        if self.app.project_exists: # set for "not"
+            error = ErrorPop(msg='No project exists!')
+            error.open()
+            return
+        widget = NewDataLayout()
+        task = CreateWizard(title='New Data', wdg=widget)
+        #task.run = self._save_data
+        task.open()
+
     def open(self, *args): pass
 
     def close_project(self, *args):
         # call this before a new project
+        self.app.project_exists = False
+        self.app.project_dir = ''
         tp = self.ids.tabpanel
         while len(tp.tab_list) > 1:
             tp.remove_widget(tp.tab_list[0])
         self.ids.flow.clear_widgets()
         tp.switch_to(tp.tab_list[0])
 
-    def save_project(self, *args): pass
+    def save_project(self, *args):
+        # same as _new_project + export data & results
+        pass
 
     def _save_project(self, selection, fname, *args):
         if not selection:
@@ -337,6 +372,8 @@ class Body(FloatLayout):
             error.open()
             return
 
+        self.app.project_exists = True
+        self.app.project_dir = selection
         # dump widgets' properties from process flow to dict, then to json
         project = {'test': 'blah'}
         with open(op.join(selection, fname), 'wb') as f:
@@ -649,6 +686,8 @@ class Body(FloatLayout):
 class KrySA(App):
     path = op.dirname(op.abspath(__file__))
     icon = path+'/icon.png'
+    project_exists = False
+    project_dir = ''
     title = 'KrySA'
 
     def build(self):

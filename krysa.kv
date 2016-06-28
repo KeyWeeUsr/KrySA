@@ -1,6 +1,8 @@
 #:import dp kivy.metrics.dp
 #:import isdir os.path.isdir
 #:import join os.path.join
+#:import Factory kivy.factory.Factory
+#:import ObjectProperty kivy.properties.ObjectProperty
 
 <Body>:
     ActionBar:
@@ -197,6 +199,24 @@
                 disabled: True if tablesel.text == '' else False
                 on_release: root.run()
 
+<CreateWizard>:
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            id: container
+
+        BoxLayout:
+            size_hint_y: None
+            height: dp(60)
+            Button:
+                text: 'Cancel'
+                on_release: root.dismiss()
+
+            Button:
+                text: 'Run'
+                disabled: True
+                on_release: root.run()
+
 <CountLayout>:
     orientation: 'vertical'
     TextInput:
@@ -246,3 +266,92 @@
             Button:
                 text: 'Dismiss!'
                 on_release: root.dismiss()
+
+<NewDataValue@BoxLayout>:
+    size_hint_y: None
+    height: dp(30)
+    f: None
+    TextInput:
+        input_filter: root.f
+    Button:
+        size_hint_x: None
+        width: dp(30)
+        text: 'X'
+        on_release: root.parent.remove_widget(root)
+
+<NewDataColumn@BoxLayout>:
+    filter: None
+    on_filter: print self.filter
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: None
+        height: dp(30)
+        TextInput:
+            id: colname
+            text: 'Column'
+        Button:
+            size_hint_x: None
+            width: dp(30)
+            text: 'X'
+            on_release: root.parent.remove_widget(root)
+    Spinner:
+        size_hint_y: None
+        height: dp(30)
+        id: coltype
+        text: 'TEXT'
+        values: ['TEXT', 'INTEGER', 'REAL']
+        on_text:
+            if self.text == 'REAL': root.filter = 'float'
+            elif self.text == 'INTEGER': root.filter = 'int'
+            elif self.text == 'TEXT': root.filter = ObjectProperty(None)
+    BoxLayout:
+        size_hint_y: None
+        height: dp(30)
+        Label:
+            text: 'Values'
+        Button:
+            size_hint_x: None
+            width: dp(30)
+            text: '+'
+            on_release:
+                vals.add_widget(Factory.NewDataValue(f=root.filter))
+    ScrollView:
+        GridLayout:
+            size_hint_y: None
+            height: self.minimum_height
+            cols: 1
+            id: vals
+    Button:
+        size_hint_y: None
+        height: dp(60)
+        text: 'Check & Lock'
+        on_release: print('check n lock')
+        # disable all + & X buttons, check types of values, throw error if wrng
+
+<NewDataLayout>:
+    manager: manager
+    ScreenManager:
+        id: manager
+        Screen:
+            name: 'createdata'
+            BoxLayout:
+                orientation: 'vertical'
+                BoxLayout:
+                    size_hint_y: None
+                    height: dp(30)
+                    Label:
+                        text: 'Data name'
+                    Button:
+                        size_hint_x: None
+                        width: dp(30)
+                        text: '+'
+                        on_release: columns.add_widget(Factory.NewDataColumn())
+                BoxLayout:
+                    id: columns
+        Screen:
+            name: 'createtable'
+            BoxLayout
+                orientation: 'vertical'
+        Screen:
+            BoxLayout
+                orientation: 'vertical'
