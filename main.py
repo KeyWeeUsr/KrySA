@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.3
+# Version: 0.1.4
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -32,11 +32,11 @@ import sqlite3
 import os.path as op
 from kivy.app import App
 from functools import partial
+from dropdown import DropDown
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.button import Button
-from kivy.uix.dropdown import DropDown
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
@@ -57,15 +57,71 @@ class ErrorPop(Popup):
         super(ErrorPop, self).__init__(**kw)
 
 
+class NewDataValue(BoxLayout):
+    def __init__(self, **kw):
+        self.app = App.get_running_app()
+        super(NewDataValue, self).__init__(**kw)
+        self.filter = kw['filter']
+
+
+class NewDataColumn(BoxLayout):
+    def __init__(self, **kw):
+        self.app = App.get_running_app()
+        super(NewDataColumn, self).__init__(**kw)
+
+    def free(self, items):
+        for item in items:
+            if hasattr(item, 'disabled'):
+                try:
+                    if item.parent.ids['coltype'] == item:
+                        continue
+                except:
+                    item.disabled = False
+            else:
+                # enable children
+                for i in item:
+                    try:
+                        if i.parent.ids['coltype'] == item:
+                            continue
+                    except:
+                        i.disabled = False
+
+    def checklock(self, disable, coltype, check, *args):
+        msg = 'Please remove any SQL keyword present in the column!'
+
+        for item in disable:
+            if hasattr(item, 'disabled'):
+                item.disabled = True
+            else:
+                # disable children
+                for i in item:
+                    i.disabled = True
+        coltype = coltype.text
+
+        # check for any sql keywords
+        for item in check:
+            try:
+                for keyword in self.app.sql_blacklist:
+                    if keyword in item.text.upper():
+                        error = ErrorPop(msg=msg)
+                        error.open()
+                        return
+            except AttributeError:
+                for i in item.children:
+                    for keyword in self.app.sql_blacklist:
+                        if keyword in i.ids.value.text.upper():
+                            error = ErrorPop(msg=msg)
+                            error.open()
+                            return
+
+
 class NewDataLayout(BoxLayout):
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataLayout, self).__init__(**kw)
-        if not op.exists(op.join(self.app.project_dir, 'data', 'data.sqlite')):
-            # create table file
-            pass
 
 
+# remove unnecessary __init__ later
 class SmallLargeLayout(BoxLayout):
     def __init__(self, **kw):
         super(SmallLargeLayout, self).__init__(**kw)
@@ -76,6 +132,7 @@ class CountLayout(BoxLayout):
         super(CountLayout, self).__init__(**kw)
 
 
+# inherit?
 class Task(Popup):
     run = ObjectProperty(None)
 
@@ -130,12 +187,13 @@ class TableItem(TextInput):
     def update_value(self, txt, *args):
         data = []
         cols = self.cols - 1
+
         for i in self.origin.data:
             if 'cell' in i:
                 data.append(i)
         chunks = [data[x:x+cols] for x in xrange(0, len(data), cols)]
 
-        orig_type = type(chunks[self.r][self.c-1])
+        orig_type = type(chunks[self.r][self.c - 1])
         self.origin.data[self.cols*(self.r+1)-(self.cols-self.c)]['text'] = txt
         self.origin.refresh_from_data()
 
@@ -154,17 +212,21 @@ class Table(ScrollView):
         container = RecycleGridLayout(size_hint=(None, None))
         container.viewclass = TableItem
         container.bind(minimum_size=container.setter('size'))
+
         self.max_rows = kw.get('max_rows', 1)
         self.rows = self.max_rows + 1
         self.max_cols = kw.get('max_cols', 1)
         self.cols = self.max_cols + 1
         self.values = kw.get('values', [])
+        self.labels = kw.get('labels', None)
+        self.types = kw.get('types', None)
+
         container.rows = self.rows
         container.cols = self.cols
-        self.labels = kw.get('labels', None)
-        # labels need a rewrite
+
         ltr = [' (' + letter + ')' for letter in self.get_letters()]
         self.rv.add_widget(container)
+
         if 'item_size' not in kw:
             item_size = self.default_size
         super(Table, self).__init__(**kw)
@@ -200,11 +262,19 @@ class Table(ScrollView):
                         except IndexError:
                             print 'values < space'
                             val = '.'
+
                         if 'e+' in str(val) or 'e-' in str(val):
                             val = '{0:.10f}'.format(val)
+                        if hasattr(self, 'types'):
+                            if self.types[c - 1] == 'INTEGER':
+                                filter = 'int'
+                                text_type = type(1)
+                            elif self.types[c - 1] == 'REAL':
+                                filter = 'float'
+                                text_type = type(1.1)
                         self.rv.data.append({'text': str(val),
                                              'disabled': False,
-                                             'cell': self.labels[c-1]+str(r),
+                                             'cell': self.labels[c-1] + str(r),
                                              'r': r,
                                              'rows': self.rows,
                                              'c': c,
@@ -219,14 +289,14 @@ class Table(ScrollView):
         self.add_widget(self.rv)
 
     def get_letters(self):
-        letters = [chr(letter+65) for letter in range(26)]
+        letters = [chr(letter + 65) for letter in range(26)]
         result = []
         label = []
-        cols = range(self.cols+1)
+        cols = range(self.cols + 1)
         for i in cols:
             if i != 0:
                 while i:
-                    i, rem = divmod(i-1, 26)
+                    i, rem = divmod(i - 1, 26)
                     label[:0] = letters[rem]
                 result.append(''.join(label))
                 label = []
@@ -278,7 +348,7 @@ class Body(FloatLayout):
     def __init__(self, **kw):
         self.app = App.get_running_app()
         self.tables = []
-        self.app.menu = {'file': (['_New...', self.new],
+        self.app.menu = {'file': (['New...', self.new],
                                   ['_Open', self.open],
                                   ['Close Project', self.close_project],
                                   ['_Save Project', self.save_project],
@@ -309,9 +379,11 @@ class Body(FloatLayout):
     def new(self, button, *args):
         d = DropDown(allow_sides=True, auto_width=False)
         buttons = []
-        buttons.append(SizedButton(text='_Project'))
+
+        # Project saving works, but implementing ProcessFlow is still ToDo
+        buttons.append(SizedButton(text='Project'))
         buttons[0].bind(on_release=self._new_project)
-        buttons.append(SizedButton(text='_Data'))
+        buttons.append(SizedButton(text='Data'))
         buttons[1].bind(on_release=self._new_data)
         for b in buttons:
             d.add_widget(b)
@@ -327,14 +399,77 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _new_data(self, *args):
-        if self.app.project_exists: # set for "not"
+        if not self.app.project_exists:
             error = ErrorPop(msg='No project exists!')
             error.open()
             return
         widget = NewDataLayout()
-        task = CreateWizard(title='New Data', wdg=widget)
-        #task.run = self._save_data
+        task = CreateWizard(title='New Data', wdg=widget,
+                            run=partial(self._save_data, widget))
         task.open()
+
+    def _save_data(self, wizard, *args):
+        labels = []
+        types = []
+        values = []
+        table_name = wizard.ids.table_name.text
+
+        if not len(table_name):
+            error = ErrorPop(msg='Please name your data!')
+            error.open()
+            return
+        if not len(wizard.ids.columns.children):
+            error = ErrorPop(msg='There must be at least one column!')
+            error.open()
+            return
+
+        for child in reversed(wizard.ids.columns.children):
+            child.ids.checklock.dispatch('on_release')
+        for child in reversed(wizard.ids.columns.children):
+            if child.ids.colname.text not in labels:
+                lbl = re.findall(r'([a-zA-Z0-9])', child.ids.colname.text)
+                if not len(lbl):
+                    error = ErrorPop(msg='Use only a-z A-Z 0-9 characters!')
+                    error.open()
+                    return
+                labels.append(''.join(lbl))
+            else:
+                error = ErrorPop(msg='Each column must have a unique name!')
+                error.open()
+                return
+
+            types.append(child.ids.coltype.text)
+            column_values = []
+
+            for value_wdg in reversed(child.ids.vals.children):
+                column_values.append(value_wdg.ids.value.text)
+            values.append(column_values)
+
+        max_cols = len(values)
+        max_rows = len(max(values, key=len))
+
+        # create table in KrySA, then export
+        tabletab = TabbedPanelItem(text=table_name)
+        self.ids.tabpanel.add_widget(tabletab)
+        _values = values[:]
+        values = []
+
+        for i in range(max_rows):
+            for j in range(max_cols):
+                try:
+                    values.append(_values[j][i])
+                except IndexError:
+                    values.append(u'')
+
+        self.tables.append((table_name, Table(max_cols=max_cols,
+                                              max_rows=max_rows, pos=self.pos,
+                                              size=self.size, values=values,
+                                              labels=labels, types=types)))
+        tabletab.content = self.tables[-1][1]
+
+        # export to data.sqlite in <project>/data directory
+        data = op.join(self.app.project_dir, 'data')
+        self._export_data([data], 'data.sqlite')
 
     def open(self, *args): pass
 
@@ -350,13 +485,20 @@ class Body(FloatLayout):
 
     def save_project(self, *args):
         # same as _new_project + export data & results
-        pass
+        self.savedlg = Dialog(title='New Project',
+                              confirm='Save',
+                              run=self._save_project,
+                              dirs=True,
+                              project=True)
+        self.savedlg.open()
 
     def _save_project(self, selection, fname, *args):
         if not selection:
             return
         else:
             selection = selection[0]
+        if '.' not in fname:
+            fname = fname + '.krysa'
 
         try:
             os.mkdir(op.join(selection, fname.split('.')[0]))
@@ -374,6 +516,9 @@ class Body(FloatLayout):
 
         self.app.project_exists = True
         self.app.project_dir = selection
+        self.app.project_name = fname.split('.')[0]
+
+        # (dummy for now)
         # dump widgets' properties from process flow to dict, then to json
         project = {'test': 'blah'}
         with open(op.join(selection, fname), 'wb') as f:
@@ -381,6 +526,8 @@ class Body(FloatLayout):
 
         # let user set table columns, add to tab, then:
         self._export_data([data], 'data.sqlite')
+
+        # exporting results still missing -> 0.2.x
 
     def save_project_as(self, *args): pass
 
@@ -400,11 +547,14 @@ class Body(FloatLayout):
             return
         else:
             selection = selection[0]
+
         conn = sqlite3.connect(op.join(selection))
         c = conn.cursor()
+
         # get tables first!
         c.execute("SELECT name FROM sqlite_master WHERE type='table'")
         tables = [tab[0] for tab in c.fetchall()]
+
         for table in tables:
             c.execute("pragma table_info(%s)" % table)
             table_info = c.fetchall()
@@ -419,16 +569,15 @@ class Body(FloatLayout):
             max_cols = len(values)
             values += [item for sublist in c.fetchall() for item in sublist]
             max_rows = int(math.ceil(len(values)/float(max_cols)))
-            self.tables.append((table,
-                                Table(max_cols=max_cols,
-                                      max_rows=max_rows,
-                                      pos=self.pos,
-                                      size=self.size,
-                                      values=values,
-                                      labels=labels)))
+            self.tables.append((table, Table(max_cols=max_cols,
+                                             max_rows=max_rows, pos=self.pos,
+                                             size=self.size, values=values,
+                                             labels=labels)))
             tabletab.content = self.tables[-1][1]
             self.opendlg.dismiss()
         conn.close()
+        # ToDo: implement automatic saving to Project's data.sqlite
+        # ToDo: if the same table name exist in tables, add ' (2)' or something
 
     def export_data(self, *args):
         self.savedlg = Dialog(title='Export Data',
@@ -450,6 +599,17 @@ class Body(FloatLayout):
                     rows.append(item['text'])
             except KeyError:
                 pass
+
+            # protect against '' values -> int(''), float('')
+            except ValueError:
+                # duplicated zeros to prevent sqlite3.IntegrityError
+                # - raised when there is type checking for inserting
+                # values to the table e.g. type(0) != type(0.0)
+                if issubclass(item['type'], float):
+                    rows.append(0.0)
+                elif issubclass(item['type'], int):
+                    rows.append(0)
+
         data = []
         return rows
 
@@ -493,6 +653,7 @@ class Body(FloatLayout):
                 _chunk = []
                 for cnk in chunk:
                     if not isinstance(cnk, (str, unicode)):
+                        # switch to unicode???
                         _chunk.append(str(cnk))
                     else:
                         _chunk.append('\''+cnk+'\'')
@@ -687,8 +848,11 @@ class KrySA(App):
     path = op.dirname(op.abspath(__file__))
     icon = path+'/icon.png'
     project_exists = False
+    project_name = ''
     project_dir = ''
     title = 'KrySA'
+    sql_blacklist = ['DROP', 'EXEC', 'DECLARE', 'UPDATE', 'CREATE', 'DELETE',
+                     'INSERT', 'JOIN', '=', '"', "'", ';']
 
     def build(self):
         a = MenuDrop()

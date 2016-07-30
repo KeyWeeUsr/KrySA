@@ -214,7 +214,7 @@
 
             Button:
                 text: 'Run'
-                disabled: True
+                disabled: False
                 on_release: root.run()
 
 <CountLayout>:
@@ -267,19 +267,22 @@
                 text: 'Dismiss!'
                 on_release: root.dismiss()
 
-<NewDataValue@BoxLayout>:
+<NewDataValue>:
     size_hint_y: None
     height: dp(30)
-    f: None
+    filter: None
     TextInput:
-        input_filter: root.f
+        id: value
+        input_filter: root.filter
     Button:
         size_hint_x: None
         width: dp(30)
         text: 'X'
         on_release: root.parent.remove_widget(root)
 
-<NewDataColumn@BoxLayout>:
+<NewDataColumn>:
+    size_hint_x: None
+    width: dp(250)
     filter: None
     on_filter: print self.filter
     orientation: 'vertical'
@@ -288,8 +291,9 @@
         height: dp(30)
         TextInput:
             id: colname
-            text: 'Column'
+            text: 'Data'
         Button:
+            id: colX
             size_hint_x: None
             width: dp(30)
             text: 'X'
@@ -310,48 +314,54 @@
         Label:
             text: 'Values'
         Button:
+            id: valadd
             size_hint_x: None
             width: dp(30)
             text: '+'
             on_release:
-                vals.add_widget(Factory.NewDataValue(f=root.filter))
+                coltype.disabled = True
+                vals.add_widget(Factory.NewDataValue(filter=root.filter))
     ScrollView:
         GridLayout:
             size_hint_y: None
             height: self.minimum_height
             cols: 1
             id: vals
-    Button:
-        size_hint_y: None
-        height: dp(60)
-        text: 'Check & Lock'
-        on_release: print('check n lock')
-        # disable all + & X buttons, check types of values, throw error if wrng
+    BoxLayout:
+        Button:
+            id: checklock
+            size_hint_y: None
+            height: dp(60)
+            text: 'Check & Lock'
+            disable: [self, colname, coltype, colX, valadd, vals.children]
+            check: (colname, vals)
+            on_release:
+                root.checklock(self.disable, coltype, self.check)
+            # disable all + & X buttons, check types of values, throw error if wrng
+        Button:
+            size_hint_y: None
+            height: dp(60)
+            text: 'Unlock'
+            on_release:
+                root.free(checklock.disable)
 
 <NewDataLayout>:
-    manager: manager
-    ScreenManager:
-        id: manager
-        Screen:
-            name: 'createdata'
-            BoxLayout:
-                orientation: 'vertical'
-                BoxLayout:
-                    size_hint_y: None
-                    height: dp(30)
-                    Label:
-                        text: 'Data name'
-                    Button:
-                        size_hint_x: None
-                        width: dp(30)
-                        text: '+'
-                        on_release: columns.add_widget(Factory.NewDataColumn())
-                BoxLayout:
-                    id: columns
-        Screen:
-            name: 'createtable'
-            BoxLayout
-                orientation: 'vertical'
-        Screen:
-            BoxLayout
-                orientation: 'vertical'
+    BoxLayout:
+        orientation: 'vertical'
+        BoxLayout:
+            size_hint_y: None
+            height: dp(30)
+            TextInput:
+                id: table_name
+                hint_text: 'Data name'
+            Button:
+                size_hint_x: None
+                width: dp(30)
+                text: '+'
+                on_release: columns.add_widget(Factory.NewDataColumn())
+        ScrollView:
+            GridLayout:
+                rows: 1
+                size_hint_x: None
+                width: self.minimum_width
+                id: columns
