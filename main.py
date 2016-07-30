@@ -315,7 +315,8 @@ class Table(ScrollView):
 class ProcessFlow(BoxLayout, StencilView):
     def __init__(self, **kw):
         super(ProcessFlow, self).__init__(**kw)
-        self.texture = Image(source='grid.png').texture
+        app = App.get_running_app()
+        self.texture = Image(source=app.path+'/grid.png').texture
         self.texture.wrap = 'repeat'
 
 
