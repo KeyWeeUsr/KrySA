@@ -144,7 +144,7 @@
             on_selection: if self.selection: select.text = self.selection[0]
             dirselect: root.dirs
             filters:
-                [lambda d, f: isdir(join(d, f))] if root.dirs else []
+                [lambda d, f: isdir(join(d, f))] if root.dirs else root.filter
 
         BoxLayout:
             size_hint_y: None
@@ -275,6 +275,7 @@
         id: value
         input_filter: root.filter
     Button:
+        id: valX
         size_hint_x: None
         width: dp(30)
         text: 'X'
@@ -284,7 +285,7 @@
     size_hint_x: None
     width: dp(250)
     filter: None
-    on_filter: print self.filter
+    # on_filter: print self.filter
     orientation: 'vertical'
     BoxLayout:
         size_hint_y: None
@@ -355,6 +356,7 @@
                 id: table_name
                 hint_text: 'Data name'
             Button:
+                id: columnadd
                 size_hint_x: None
                 width: dp(30)
                 text: '+'

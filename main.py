@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.4
+# Version: 0.1.5
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -96,9 +96,8 @@ class NewDataColumn(BoxLayout):
                 # disable children
                 for i in item:
                     i.disabled = True
-        coltype = coltype.text
 
-        # check for any sql keywords
+        # check for any sql keywords and correct values
         for item in check:
             try:
                 for keyword in self.app.sql_blacklist:
@@ -113,6 +112,10 @@ class NewDataColumn(BoxLayout):
                             error = ErrorPop(msg=msg)
                             error.open()
                             return
+                    if i.ids.value.text == '' and coltype.text == 'REAL':
+                        i.ids.value.text = '0.0'
+                    elif i.ids.value.text == '' and coltype.text == 'INTEGER':
+                        i.ids.value.text = '0'
 
 
 class NewDataLayout(BoxLayout):
@@ -166,6 +169,7 @@ class Dialog(Popup):
     run = ObjectProperty(None)
     dirs = BooleanProperty(False)
     project = BooleanProperty(False)
+    filter = [lambda folder, filename: filename.endswith('.sqlite')]
 
     def __init__(self, **kw):
         super(Dialog, self).__init__(**kw)
@@ -234,7 +238,7 @@ class Table(ScrollView):
             for c in range(self.cols):
                 if r == 0:
                     if c == 0:
-                        self.rv.data.append({'text': '', 'disabled': True,
+                        self.rv.data.append({'text': u'', 'disabled': True,
                                              'size': self.number_size,
                                              'origin': self.rv})
                     else:
@@ -242,12 +246,12 @@ class Table(ScrollView):
                                              '_text': self.labels[c-1],
                                              'disabled': True,
                                              'cell': 'label' + str(c-1),
-                                             'type': type(''),
+                                             'type': type(u''),
                                              'size': self.default_size,
                                              'origin': self.rv})
                 else:
                     if c == 0:
-                        self.rv.data.append({'text': str(r),
+                        self.rv.data.append({'text': unicode(r),
                                              'disabled': True,
                                              'size': self.number_size,
                                              'origin': self.rv})
@@ -265,14 +269,14 @@ class Table(ScrollView):
 
                         if 'e+' in str(val) or 'e-' in str(val):
                             val = '{0:.10f}'.format(val)
-                        if hasattr(self, 'types'):
+                        if self.types:
                             if self.types[c - 1] == 'INTEGER':
                                 filter = 'int'
                                 text_type = type(1)
                             elif self.types[c - 1] == 'REAL':
                                 filter = 'float'
                                 text_type = type(1.1)
-                        self.rv.data.append({'text': str(val),
+                        self.rv.data.append({'text': unicode(val),
                                              'disabled': False,
                                              'cell': self.labels[c-1] + str(r),
                                              'r': r,
@@ -352,7 +356,7 @@ class Body(FloatLayout):
         self.app.menu = {'file': (['New...', self.new],
                                   ['_Open', self.open],
                                   ['Close Project', self.close_project],
-                                  ['_Save Project', self.save_project],
+                                  ['Save Project', self.save_project],
                                   ['_Save Project As...',
                                    self.save_project_as],
                                   ['Import Data', self.import_data],
@@ -405,9 +409,9 @@ class Body(FloatLayout):
             error.open()
             return
         widget = NewDataLayout()
-        task = CreateWizard(title='New Data', wdg=widget,
-                            run=partial(self._save_data, widget))
-        task.open()
+        self.wiz_newdata = CreateWizard(title='New Data', wdg=widget,
+                                        run=partial(self._save_data, widget))
+        self.wiz_newdata.open()
 
     def _save_data(self, wizard, *args):
         labels = []
@@ -460,7 +464,12 @@ class Body(FloatLayout):
                 try:
                     values.append(_values[j][i])
                 except IndexError:
-                    values.append(u'')
+                    if types[j] == 'INTEGER':
+                        values.append(0)
+                    elif types[j] == 'REAL':
+                        values.append(0.0)
+                    else:
+                        values.append(u'')
 
         self.tables.append((table_name, Table(max_cols=max_cols,
                                               max_rows=max_rows, pos=self.pos,
@@ -470,7 +479,9 @@ class Body(FloatLayout):
 
         # export to data.sqlite in <project>/data directory
         data = op.join(self.app.project_dir, 'data')
+
         self._export_data([data], 'data.sqlite')
+        self.wiz_newdata.dismiss()
 
     def open(self, *args): pass
 
@@ -478,8 +489,10 @@ class Body(FloatLayout):
         # call this before a new project
         self.app.project_exists = False
         self.app.project_dir = ''
+        self.app.project_name = ''
         tp = self.ids.tabpanel
         while len(tp.tab_list) > 1:
+            self.tables.pop()
             tp.remove_widget(tp.tab_list[0])
         self.ids.flow.clear_widgets()
         tp.switch_to(tp.tab_list[0])
@@ -548,6 +561,8 @@ class Body(FloatLayout):
             return
         else:
             selection = selection[0]
+            if '.sqlite' not in selection:
+                return
 
         conn = sqlite3.connect(op.join(selection))
         c = conn.cursor()
@@ -654,8 +669,7 @@ class Body(FloatLayout):
                 _chunk = []
                 for cnk in chunk:
                     if not isinstance(cnk, (str, unicode)):
-                        # switch to unicode???
-                        _chunk.append(str(cnk))
+                        _chunk.append(unicode(cnk))
                     else:
                         _chunk.append('\''+cnk+'\'')
                 values = ','.join(_chunk)
