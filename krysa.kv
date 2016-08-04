@@ -157,6 +157,7 @@
             TextInput:
                 id: name
                 disabled: not root.dirs
+                input_filter: app.root.simple_chars
 
         BoxLayout:
             size_hint_y: None
@@ -285,7 +286,6 @@
     size_hint_x: None
     width: dp(250)
     filter: None
-    # on_filter: print self.filter
     orientation: 'vertical'
     BoxLayout:
         size_hint_y: None
@@ -293,6 +293,7 @@
         TextInput:
             id: colname
             text: 'Data'
+            input_filter: app.root.simple_chars
         Button:
             id: colX
             size_hint_x: None
@@ -355,6 +356,7 @@
             TextInput:
                 id: table_name
                 hint_text: 'Data name'
+                input_filter: app.root.simple_chars
             Button:
                 id: columnadd
                 size_hint_x: None

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.5
+# Version: 0.1.6
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -211,6 +211,7 @@ class Table(ScrollView):
     default_size = (100, 30)
 
     def __init__(self, **kw):
+        app = App.get_running_app()
         self.rv = RecycleView(bar_width='10dp',
                               scroll_type=['bars', 'content'])
         container = RecycleGridLayout(size_hint=(None, None))
@@ -256,7 +257,7 @@ class Table(ScrollView):
                                              'size': self.number_size,
                                              'origin': self.rv})
                     else:
-                        filter = None
+                        filter = app.root.simple_chars
                         try:
                             val = self.values.pop(0)
                             text_type = type(val)
@@ -357,8 +358,6 @@ class Body(FloatLayout):
                                   ['_Open', self.open],
                                   ['Close Project', self.close_project],
                                   ['Save Project', self.save_project],
-                                  ['_Save Project As...',
-                                   self.save_project_as],
                                   ['Import Data', self.import_data],
                                   ['Export Data', self.export_data],
                                   ['_Recent Projects', self.test],
@@ -542,8 +541,6 @@ class Body(FloatLayout):
         self._export_data([data], 'data.sqlite')
 
         # exporting results still missing -> 0.2.x
-
-    def save_project_as(self, *args): pass
 
     def import_data(self, *args):
         self.opendlg = Dialog(title='Import Data',
@@ -854,6 +851,10 @@ class Body(FloatLayout):
                     else:
                         values.append(item['text'])
         return values
+
+    def simple_chars(self, substring, from_undo):
+        chars = re.findall(r'([a-zA-Z0-9.])', substring)
+        return u''.join(chars)
 
     def test(self, *args):
         print 'ping: ', args
