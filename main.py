@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.6
+# Version: 0.1.7
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0
 #
@@ -46,7 +46,8 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stencilview import StencilView
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.recyclegridlayout import RecycleGridLayout
-from kivy.properties import StringProperty, ObjectProperty, BooleanProperty
+from kivy.properties import StringProperty, ObjectProperty, \
+                            BooleanProperty, ListProperty
 
 
 class ErrorPop(Popup):
@@ -169,7 +170,7 @@ class Dialog(Popup):
     run = ObjectProperty(None)
     dirs = BooleanProperty(False)
     project = BooleanProperty(False)
-    filter = [lambda folder, filename: filename.endswith('.sqlite')]
+    filter = ListProperty([])
 
     def __init__(self, **kw):
         super(Dialog, self).__init__(**kw)
@@ -178,9 +179,11 @@ class Dialog(Popup):
         self.dirs = kw.get('dirs', False)
         self.project = kw.get('project', False)
         if self.project:
-            self.ids.name.hint_text = 'project.krysa'
+            self.ids.name.hint_text = 'Project.krysa'
+            self.filter = [lambda folder, fname: fname.endswith('.krysa')]
         else:
             self.ids.name.hint_text = 'example.sqlite'
+            self.filter = [lambda folder, fname: fname.endswith('.sqlite')]
 
 
 class SideItem(BoxLayout):
@@ -355,7 +358,7 @@ class Body(FloatLayout):
         self.app = App.get_running_app()
         self.tables = []
         self.app.menu = {'file': (['New...', self.new],
-                                  ['_Open', self.open],
+                                  ['Open Project', self.open_project],
                                   ['Close Project', self.close_project],
                                   ['Save Project', self.save_project],
                                   ['Import Data', self.import_data],
@@ -482,7 +485,37 @@ class Body(FloatLayout):
         self._export_data([data], 'data.sqlite')
         self.wiz_newdata.dismiss()
 
-    def open(self, *args): pass
+    def open_project(self, *args):
+        self.close_project()
+        self.opendlg = Dialog(title='Open Project',
+                              confirm='Open',
+                              run=self._open_project,
+                              project=True)
+        self.opendlg.open()
+
+    def _open_project(self, selection, *args):
+        if not selection:
+            return
+        else:
+            selection, fname = op.split(selection[0])
+
+        data = op.join(selection, 'data')
+        results = op.join(selection, 'results')
+
+        self.app.project_exists = True
+        self.app.project_dir = selection
+        self.app.project_name = fname.split('.')[0]
+
+        # (dummy for now)
+        # dump widgets' properties from process flow to dict, then to json
+        with open(op.join(selection, fname), 'rb') as f:
+            project = json.loads(f.read())
+        print project
+
+        # import from project automatically
+        self._import_data([op.join(data, 'data.sqlite')])
+
+        # importing results still missing -> 0.2.x
 
     def close_project(self, *args):
         # call this before a new project
@@ -505,27 +538,33 @@ class Body(FloatLayout):
                               project=True)
         self.savedlg.open()
 
-    def _save_project(self, selection, fname, *args):
+    def _save_project(self, selection=None, fname=None, *args):
         if not selection:
-            return
+            if not self.app.project_exists:
+                return
+            selection = op.dirname(self.app.project_dir)
+            fname = self.app.project_name
         else:
             selection = selection[0]
         if '.' not in fname:
             fname = fname + '.krysa'
 
-        try:
-            os.mkdir(op.join(selection, fname.split('.')[0]))
-            selection = op.join(selection, fname.split('.')[0])
-            data = op.join(selection, 'data')
-            results = op.join(selection, 'results')
+        if selection != op.dirname(self.app.project_dir):
+            try:
+                os.mkdir(op.join(selection, fname.split('.')[0]))
+            except OSError:
+                error = ErrorPop(msg='Project folder already exists!')
+                error.open()
+                return
+
+        selection = op.join(selection, fname.split('.')[0])
+        data = op.join(selection, 'data')
+        results = op.join(selection, 'results')
+        if selection != self.app.project_dir:
             os.mkdir(data)
             os.mkdir(results)
-            if op.exists(op.join(selection, fname)):
-                os.remove(op.join(selection, fname))
-        except OSError:
-            error = ErrorPop(msg='Project folder already exists!')
-            error.open()
-            return
+        if op.exists(op.join(selection, fname)):
+            os.remove(op.join(selection, fname))
 
         self.app.project_exists = True
         self.app.project_dir = selection
@@ -533,7 +572,7 @@ class Body(FloatLayout):
 
         # (dummy for now)
         # dump widgets' properties from process flow to dict, then to json
-        project = {'test': 'blah'}
+        project = {u'test': u'blah'}
         with open(op.join(selection, fname), 'wb') as f:
             f.write(json.dumps(project, indent=4))
 
@@ -852,7 +891,8 @@ class Body(FloatLayout):
                         values.append(item['text'])
         return values
 
-    def simple_chars(self, substring, from_undo):
+    @staticmethod
+    def simple_chars(substring, from_undo):
         chars = re.findall(r'([a-zA-Z0-9.])', substring)
         return u''.join(chars)
 

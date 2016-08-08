@@ -96,8 +96,6 @@ class DropDown(ScrollView):
 
     :attr:`allow_sides` is a :class:`~kivy.properties.BooleanProperty`
     and defaults to False.
-
-    .. versionadded:: 1.9.2
     '''
 
     attach_to = ObjectProperty(allownone=True)
@@ -243,6 +241,8 @@ class DropDown(ScrollView):
             return True
         if 'button' in touch.profile and touch.button.startswith('scroll'):
             return
+        if self.collide_point(*touch.pos):
+            return True
         if self.auto_dismiss:
             self.dismiss()
 
