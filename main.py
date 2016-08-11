@@ -1,28 +1,14 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.1.7
+# Version: 0.2.0
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
-# License: GNU GPL v3.0
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-# EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-# NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
-# BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-# ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-# CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-#
-# More info in LICENSE.txt
-#
-# The above copyright notice, warning and additional info together with
-# LICENSE.txt file shall be included in all copies or substantial portions
-# of the Software.
+# License: GNU GPL v3.0, More info in LICENSE.txt
 
 from kivy.config import Config
 # Config.set('graphics', 'window_state', 'maximized')
 import re
 import os
+import time
 import json
 import math
 import numpy
@@ -33,6 +19,7 @@ import os.path as op
 from kivy.app import App
 from functools import partial
 from dropdown import DropDown
+from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.uix.label import Label
@@ -44,10 +31,25 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stencilview import StencilView
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, \
                             BooleanProperty, ListProperty
+
+
+class PageBox(BoxLayout):
+    def __init__(self, **kwargs):
+        super(PageBox, self).__init__(**kwargs)
+        self.add_widget = self.ids.page.add_widget
+
+
+class PaperLabel(Label):
+    pass
+
+
+class ImgButton(Button):
+    source = StringProperty('')
 
 
 class ErrorPop(Popup):
@@ -142,8 +144,10 @@ class Task(Popup):
 
     def __init__(self, **kw):
         super(Task, self).__init__(**kw)
+        self.app = App.get_running_app()
         self.run = kw.get('run', None)
         wdg = kw.get('wdg', None)
+        self.call = kw.get('call', None)
         if wdg:
             self.ids.container.add_widget(wdg)
 
@@ -152,6 +156,18 @@ class Task(Popup):
         gen = (i for i, val in enumerate(values) if val == text)
         for i in gen:
             return i
+
+    def try_run(self, *args):
+        try:
+            self.run(*args)
+            if self.call:
+                but = Button(size_hint_y=None, height='25dp',
+                             text=self.call[0])
+                but.bind(on_release=self.call[1])
+                self.app.root.ids.recenttasks.add_widget(but)
+            self.dismiss()
+        except Exception as err:
+            Logger.exception(err)
 
 
 class CreateWizard(Popup):
@@ -735,7 +751,8 @@ class Body(FloatLayout):
 
     def basic_count(self, *args):
         widget = CountLayout()
-        task = Task(title='Count', wdg=widget)
+        task = Task(title='Count', wdg=widget,
+                    call=['Count', self.basic_count])
         task.run = partial(self._basic_count,
                            task,
                            task.ids.container.children[0].ids.name)
@@ -743,13 +760,14 @@ class Body(FloatLayout):
 
     def _basic_count(self, task, address, *args):
         values = self.from_address(task.tablenum, address.text)
-        print len(values)
+        self.set_page('Count', str(len(values)), 'text')
 
     def basic_countifs(self, *args): pass
 
     def basic_min(self, *args):
         widget = CountLayout()
-        task = Task(title='Minimum', wdg=widget)
+        task = Task(title='Minimum', wdg=widget,
+                    call=['Minimum', self.basic_min])
         task.run = partial(self._basic_min,
                            task,
                            task.ids.container.children[0].ids.name)
@@ -757,12 +775,12 @@ class Body(FloatLayout):
 
     def _basic_min(self, task, address, *args):
         values = self.from_address(task.tablenum, address.text)
-        print values
-        print min(values)
+        self.set_page('Minimum', str(min(values)), 'text')
 
     def basic_max(self, *args):
         widget = CountLayout()
-        task = Task(title='Maximum', wdg=widget)
+        task = Task(title='Maximum', wdg=widget,
+                    call=['Maximum', self.basic_max])
         task.run = partial(self._basic_max,
                            task,
                            task.ids.container.children[0].ids.name)
@@ -770,12 +788,12 @@ class Body(FloatLayout):
 
     def _basic_max(self, task, address, *args):
         values = self.from_address(task.tablenum, address.text)
-        print values
-        print max(values)
+        self.set_page('Maximum', str(max(values)), 'text')
 
     def basic_small(self, *args):
         widget = SmallLargeLayout()
-        task = Task(title='Small', wdg=widget)
+        task = Task(title='Small', wdg=widget,
+                    call=['Small', self.basic_small])
         task.run = partial(self._basic_small,
                            task,
                            task.ids.container.children[0].ids.name,
@@ -785,15 +803,16 @@ class Body(FloatLayout):
     def _basic_small(self, task, address, k, *args):
         values = self.from_address(task.tablenum, address.text)
         values = sorted(values)
-        print values
+        k = int(k.text) - 1
         try:
-            print values[int(k.text)-1]
+            self.set_page('Small (%s.)' % k, str(values[k]), 'text')
         except:
             pass
 
     def basic_large(self, *args):
         widget = SmallLargeLayout()
-        task = Task(title='Large', wdg=widget)
+        task = Task(title='Large', wdg=widget,
+                    call=['Large', self.basic_large])
         task.run = partial(self._basic_large,
                            task,
                            task.ids.container.children[0].ids.name,
@@ -803,9 +822,9 @@ class Body(FloatLayout):
     def _basic_large(self, task, address, k, *args):
         values = self.from_address(task.tablenum, address.text)
         values = sorted(values, reverse=True)
-        print values
+        k = int(k.text) - 1
         try:
-            print values[int(k.text)-1]
+            self.set_page('Large (%s.)' % k, str(values[k]), 'text')
         except:
             pass  # throw error k out of len(values) bounds, same for *_small
 
@@ -890,6 +909,31 @@ class Body(FloatLayout):
                     else:
                         values.append(item['text'])
         return values
+
+    def set_page(self, task, result, result_type='text', footer='time'):
+        page = PageBox()
+        head = PaperLabel(text=task, size_hint_y=None, height='30dp')
+
+        if result_type == 'text':
+            content = PaperLabel(text=result)
+        elif result_type == 'graph':
+            content = Image(source=result)
+
+        # turn off with footer=None
+        if not footer:
+            foot = PaperLabel(size_hint_y=None, height='30dp')
+        else:
+            if footer == 'time':
+                foot = PaperLabel(text=str(time.time()),
+                                  size_hint_y=None,
+                                  height='30dp')
+            else:
+                foot = PaperLabel(text=footer, size_hint_y=None,
+                                  height='30dp')
+        page.add_widget(head)
+        page.add_widget(content)
+        page.add_widget(foot)
+        self.ids.results.add_widget(page)
 
     @staticmethod
     def simple_chars(substring, from_undo):

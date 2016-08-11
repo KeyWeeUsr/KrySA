@@ -53,14 +53,40 @@
                     sizable_from: 'top'
                     BoxLayout:
                         orientation: 'vertical'
-                        ScrollView:
-                            GridLayout:
-                                size_hint_y: None
-                                height: self.minimum_height
-                                cols: 1
-                                SideItem:
-                                SideItem:
-                                SideItem:
+                        BoxLayout:
+                            size_hint_y: 0.15
+                            ImgButton:
+                                source: 'clock.png'
+                                on_release: taskpanel.current = 'recent'
+                            ImgButton
+                                source: 'star.png'
+                                on_release: taskpanel.current = 'favorite'
+                        ScreenManager:
+                            id: taskpanel
+                            Screen:
+                                name: 'recent'
+                                ScrollView:
+                                    GridLayout:
+                                        id: recenttasks
+                                        size_hint_y: None
+                                        height: self.minimum_height
+                                        cols: 1
+                                        Label:
+                                            size_hint_y: None
+                                            text: 'Recent Tasks'
+                                            height: dp(30)
+                            Screen:
+                                name: 'favorite'
+                                ScrollView:
+                                    GridLayout:
+                                        id: favtasks
+                                        size_hint_y: None
+                                        height: self.minimum_height
+                                        cols: 1
+                                        Label:
+                                            size_hint_y: None
+                                            text: 'Favorite Tasks'
+                                            height: dp(30)
 
         TabbedPanel:
             id: tabpanel
@@ -72,6 +98,32 @@
                 text: 'Process Flow'
                 ProcessFlow:
                     id: flow
+        Splitter:
+            id: resultspanel
+            canvas.before:
+                Color:
+                    rgba: 0.9, 0.9, 0.9, 1
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            size_hint: None, None
+            min_size: dp(12)
+            max_size: dp(650)
+            height: root.height - dp(37)
+            sizable_from: 'left'
+            rescale_with_parent: True
+            ScrollView:
+                size_hint_x: None
+                width: self.parent.width - dp(28)
+                pos: self.parent.pos[0] + dp(28), self.pos[1]
+                GridLayout
+                    id: results
+                    cols: 1
+                    size_hint: None, None
+                    size: self.minimum_size
+                    Widget:
+                        size_hint_y: None
+                        height: dp(5)
 
 <MenuDrop>:
     auto_width: False
@@ -198,7 +250,7 @@
             Button:
                 text: 'Run'
                 disabled: True if tablesel.text == '' else False
-                on_release: root.run()
+                on_release: root.try_run()
 
 <CreateWizard>:
     BoxLayout:
@@ -369,3 +421,52 @@
                 size_hint_x: None
                 width: self.minimum_width
                 id: columns
+
+<Page@BoxLayout>:
+    canvas:
+        Color:
+            rgba: 0.2, 0.2, 0.2, 0.2
+        Rectangle:
+            size: [s + dp(4) for s in self.size]
+            pos: self.pos[0] - dp(2), self.pos[1] - dp(2)
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+    orientation: 'vertical'
+
+<PageBox>:
+    size_hint: None, None
+    size: dp(597), dp(884)  # A4 72dpi
+    orientation: 'vertical'
+    BoxLayout:
+        Widget:
+            size_hint_x: None
+            width: dp(2)
+        Page:
+            id: page
+    Widget:
+        size_hint_y: None
+        height: dp(42)
+    Button:
+        size_hint: None, None
+        size: dp(30), dp(30)
+        pos_hint: {'right':0.99}
+        pos: self.pos[0], page.pos[1] + page.height - self.height
+        text: 'X'
+        on_release: root.parent.remove_widget(root)
+
+<PaperLabel>:
+    color: 0, 0, 0, 1
+
+<ImgButton>:
+    size_hint_x: None
+    width: self.height
+    canvas:
+        Color:
+            rgb: 1, 1, 1
+        Rectangle:
+            source: self.source
+            size: [s - 6 for s in self.size]
+            pos: [p + 3 for p in self.pos]

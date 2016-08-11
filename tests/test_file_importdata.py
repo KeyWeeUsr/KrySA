@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
 
         # test data
         self.assertTrue(op.exists(op.join(self.path, 'test_Project',
-                                       'data', 'data.sqlite')))
+                                          'data', 'data.sqlite')))
         conn = sqlite3.connect(op.join(self.path, 'test_Project',
                                        'data', 'data.sqlite'))
         c = conn.cursor()
