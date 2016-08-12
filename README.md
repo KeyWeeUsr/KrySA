@@ -3,6 +3,9 @@ KrySA
 
 <img align="right" height="256" src="https://raw.githubusercontent.com/KeyWeeUsr/KrySA/master/logo.png" />
 
+<a href="http://krysa.readthedocs.io/en/latest/" target="_blank">
+<img src="https://img.shields.io/badge/docs-latest-brightgreen.svg" /></a>
+
 _Statistical analysis for rats._
 
 A common translation of the word "krysa" is "a rat", mostly considered a lower creature, but in fact a really cute and intelligent little rodent.
