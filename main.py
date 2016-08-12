@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.2.0
+# Version: 0.2.1
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -392,7 +392,7 @@ class Body(FloatLayout):
                                   ['_Protect Data', self.test],
                                   ['_Go To...', self.test],),
                          'tasks': (['Basic', self.basic],
-                                   ['Averages', self.avgs],),
+                                   ['_Averages', self.avgs],),
                          'help': (['_KrySA Help', self.test],
                                   ['_Getting Started Tutorial', self.test],
                                   ['About KrySA', self.about],),
@@ -933,7 +933,7 @@ class Body(FloatLayout):
         page.add_widget(head)
         page.add_widget(content)
         page.add_widget(foot)
-        self.ids.results.add_widget(page)
+        self.ids.results.add_widget(page, 1)
 
     @staticmethod
     def simple_chars(substring, from_undo):
