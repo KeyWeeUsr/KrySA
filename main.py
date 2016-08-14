@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.2.1
+# Version: 0.2.2
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -8,7 +8,6 @@ from kivy.config import Config
 # Config.set('graphics', 'window_state', 'maximized')
 import re
 import os
-import time
 import json
 import math
 import numpy
@@ -23,6 +22,7 @@ from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.uix.label import Label
+from time import gmtime, strftime
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
@@ -864,7 +864,8 @@ class Body(FloatLayout):
         aboutdlg.open()
 
     # non-menu functions
-    def get_column(self, address):
+    @staticmethod
+    def get_column(address):
         col = 0
         for c in address:
             if c in string.ascii_letters:
@@ -872,7 +873,6 @@ class Body(FloatLayout):
         return col
 
     def from_address(self, table, address, *args):
-        # allow using column name as address?
         values = []
         col_row = []  # [column, row] such as [x, y] |_
         if ':' not in address:
@@ -924,7 +924,8 @@ class Body(FloatLayout):
             foot = PaperLabel(size_hint_y=None, height='30dp')
         else:
             if footer == 'time':
-                foot = PaperLabel(text=str(time.time()),
+                t = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime())
+                foot = PaperLabel(text=t,
                                   size_hint_y=None,
                                   height='30dp')
             else:

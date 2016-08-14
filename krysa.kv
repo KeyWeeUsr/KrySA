@@ -54,7 +54,8 @@
                     BoxLayout:
                         orientation: 'vertical'
                         BoxLayout:
-                            size_hint_y: 0.15
+                            size_hint_y: None
+                            height: dp(26)
                             ImgButton:
                                 source: 'clock.png'
                                 on_release: taskpanel.current = 'recent'
@@ -104,7 +105,7 @@
                 Color:
                     rgba: 0.9, 0.9, 0.9, 1
                 Rectangle:
-                    pos: self.pos
+                    pos: self.pos[0] + dp(13), self.pos[1]
                     size: self.size
             size_hint: None, None
             min_size: dp(12)
@@ -116,6 +117,9 @@
                 size_hint_x: None
                 width: self.parent.width - dp(28)
                 pos: self.parent.pos[0] + dp(28), self.pos[1]
+                bar_width: 0
+                bar_color: 0, 0, 0, 0
+                bar_inactive_color: 0, 0, 0, 0
                 GridLayout
                     id: results
                     cols: 1
@@ -133,6 +137,9 @@
         Rectangle:
             pos: self.pos
             size: self.size
+
+<SplitterStrip>:
+    background_color: 0.5, 0.5, 0.5, 1
 
 <SizedButton>:
     size_hint: None, None
@@ -391,7 +398,6 @@
             check: (colname, vals)
             on_release:
                 root.checklock(self.disable, coltype, self.check)
-            # disable all + & X buttons, check types of values, throw error if wrng
         Button:
             size_hint_y: None
             height: dp(60)

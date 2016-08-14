@@ -26,6 +26,7 @@ Contents
 
    gettingstarted
    project
+   task
    contribute
 
 Indices and tables

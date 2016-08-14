@@ -9,10 +9,10 @@ KrySA runs on Kivy framework, therefore it is possible to run it on any of
 available platforms for Kivy, mainly Windows, Linux and Mac. It requires some
 additional packages you'll need to install if you want to run it:
 
-- `Kivy <https://kivy.org>`_
-- `SciPy <https://scipy.org>`_
-- `NumPy <https://numpy.org>`_
-- `MatPlotLib <https://matplotlib.org>`_
+- `Kivy <https://pypi.python.org/pypi/kivy>`_
+- `SciPy <https://pypi.python.org/pypi/scipy>`_
+- `NumPy <https://pypi.python.org/pypi/numpy/>`_
+- `MatPlotLib <https://pypi.python.org/pypi/matplotlib>`_
 
 There's no executable for KrySA yet, you'll need to install it from source and
 run with Python until there is a release available. Don't worry, it'll be
@@ -30,11 +30,13 @@ GPU             Anything with OpenGL 2.0 support should be enough
 Internet        Necessary for downloading requirements and updating
 =============== ========================================================
 
+.. _install:
+
 Installation
 ------------
 
 .. |nspywhl| replace:: here
-.. _nspywhl: http://localhost
+.. _nspywhl: https://anaconda.org/carlkl/packages
 .. |kivyinstall| replace:: Kivy Installation
 .. _kivyinstall: https://kivy.org/docs/installation/installation.html
 
@@ -48,10 +50,10 @@ Windows, which will install Python together with Kivy. On other platforms use
    none of those are good, compile Kivy from source.
 
 Then it gets a little bit harder with SciPy and NumPy because those need to be
-compiled and it doesn't work with Windows really good. For this case we will
-use already compiled packages in ``.whl`` files. You can find them |nspywhl|_.
-Choose packages for Python 2.7 (cp27). On Linux they should work without issues
-with ``pip install <package>``. ::
+compiled and it sometimes doesn't work with Windows. For this case we will use
+already compiled packages in ``.whl`` files. You can find them either on pypi
+or |nspywhl|_. Choose packages for Python 2.7 (cp27). On Linux they should work
+without issues with ``pip install <package>``. ::
 
     pip install <path to package>.whl
 

@@ -50,7 +50,7 @@ Data file
 
 KrySA creates a single ``.sqlite`` file which handles all the :ref:`data` you
 create. Although `SQLite` doesn't limit its columns by default, KrySA uses this
-option to prevent crashing caused by a user's mistake of running :ref:`task`
+option to prevent crashing caused by a user's mistake of running a :ref:`task`
 expecting only numbers with a value of type `TEXT`.
 
 .. _data:
@@ -68,7 +68,7 @@ Remember, for each column you have to select a type of its values:
 ========== ========================================================
    Type    Description
 ---------- --------------------------------------------------------
-REAL       Only numbers with a single ``.`` symbol = ``1.1``
+REAL       Only numbers with a single ``.`` symbol (``1.1``)
 INTEGER    Only numbers without any special symbols
 TEXT       Non-limited value converting input directly to unicode
 ========== ========================================================
@@ -86,6 +86,9 @@ wrong values. When you're finished, type ``Run``, it'll run ``Check & Lock``
 for each available column. If all the columns pass the test, a new tab after
 the :ref:`flow` tab is created and then the application export *every* present
 data to the :ref:`sqlite`.
+
+Each column in finished :ref:`data` has an address you can access it later with
+in a :ref:`task`.
 
 Importing
 ~~~~~~~~~
@@ -121,12 +124,5 @@ Nothing yet.
 
 Process Flow
 ------------
-
-Nothing yet.
-
-.. _task:
-
-Task
-----
 
 Nothing yet.
