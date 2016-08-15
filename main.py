@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.2.2
+# Version: 0.2.3
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -31,12 +31,15 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stencilview import StencilView
-from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, \
                             BooleanProperty, ListProperty
 
+import tasks
+import tasks.basic
+import tasks.avgs
+from tasks import Task
 
 class PageBox(BoxLayout):
     def __init__(self, **kwargs):
@@ -125,49 +128,6 @@ class NewDataLayout(BoxLayout):
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataLayout, self).__init__(**kw)
-
-
-# remove unnecessary __init__ later
-class SmallLargeLayout(BoxLayout):
-    def __init__(self, **kw):
-        super(SmallLargeLayout, self).__init__(**kw)
-
-
-class CountLayout(BoxLayout):
-    def __init__(self, **kw):
-        super(CountLayout, self).__init__(**kw)
-
-
-# inherit?
-class Task(Popup):
-    run = ObjectProperty(None)
-
-    def __init__(self, **kw):
-        super(Task, self).__init__(**kw)
-        self.app = App.get_running_app()
-        self.run = kw.get('run', None)
-        wdg = kw.get('wdg', None)
-        self.call = kw.get('call', None)
-        if wdg:
-            self.ids.container.add_widget(wdg)
-
-    def get_table_pos(self, text, values, *args):
-        print values
-        gen = (i for i, val in enumerate(values) if val == text)
-        for i in gen:
-            return i
-
-    def try_run(self, *args):
-        try:
-            self.run(*args)
-            if self.call:
-                but = Button(size_hint_y=None, height='25dp',
-                             text=self.call[0])
-                but.bind(on_release=self.call[1])
-                self.app.root.ids.recenttasks.add_widget(but)
-            self.dismiss()
-        except Exception as err:
-            Logger.exception(err)
 
 
 class CreateWizard(Popup):
@@ -731,129 +691,20 @@ class Body(FloatLayout):
         self.savedlg.dismiss()
 
     def basic(self, button, *args):
-        d = DropDown(allow_sides=True, auto_width=False)
-        buttons = []
-        buttons.append(SizedButton(text='Count'))
-        buttons[0].bind(on_release=self.basic_count)
-        buttons.append(SizedButton(text='_Count if'))
-        buttons.append(SizedButton(text='Minimum'))
-        buttons[2].bind(on_release=self.basic_min)
-        buttons.append(SizedButton(text='Maximum'))
-        buttons[3].bind(on_release=self.basic_max)
-        buttons.append(SizedButton(text='Small'))
-        buttons[4].bind(on_release=self.basic_small)
-        buttons.append(SizedButton(text='Large'))
-        buttons[5].bind(on_release=self.basic_large)
-        buttons.append(SizedButton(text='_Frequency'))
-        for b in buttons:
-            d.add_widget(b)
-        d.open(button)
-
-    def basic_count(self, *args):
-        widget = CountLayout()
-        task = Task(title='Count', wdg=widget,
-                    call=['Count', self.basic_count])
-        task.run = partial(self._basic_count,
-                           task,
-                           task.ids.container.children[0].ids.name)
-        task.open()
-
-    def _basic_count(self, task, address, *args):
-        values = self.from_address(task.tablenum, address.text)
-        self.set_page('Count', str(len(values)), 'text')
-
-    def basic_countifs(self, *args): pass
-
-    def basic_min(self, *args):
-        widget = CountLayout()
-        task = Task(title='Minimum', wdg=widget,
-                    call=['Minimum', self.basic_min])
-        task.run = partial(self._basic_min,
-                           task,
-                           task.ids.container.children[0].ids.name)
-        task.open()
-
-    def _basic_min(self, task, address, *args):
-        values = self.from_address(task.tablenum, address.text)
-        self.set_page('Minimum', str(min(values)), 'text')
-
-    def basic_max(self, *args):
-        widget = CountLayout()
-        task = Task(title='Maximum', wdg=widget,
-                    call=['Maximum', self.basic_max])
-        task.run = partial(self._basic_max,
-                           task,
-                           task.ids.container.children[0].ids.name)
-        task.open()
-
-    def _basic_max(self, task, address, *args):
-        values = self.from_address(task.tablenum, address.text)
-        self.set_page('Maximum', str(max(values)), 'text')
-
-    def basic_small(self, *args):
-        widget = SmallLargeLayout()
-        task = Task(title='Small', wdg=widget,
-                    call=['Small', self.basic_small])
-        task.run = partial(self._basic_small,
-                           task,
-                           task.ids.container.children[0].ids.name,
-                           task.ids.container.children[0].ids.order)
-        task.open()
-
-    def _basic_small(self, task, address, k, *args):
-        values = self.from_address(task.tablenum, address.text)
-        values = sorted(values)
-        k = int(k.text) - 1
-        try:
-            self.set_page('Small (%s.)' % k, str(values[k]), 'text')
-        except:
-            pass
-
-    def basic_large(self, *args):
-        widget = SmallLargeLayout()
-        task = Task(title='Large', wdg=widget,
-                    call=['Large', self.basic_large])
-        task.run = partial(self._basic_large,
-                           task,
-                           task.ids.container.children[0].ids.name,
-                           task.ids.container.children[0].ids.order)
-        task.open()
-
-    def _basic_large(self, task, address, k, *args):
-        values = self.from_address(task.tablenum, address.text)
-        values = sorted(values, reverse=True)
-        k = int(k.text) - 1
-        try:
-            self.set_page('Large (%s.)' % k, str(values[k]), 'text')
-        except:
-            pass  # throw error k out of len(values) bounds, same for *_small
-
-    def basic_freq(self, *args): pass
+        drop = DropDown(allow_sides=True, auto_width=False)
+        for t in tasks.basic.names:
+            but = SizedButton(text=t[0])
+            but.bind(on_release=t[1])
+            drop.add_widget(but)
+        drop.open(button)
 
     def avgs(self, button, *args):
-        d = DropDown(allow_sides=True, auto_width=False)
-        buttons = []
-        buttons.append(SizedButton(text='N - ic'))
-        buttons.append(SizedButton(text='Quadratic'))
-        # statistics.mean()
-        buttons.append(SizedButton(text='Arithmetic'))
-        # numpy.mean(values)
-        buttons.append(SizedButton(text='Geometric'))
-        # scipy.stats.gmean(values)
-        buttons.append(SizedButton(text='Harmonic'))
-        # scipy.stats.hmean(values)
-        buttons.append(SizedButton(text='Interquartile'))
-        # 1/2 * ( max(x) + min(x) )
-        buttons.append(SizedButton(text='Midrange'))
-        buttons.append(SizedButton(text='Generalized'))
-        buttons.append(SizedButton(text='Trimmed'))
-        # scipy.stats.tmean(values, limits)
-        buttons.append(SizedButton(text='Median'))
-        buttons.append(SizedButton(text='Mode'))
-        buttons.append(SizedButton(text='Harmonic'))
-        for b in buttons:
-            d.add_widget(b)
-        d.open(button)
+        drop = DropDown(allow_sides=True, auto_width=False)
+        for t in tasks.avgs.names:
+            but = SizedButton(text=t[0])
+            but.bind(on_release=t[1])
+            drop.add_widget(but)
+        drop.open(button)
 
     def about(self, *args):
         aboutdlg = Popup(title='About')

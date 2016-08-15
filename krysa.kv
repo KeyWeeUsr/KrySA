@@ -231,34 +231,6 @@
                     if name.text: root.run(view.selection, name.text)
                     elif name.disabled: root.run(view.selection)
 
-<Task>:
-    size_hint: 0.5, 0.5
-    pos_hint: {'center': [0.5, 0.5]}
-    BoxLayout:
-        orientation: 'vertical'
-        BoxLayout:
-            Spinner:
-                id: tablesel
-                text: 'Choose data:'
-                values: [child[0] for child in app.root.tables]
-                on_text:
-                    root.tablenum = root.get_table_pos(self.text, self.values)
-
-        BoxLayout:
-            id: container
-
-        BoxLayout:
-            size_hint_y: None
-            height: dp(60)
-            Button:
-                text: 'Cancel'
-                on_release: root.dismiss()
-
-            Button:
-                text: 'Run'
-                disabled: True if tablesel.text == '' else False
-                on_release: root.try_run()
-
 <CreateWizard>:
     BoxLayout:
         orientation: 'vertical'
@@ -276,18 +248,6 @@
                 text: 'Run'
                 disabled: False
                 on_release: root.run()
-
-<CountLayout>:
-    orientation: 'vertical'
-    TextInput:
-        id: name
-
-<SmallLargeLayout>:
-    orientation: 'vertical'
-    TextInput:
-        id: name
-    TextInput:
-        id: order
 
 <TabbedPanelHeader>:
     background_down: 'atlas://data/images/defaulttheme/tab_btn'
