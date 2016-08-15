@@ -28,9 +28,3 @@ Contents
    project
    task
    contribute
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

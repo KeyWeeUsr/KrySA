@@ -90,6 +90,16 @@ data to the :ref:`sqlite`.
 Each column in finished :ref:`data` has an address you can access it later with
 in a :ref:`task`.
 
+Editing
+^^^^^^^
+
+Each cell in :ref:`data` is clickable and editable in the limits of the column
+type. Press ``<enter>`` (``<return>``) to confirm the edit, otherwise it won't
+change the value and only unfocus the cell.
+
+.. note:: Edited cells aren't automatically saved to :ref:`sqlite`, how to save
+   read in :ref:`osproject`.
+
 Importing
 ~~~~~~~~~
 
