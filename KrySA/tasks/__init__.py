@@ -5,6 +5,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.properties import ObjectProperty
+import re
 
 Builder.load_string("""
 <Task>:
@@ -54,6 +55,22 @@ Builder.load_string("""
             id: order
     Label:
         text: 'Example: k=2 for the second smallest value.'
+
+<AvgsLayout>:
+    orientation: 'vertical'
+    BoxLayout:
+        Label:
+            text: 'Address'
+        TextInput:
+            id: name
+    BoxLayout:
+        Label:
+            text: 'p ='
+        TextInput:
+            id: power
+            input_filter: root.floatfilter
+    Label:
+        text: 'Example: p=0 for the geometric mean\\np=1 for the arithmetic.'
 """)
 
 
@@ -63,6 +80,21 @@ class CountLayout(BoxLayout):
 
 class SmallLargeLayout(BoxLayout):
     pass
+
+
+class AvgsLayout(BoxLayout):
+    def floatfilter(self, substring, from_undo):
+        txt = self.ids.power.text
+        if '-' in txt and '.' not in txt:
+            chars = re.findall(r'([0-9.])', substring)
+        elif '.' in txt:
+            if '-' not in txt:
+                chars = re.findall(r'([\-0-9])', substring)
+            else:
+                chars = re.findall(r'([0-9])', substring)
+        else:
+            chars = re.findall(r'([\-0-9.])', substring)
+        return u''.join(chars)
 
 
 class Task(Popup):

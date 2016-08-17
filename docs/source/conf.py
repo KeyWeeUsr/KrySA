@@ -64,7 +64,7 @@ author = u'Peter Badida'
 # The short X.Y version.
 fpath = os.path.dirname(os.path.abspath(__file__))
 try:
-    with open(fpath+"/../../main.py") as _f:
+    with open(fpath+"/../../krysa/__main__.py") as _f:
         for i, line in enumerate(_f):
             if i == 2:
                 version = line[len('# Version: '):-1]

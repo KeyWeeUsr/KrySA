@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.2.3
+# Version: 0.2.4
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -300,7 +300,7 @@ class ProcessFlow(BoxLayout, StencilView):
     def __init__(self, **kw):
         super(ProcessFlow, self).__init__(**kw)
         app = App.get_running_app()
-        self.texture = Image(source=app.path+'/grid.png').texture
+        self.texture = Image(source=app.path+'/data/grid.png').texture
         self.texture.wrap = 'repeat'
 
 
@@ -798,7 +798,7 @@ class Body(FloatLayout):
 
 class KrySA(App):
     path = op.dirname(op.abspath(__file__))
-    icon = path+'/icon.png'
+    icon = path+'/data/icon.png'
     project_exists = False
     project_name = ''
     project_dir = ''
