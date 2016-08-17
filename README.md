@@ -1,7 +1,7 @@
 KrySA
 =====
 
-<img align="right" height="256" src="https://raw.githubusercontent.com/KeyWeeUsr/KrySA/master/logo.png" />
+<img align="right" height="256" src="https://raw.githubusercontent.com/KeyWeeUsr/KrySA/master/krysa/data/logo.png" />
 
 <a href="http://krysa.readthedocs.io/en/latest/" target="_blank">
 <img src="https://img.shields.io/badge/docs-latest-brightgreen.svg" /></a>
