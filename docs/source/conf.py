@@ -64,7 +64,7 @@ author = u'Peter Badida'
 # The short X.Y version.
 fpath = os.path.dirname(os.path.abspath(__file__))
 try:
-    with open(fpath+"/../../krysa/__main__.py") as _f:
+    with open(fpath+"/../../krysa/main.py") as _f:
         for i, line in enumerate(_f):
             if i == 2:
                 version = line[len('# Version: '):-1]
@@ -135,12 +135,6 @@ todo_include_todos = False
 #
 html_theme = 'alabaster'
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#
-# html_theme_options = {}
-
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
 
@@ -158,9 +152,22 @@ html_theme = 'alabaster'
 #
 html_logo = '_static/logo.png'
 
+# Theme options are theme-specific and customize the look and feel of a theme
+# further.  For a list of options available for each theme, see the
+# documentation.
+#
+html_theme_options = {'github_user': 'KeyWeeUsr',
+                      'github_repo': 'KrySA',
+                      'github_banner': True,
+                      'github_button': False,
+                      'touch_icon': html_logo,
+                      'show_related': True,
+                      'fixed_sidebar': True,
+                      }
+
 # The name of an image file (relative to this directory) to use as a favicon of
-# the docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
-# pixels large.
+# the docs.  This file should be a Windows icon file (.ico) being 16x16 or
+# 32x32 pixels large.
 #
 # html_favicon = None
 

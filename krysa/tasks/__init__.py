@@ -8,6 +8,8 @@ from kivy.properties import ObjectProperty
 import re
 
 Builder.load_string("""
+<SingleTI@TextInput>:
+    multiline: False
 <Task>:
     size_hint: 0.5, 0.5
     pos_hint: {'center': [0.5, 0.5]}
@@ -38,7 +40,7 @@ Builder.load_string("""
 
 <CountLayout>:
     orientation: 'vertical'
-    TextInput:
+    SingleTI:
         id: name
 
 <SmallLargeLayout>:
@@ -46,12 +48,12 @@ Builder.load_string("""
     BoxLayout:
         Label:
             text: 'Address'
-        TextInput:
+        SingleTI:
             id: name
     BoxLayout:
         Label:
             text: 'k ='
-        TextInput:
+        SingleTI:
             id: order
     Label:
         text: 'Example: k=2 for the second smallest value.'
@@ -61,12 +63,12 @@ Builder.load_string("""
     BoxLayout:
         Label:
             text: 'Address'
-        TextInput:
+        SingleTI:
             id: name
     BoxLayout:
         Label:
             text: 'p ='
-        TextInput:
+        SingleTI:
             id: power
             input_filter: root.floatfilter
     Label:

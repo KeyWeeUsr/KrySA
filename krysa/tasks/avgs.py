@@ -1,4 +1,4 @@
-from tasks import Task, CountLayout, AvgsLayout
+from . import Task, CountLayout, AvgsLayout
 from functools import partial, reduce
 import operator
 import math

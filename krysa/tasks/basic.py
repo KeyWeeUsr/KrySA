@@ -1,5 +1,5 @@
+from . import Task, CountLayout, SmallLargeLayout
 from functools import partial
-from tasks import Task, CountLayout, SmallLargeLayout
 
 
 def basic_count(*args):
