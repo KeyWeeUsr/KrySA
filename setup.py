@@ -45,6 +45,7 @@ setup(
         'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Natural Language :: English',
         'Operating System :: Android',
         'Operating System :: MacOS',
@@ -57,5 +58,5 @@ setup(
         'Topic :: Scientific/Engineering :: Visualization',
     ],
     keywords=['krysa', 'statistics', 'kivy'],
-    license="License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    license="GNU General Public License v3 (GPLv3)",
 )
