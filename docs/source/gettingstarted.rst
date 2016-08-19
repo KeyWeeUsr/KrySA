@@ -15,8 +15,7 @@ additional packages you'll need to install if you want to run it:
 - `MatPlotLib <https://pypi.python.org/pypi/matplotlib>`_
 
 There's no executable for KrySA yet, you'll need to install it from source and
-run with Python until there is a release available. Don't worry, it'll be
-explained later.
+run with Python until there is a release available.
 
 Minimum system requirements
 ---------------------------
@@ -94,3 +93,19 @@ When the repo clone(git/zip) of KrySA is ready, simply navigate into it and
 run::
 
     python main.py
+
+About docs
+----------
+
+.. |rtd| replace:: HTML upload not available
+.. _rtd: https://docs.readthedocs.io/en/latest/contribute.html#initial-triage
+
+The full documentation (including documented source) needs properly installed
+Kivy, which probably isn't possible in RTD environment itself due to required
+compilation. If compiled with e.g. Travis and then used for building the docs,
+RTD itself won't work this way (|rtd|_). Therefore there are two types of the
+docs:
+
+* *Simple:* A basic documentation intended for end-user
+
+* *Full:* Simple docs + source intended for :ref:`contribute`

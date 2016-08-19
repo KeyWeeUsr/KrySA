@@ -21,7 +21,12 @@ from os.path import dirname as dn
 import sys
 sys.path.insert(0, op.join(dn(dn(dn(op.abspath(__file__)))), 'krysa'))
 sys.path.insert(0, dn(dn(op.abspath(__file__))))
-from docs_modules import *
+try:
+    import kivy
+    import docs_modules
+except ImportError:
+    print('No Kivy installed...\nBuilding simple docs...')
+
 
 # -- General configuration ------------------------------------------------
 

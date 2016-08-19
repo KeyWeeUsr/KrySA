@@ -4,7 +4,7 @@ KrySA
 <img align="right" height="256" src="https://raw.githubusercontent.com/KeyWeeUsr/KrySA/master/krysa/data/logo.png"/>
 
 <a href="http://krysa.readthedocs.io/en/latest/" target="_blank">
-<img src="https://img.shields.io/badge/docs-latest-brightgreen.svg" /></a>
+<img src="https://readthedocs.org/projects/krysa/badge/?version=latest" /></a>
 <a href="https://pypi.python.org/pypi/krysa" target="_blank">
 <img src="https://img.shields.io/pypi/pyversions/krysa.svg" /></a>
 <a href="https://pypi.python.org/pypi/krysa" target="_blank">

@@ -3,7 +3,7 @@ import os
 import sys
 import os.path as op
 
-print('Running {}'.format(op.basename(__file__)))
+print('Creating modules from {}'.format(op.basename(__file__)))
 include_exts = ('.py',)
 exclude_dirs = ('test_Project',)
 exclude_files = ('dropdown.py', '__main__.py', 'test_file_')
@@ -13,6 +13,7 @@ mod_sep = u' » '
 paths = []
 rootdir = op.join(op.dirname(op.dirname(op.abspath(__file__))), 'krysa')
 sourcedir = op.join(op.dirname(op.abspath(__file__)), 'source')
+
 print('Getting paths...')
 for path, folders, files in os.walk(rootdir):
     dirname = op.basename(path)
@@ -33,6 +34,7 @@ for doc in docs:
     for ex in exclude_files:
         docs = [d for d in docs if ex not in d]
 
+print('Filtering files...')
 mods = []
 for doc in docs:
     mod = doc.lstrip('krysa'+op.sep).replace(op.sep, '.')
@@ -53,6 +55,7 @@ for doc in docs:
     if (name, mod) not in mods:
         mods.append((name, mod))
 
+print('Writing output...')
 for mod in mods:
     mod_name = mod[0].replace(mod_sep, '_').lower()
     with open(op.join(sourcedir, 'mod_{}.rst'.format(mod_name)), 'w') as f:
@@ -60,6 +63,14 @@ for mod in mods:
         f.write('=' * len(mod[0]))
         f.write('\n\n.. automodule:: {}\n'.format(mod[1]))
         f.write('   :members:')
-for i in os.walk(sourcedir):
-    print i
-print('Done...')
+
+with open(op.join(sourcedir, 'mod_index.rst'), 'w') as f:
+    f.write('Modules\n')
+    f.write('=======\n\n')
+    f.write('* `Index <py-modindex.html>`_\n\n')
+    f.write('.. toctree::\n')
+    f.write('   mod_krysa\n')
+    f.write('   mod_krysa_tasks\n')
+    f.write('   mod_krysa_tests\n')
+
+print('Full docs done...')
