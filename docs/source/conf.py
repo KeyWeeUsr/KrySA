@@ -17,8 +17,12 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os.path as op
+from os.path import dirname as dn
 import sys
-sys.path.insert(0, op.join(op.abspath(__file__), '..', '..', '..', 'krysa'))
+sys.path.insert(0, op.join(dn(dn(dn(op.abspath(__file__)))), 'krysa'))
+sys.path.insert(0, dn(dn(op.abspath(__file__))))
+from docs_modules import *
+
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -61,7 +65,7 @@ author = u'Peter Badida'
 # built documents.
 #
 # The short X.Y version.
-fpath = op.dirname(op.abspath(__file__))
+fpath = dn(op.abspath(__file__))
 try:
     with open(fpath+"/../../krysa/main.py") as _f:
         for i, line in enumerate(_f):

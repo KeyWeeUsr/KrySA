@@ -3,14 +3,15 @@ import os
 import sys
 import os.path as op
 
+print('Running {}'.format(op.basename(__file__)))
 include_exts = ('.py',)
 exclude_dirs = ('test_Project',)
 exclude_files = ('dropdown.py', '__main__.py', 'test_file_')
 
-mod_sep = ' » '
+mod_sep = u' » '
 
 paths = []
-rootdir = op.join(op.abspath(__file__), '..', '..', 'krysa')
+rootdir = op.join(op.dirname(op.dirname(op.abspath(__file__))), 'krysa')
 sourcedir = op.join(op.dirname(op.abspath(__file__)), 'source')
 print('Getting paths...')
 for path, folders, files in os.walk(rootdir):
@@ -53,9 +54,12 @@ for doc in docs:
         mods.append((name, mod))
 
 for mod in mods:
-    mod_name = mod[0].replace(' » ', '_').lower()
+    mod_name = mod[0].replace(mod_sep, '_').lower()
     with open(op.join(sourcedir, 'mod_{}.rst'.format(mod_name)), 'w') as f:
-        f.write('{}\n'.format(mod[0]))
+        f.write('{}\n'.format(mod[0].encode('utf-8')))
         f.write('=' * len(mod[0]))
         f.write('\n\n.. automodule:: {}\n'.format(mod[1]))
         f.write('   :members:')
+for i in os.walk(sourcedir):
+    print i
+print('Done...')
