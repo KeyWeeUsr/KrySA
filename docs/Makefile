@@ -47,9 +47,11 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf $(BUILDDIR)/../source/mod_*.rst
 
 .PHONY: html
 html:
+	python $(BUILDDIR)/../docs_modules.py
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

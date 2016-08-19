@@ -28,3 +28,13 @@ Contents
    project
    task
    contribute
+
+Modules
+=======
+
+* `Index <py-modindex.html>`_
+
+.. toctree::
+   mod_krysa
+   mod_krysa_tasks
+   mod_krysa_tests

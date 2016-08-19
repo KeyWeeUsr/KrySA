@@ -66,8 +66,8 @@ def _basic_small(task, address, k, *args):
     values = sorted(values)
     k = int(k.text) - 1
     try:
-        task.set_page('Small (%s.)' % (k + 1), str(values[k]), 'text')
-    except:
+        task.set_page('Small ({}.)'.format(k + 1), str(values[k]), 'text')
+    except IndexError:
         pass
 
 
@@ -87,8 +87,8 @@ def _basic_large(task, address, k, *args):
     values = sorted(values, reverse=True)
     k = int(k.text) - 1
     try:
-        task.set_page('Large (%s.)' % (k + 1), str(values[k]), 'text')
-    except:
+        task.set_page('Large ({}.)'.format(k + 1), str(values[k]), 'text')
+    except IndexError:
         pass  # throw error k out of len(values) bounds, same for *_small
 
 

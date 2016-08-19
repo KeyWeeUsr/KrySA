@@ -16,10 +16,9 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
+import os.path as op
+import sys
+sys.path.insert(0, op.join(op.abspath(__file__), '..', '..', '..', 'krysa'))
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
@@ -32,7 +31,7 @@ import os
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
-    'sphinx.ext.imgmath',
+    'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
 ]
 
@@ -62,7 +61,7 @@ author = u'Peter Badida'
 # built documents.
 #
 # The short X.Y version.
-fpath = os.path.dirname(os.path.abspath(__file__))
+fpath = op.dirname(op.abspath(__file__))
 try:
     with open(fpath+"/../../krysa/main.py") as _f:
         for i, line in enumerate(_f):
@@ -407,7 +406,7 @@ epub_copyright = copyright
 # epub_post_files = []
 
 # A list of files that should not be packed into the epub file.
-epub_exclude_files = ['search.html']
+epub_exclude_files = ['search.html', 'mod_*']
 
 # The depth of the table of contents in toc.ncx.
 #

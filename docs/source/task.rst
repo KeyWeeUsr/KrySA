@@ -17,11 +17,11 @@ the values are present, each column has an address starting with ``A`` for the
 first column. To select more than a single value, use ``:`` character (e.g.
 ``B1:AB2``):
 
-= = = = === == == == === =====
-. A B C ... AA AB AC ... ZZ...
-1   x x  x  x  x
-2   x x  x  x  x
-= = = = === == == == === =====
+=== === === === === == == == === =====
+ .   A   B   C  ... AA AB AC ... ZZ...
+ 1   x   x   x   x  x
+ 2   x   x   x   x  x
+=== === === === === == == == === =====
 
 After the values are selected, pres ``Run``. Depending on the :ref:`task`, it
 can create new :ref:`data` or a page in the :ref:`results` panel.

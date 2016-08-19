@@ -1,3 +1,8 @@
+'''
+.. toctree::
+   mod_krysa_tasks_basic
+   mod_krysa_tasks_avgs
+'''
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.logger import Logger
@@ -105,15 +110,16 @@ class Task(Popup):
     def __init__(self, **kw):
         super(Task, self).__init__(**kw)
         self.app = App.get_running_app()
-        self.run = kw.get('run', None)
-        wdg = kw.get('wdg', None)
-        self.call = kw.get('call', None)
+        self.run = kw.get('run')
+        wdg = kw.get('wdg')
+        self.call = kw.get('call')
         self.from_address = self.app.root.from_address
         self.set_page = self.app.root.set_page
         if wdg:
             self.ids.container.add_widget(wdg)
 
-    def get_table_pos(self, text, values, *args):
+    @staticmethod
+    def get_table_pos(text, values, *args):
         print values
         gen = (i for i, val in enumerate(values) if val == text)
         for i in gen:

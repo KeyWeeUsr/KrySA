@@ -18,19 +18,19 @@
 
             ActionButton:
                 text: 'File'
-                on_release: app.drop.click(self, app.menu['file'])
+                on_release: app.drop.click(self, app.menu[self.text.lower()])
 
             ActionButton:
                 text: 'Edit'
-                on_release: app.drop.click(self, app.menu['edit'])
+                on_release: app.drop.click(self, app.menu[self.text.lower()])
 
             ActionButton:
                 text: 'Tasks'
-                on_release: app.drop.click(self, app.menu['tasks'])
+                on_release: app.drop.click(self, app.menu[self.text.lower()])
 
             ActionButton:
                 text: 'Help'
-                on_release: app.drop.click(self, app.menu['help'])
+                on_release: app.drop.click(self, app.menu[self.text.lower()])
 
     BoxLayout:
         Splitter:
@@ -42,13 +42,12 @@
             BoxLayout:
                 orientation: 'vertical'
                 ScrollView:
-                    GridLayout:
+                    TreeView:
+                        id: tree
+                        hide_root: False
+                        root_options: dict(text='Project Tree')
                         size_hint_y: None
                         height: self.minimum_height
-                        cols: 1
-                        SideItem:
-                        SideItem:
-                        SideItem:
                 Splitter:
                     sizable_from: 'top'
                     BoxLayout:
@@ -88,7 +87,6 @@
                                             size_hint_y: None
                                             text: 'Favorite Tasks'
                                             height: dp(30)
-
         TabbedPanel:
             id: tabpanel
             tab_pos: 'bottom_mid'

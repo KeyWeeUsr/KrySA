@@ -46,6 +46,7 @@ if "%1" == "help" (
 if "%1" == "clean" (
 	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
 	del /q /s %BUILDDIR%\*
+    del /q %BUILDDIR%\..\source\mod_*.rst
 	goto end
 )
 
@@ -75,6 +76,7 @@ if errorlevel 9009 (
 
 
 if "%1" == "html" (
+    python %BUILDDIR%\..\docs_modules.py
 	%SPHINXBUILD% -b html %ALLSPHINXOPTS% %BUILDDIR%/html
 	if errorlevel 1 exit /b 1
 	echo.

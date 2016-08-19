@@ -28,7 +28,7 @@ with open(op.join(root, "krysa/main.py")) as f:
 ver_split = version.split('.')
 num_check = [int(n) for n in ver_split]
 if len(ver_split) != 3:
-    raise Exception('No correct version! ( %s )' % version)
+    raise Exception('No correct version! ( {0} )'.format(version))
 
 setup(
     name=name,

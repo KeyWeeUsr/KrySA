@@ -67,6 +67,17 @@ Getting KrySA
 There are many ways how to get it, but basically you need to download it from
 the `official repository <https://github.com/KeyWeeUsr/KrySA>`_.
 
+#. Pip
+
+   KrySA is available on `PyPi <https://pypi.python.org/pypi/krysa>`_, simply
+   type::
+
+        pip install krysa
+
+   and then run it with::
+
+        python -m krysa
+
 #. Git
 
    Clone the whole repository and be able to update KrySA when a new version
@@ -79,6 +90,7 @@ the `official repository <https://github.com/KeyWeeUsr/KrySA>`_.
    Click on the ``Clone or download`` button, download the zip file and unpack
    its contents.
 
-When the folder with KrySA is ready, simply navigate into it and run::
+When the repo clone(git/zip) of KrySA is ready, simply navigate into it and
+run::
 
     python main.py

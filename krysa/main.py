@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.2.5
+# Version: 0.3.0
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
 from kivy.config import Config
-# Config.set('graphics', 'window_state', 'maximized')
-import re
 import os
+if 'SPHINXBUILD' not in os.environ:
+    Config.set('graphics', 'window_state', 'maximized')
+import re
 import json
 import math
 import numpy
@@ -16,6 +17,7 @@ import string
 import sqlite3
 import os.path as op
 from kivy.app import App
+from kivy.clock import Clock
 from functools import partial
 from dropdown import DropDown
 from kivy.logger import Logger
@@ -32,6 +34,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stencilview import StencilView
 from kivy.uix.tabbedpanel import TabbedPanelItem
+from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, \
                             BooleanProperty, ListProperty
@@ -41,21 +44,32 @@ import tasks.basic
 import tasks.avgs
 from tasks import Task
 
+
 class PageBox(BoxLayout):
+    '''A layout that includes Page widget together with transparent separator.
+    It's used for adding new results from Tasks.
+    '''
     def __init__(self, **kwargs):
         super(PageBox, self).__init__(**kwargs)
         self.add_widget = self.ids.page.add_widget
 
 
 class PaperLabel(Label):
+    '''A label with visual properties as a paper sheet.
+    '''
     pass
 
 
 class ImgButton(Button):
+    '''A button with an image of square shape in the middle.
+    '''
     source = StringProperty('')
 
 
 class ErrorPop(Popup):
+    '''An error popup to let user know something is missing or typed wrong
+    when console is disabled.
+    '''
     message = StringProperty('')
 
     def __init__(self, **kw):
@@ -64,6 +78,9 @@ class ErrorPop(Popup):
 
 
 class NewDataValue(BoxLayout):
+    '''A layout handling the behavior of inputs and button for each new
+    value in :ref:`data`.
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataValue, self).__init__(**kw)
@@ -71,11 +88,15 @@ class NewDataValue(BoxLayout):
 
 
 class NewDataColumn(BoxLayout):
+    '''A layout handling the behavior of type, values(``NewDataValue``) and
+    some buttons for each new column in :ref:`data`.
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataColumn, self).__init__(**kw)
 
-    def free(self, items):
+    @staticmethod
+    def free(items):
         for item in items:
             if hasattr(item, 'disabled'):
                 try:
@@ -125,23 +146,32 @@ class NewDataColumn(BoxLayout):
 
 
 class NewDataLayout(BoxLayout):
+    '''A layout handling the behavior of ``NewDataColumn`` and some inputs for
+    each new value in :ref:`data`.
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataLayout, self).__init__(**kw)
 
 
 class CreateWizard(Popup):
+    '''A popup handling the behavior for creating a new :ref:`data`,
+    i.e a wizard.
+    '''
     run = ObjectProperty(None)
 
     def __init__(self, **kw):
         super(CreateWizard, self).__init__(**kw)
-        self.run = kw.get('run', None)
-        wdg = kw.get('wdg', None)
+        self.run = kw.get('run')
+        wdg = kw.get('wdg')
         if wdg:
             self.ids.container.add_widget(wdg)
 
 
 class Dialog(Popup):
+    '''A dialog handling the behavior for creating or opening files e.g.
+    :ref:`project` or :ref:`data`.
+    '''
     confirm = StringProperty('')
     run = ObjectProperty(None)
     dirs = BooleanProperty(False)
@@ -151,7 +181,7 @@ class Dialog(Popup):
     def __init__(self, **kw):
         super(Dialog, self).__init__(**kw)
         self.confirm = kw.get('confirm', '')
-        self.run = kw.get('run', None)
+        self.run = kw.get('run')
         self.dirs = kw.get('dirs', False)
         self.project = kw.get('project', False)
         if self.project:
@@ -163,11 +193,18 @@ class Dialog(Popup):
 
 
 class SideItem(BoxLayout):
+    '''Supposed to be a part of settings, most likely will be removed/replaced.
+    '''
     pass
 
 
 class TableItem(TextInput):
+    '''An item handling the behavior or each separate value in the
+    :mod:`main.Table` such as updating/editing values in :ref:`data`.
+    '''
     def update_value(self, txt, *args):
+        '''Updates the value on ``<enter>`` (``return``) confirm in :mod:`main.Table`.
+        '''
         data = []
         cols = self.cols - 1
 
@@ -182,6 +219,11 @@ class TableItem(TextInput):
 
 
 class Table(ScrollView):
+    '''A view handling the behavior of the inputs from :ref:`sqlite`. Separates
+    the values from :ref:`sqlite` according to its :ref:`data`'s column types
+    into three Python categories - `int`, `float` or `unicode` and assigns
+    an alphabetic order for each column together with row number to each value.
+    '''
     # use with ....add_widget(Table(max_cols=3, max_rows=3))
     # Grid -> Scroll, grid as container - better for sizing and placing
 
@@ -202,8 +244,8 @@ class Table(ScrollView):
         self.max_cols = kw.get('max_cols', 1)
         self.cols = self.max_cols + 1
         self.values = kw.get('values', [])
-        self.labels = kw.get('labels', None)
-        self.types = kw.get('types', None)
+        self.labels = kw.get('labels')
+        self.types = kw.get('types')
 
         container.rows = self.rows
         container.cols = self.cols
@@ -241,7 +283,7 @@ class Table(ScrollView):
                             val = self.values.pop(0)
                             text_type = type(val)
                             filter_val = repr(text_type)[7:-2]
-                            if filter_val == 'int' or filter_val == 'float':
+                            if filter_val in ['int', 'float']:
                                 filter = filter_val
                         except IndexError:
                             print 'values < space'
@@ -273,6 +315,8 @@ class Table(ScrollView):
         self.add_widget(self.rv)
 
     def get_letters(self):
+        '''Gets a list of letters the same length as :ref:`data`'s columns.
+        '''
         letters = [chr(letter + 65) for letter in range(26)]
         result = []
         label = []
@@ -297,6 +341,11 @@ class Table(ScrollView):
 
 
 class ProcessFlow(BoxLayout, StencilView):
+    '''A canvas on which will be displayed actions for each :ref:`data` related
+    to them, such as used tasks connected with result of the tasks.
+
+    (Not implemented yet)
+    '''
     def __init__(self, **kw):
         super(ProcessFlow, self).__init__(**kw)
         app = App.get_running_app()
@@ -305,6 +354,10 @@ class ProcessFlow(BoxLayout, StencilView):
 
 
 class SizedButton(Button):
+    '''A button with width automatically customized according to text length of
+    its siblings, which makes every sibling the same size as the one with the
+    longest text string.
+    '''
     def correct_width(self, *args):
         self.width = self.texture_size[0] + 8
         self.parent.parent.width = max([c.width for c in self.parent.children])
@@ -313,6 +366,14 @@ class SizedButton(Button):
 
 
 class MenuDrop(DropDown):
+    '''A list of :mod:`main.SizedButton` s displayed as a menu, where each
+    button may create another menu depending on the function bound to it. The
+    main menu is handled through a single instance of :mod:`main.MenuDrop`
+    which is instantiated before :mod:`main.Krysa.build` function.
+
+    Each click/tap on the menu button then assigns a value to it from
+    ``App.menu`` dictionary according to its name in `kv` file.
+    '''
     def __init__(self, **kw):
         app = App.get_running_app()
         app.drop = self
@@ -330,6 +391,10 @@ class MenuDrop(DropDown):
 
 
 class Body(FloatLayout):
+    '''The main layout for the application. It handles menu values, their
+    appropriate functions, filtering of user's input and functions for
+    accessing :ref:`sqlite` in :mod:`main.Table`.
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         self.tables = []
@@ -360,6 +425,8 @@ class Body(FloatLayout):
         super(Body, self).__init__(**kw)
 
     def new(self, button, *args):
+        '''Opens a submenu for ``New`` menu.
+        '''
         d = DropDown(allow_sides=True, auto_width=False)
         buttons = []
 
@@ -382,6 +449,9 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _new_data(self, *args):
+        '''Opens a wizard for creating a new :ref:`data` if a :ref:`project` is
+        available or shows a warning if it doesn't exist.
+        '''
         if not self.app.project_exists:
             error = ErrorPop(msg='No project exists!')
             error.open()
@@ -392,6 +462,9 @@ class Body(FloatLayout):
         self.wiz_newdata.open()
 
     def _save_data(self, wizard, *args):
+        '''Gets data from the wizard, puts them into :mod:`main.Table` and exports them
+        into :ref:`sqlite`.
+        '''
         labels = []
         types = []
         values = []
@@ -470,6 +543,9 @@ class Body(FloatLayout):
         self.opendlg.open()
 
     def _open_project(self, selection, *args):
+        '''Opens a :ref:`project` from path selected in ``Dialog`` and imports
+        :ref:`sqlite`.
+        '''
         if not selection:
             return
         else:
@@ -491,9 +567,12 @@ class Body(FloatLayout):
         # import from project automatically
         self._import_data([op.join(data, 'data.sqlite')])
 
-        # importing results still missing -> 0.2.x
+        # importing results still missing -> 0.3.x
 
     def close_project(self, *args):
+        '''Clears all important variables, removes all :ref:`data` available in
+        :mod:`main.Table` and switches to :mod:`main.ProcessFlow`.
+        '''
         # call this before a new project
         self.app.project_exists = False
         self.app.project_dir = ''
@@ -507,6 +586,11 @@ class Body(FloatLayout):
 
     def save_project(self, *args):
         # same as _new_project + export data & results
+
+        # make some output if unsaved changes available(e.g. * before name)
+        if self.app.project_exists:
+            self._save_project()
+            return
         self.savedlg = Dialog(title='New Project',
                               confirm='Save',
                               run=self._save_project,
@@ -515,6 +599,9 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _save_project(self, selection=None, fname=None, *args):
+        '''Saves a :ref:`project` to path selected in ``Dialog`` and exports
+        :ref:`sqlite`.
+        '''
         if not selection:
             if not self.app.project_exists:
                 return
@@ -555,7 +642,8 @@ class Body(FloatLayout):
         # let user set table columns, add to tab, then:
         self._export_data([data], 'data.sqlite')
 
-        # exporting results still missing -> 0.2.x
+        # exporting results to pdf -> 0.3.x
+        self._export_results(results)
 
     def import_data(self, *args):
         self.opendlg = Dialog(title='Import Data',
@@ -564,6 +652,9 @@ class Body(FloatLayout):
         self.opendlg.open()
 
     def _import_data(self, selection, *args):
+        '''Imports :ref:`sqlite` from path selected in ``Dialog`` and puts it
+        to :mod:`main.Table`.
+        '''
         # limit table name and column name to [a-zA-Z]
 
         # CREATE TABLE test(
@@ -584,7 +675,7 @@ class Body(FloatLayout):
         tables = [tab[0] for tab in c.fetchall()]
 
         for table in tables:
-            c.execute("pragma table_info(%s)" % table)
+            c.execute("pragma table_info({0})".format(table))
             table_info = c.fetchall()
             labels = [lbl[1] for lbl in table_info]
             types = [type[2][0] for type in table_info]
@@ -592,7 +683,7 @@ class Body(FloatLayout):
 
             tabletab = TabbedPanelItem(text=table)
             self.ids.tabpanel.add_widget(tabletab)
-            c.execute('select * from %s' % table)
+            c.execute('select * from {0}'.format(table))
             values = [item for item in c.fetchone()]
             max_cols = len(values)
             values += [item for sublist in c.fetchall() for item in sublist]
@@ -614,7 +705,19 @@ class Body(FloatLayout):
                               dirs=True)
         self.savedlg.open()
 
-    def _extract_rows(self, data):
+    @staticmethod
+    def _extract_rows(data):
+        '''Extract values from :mod:`main.Table`'s dictionary into a flat list.
+
+        Example:
+
+        ===== ===== =====
+        Data1 Data2 Data3
+          1    2.0    3
+        ===== ===== =====
+
+        [u'Data1', u'Data2', u'Data3', u'1', 2.0, 3, ...]
+        '''
         rows = []
         for item in data:
             try:
@@ -642,6 +745,9 @@ class Body(FloatLayout):
         return rows
 
     def _export_data(self, selection, fname, *args):
+        '''Exports all available :ref:`data` (visible as tabs) as :ref:`sqlite`
+        into path selected in ``Dialog``.
+        '''
         col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL'}
         if not selection:
             return
@@ -690,7 +796,22 @@ class Body(FloatLayout):
         conn.close()
         self.savedlg.dismiss()
 
-    def basic(self, button, *args):
+    def _export_results(self, selection, *args):
+        if not selection:
+            return
+        for file in os.listdir(selection):
+            os.remove(op.join(selection, file))
+        result_wdg = self.ids.results
+        for i, result in enumerate(reversed(self.ids.results.children)):
+            try:
+                where = op.join(selection, str(i).zfill(3)+'.png')
+                result.children[2].children[0].export_to_png(where)
+            except IndexError:
+                print 'No results available.'
+
+    # menu showing functions
+    @staticmethod
+    def basic(button, *args):
         drop = DropDown(allow_sides=True, auto_width=False)
         for t in tasks.basic.names:
             but = SizedButton(text=t[0])
@@ -698,7 +819,8 @@ class Body(FloatLayout):
             drop.add_widget(but)
         drop.open(button)
 
-    def avgs(self, button, *args):
+    @staticmethod
+    def avgs(button, *args):
         drop = DropDown(allow_sides=True, auto_width=False)
         for t in tasks.avgs.names:
             but = SizedButton(text=t[0])
@@ -706,7 +828,10 @@ class Body(FloatLayout):
             drop.add_widget(but)
         drop.open(button)
 
-    def about(self, *args):
+    @staticmethod
+    def about(*args):
+        '''Displays `about` page of the app and includes other credits (todo).
+        '''
         aboutdlg = Popup(title='About')
         text = ('Copyright (C) 2016, KeyWeeUsr(Peter Badida)\n'
                 'License: GNU GPL v3.0\n'
@@ -714,7 +839,11 @@ class Body(FloatLayout):
         aboutdlg.content = Label(text=text)
         aboutdlg.open()
 
-    # non-menu functions
+    @staticmethod
+    def test(*args):
+        print 'ping: ', args
+
+    # non-menu related functions
     @staticmethod
     def get_column(address):
         col = 0
@@ -724,6 +853,16 @@ class Body(FloatLayout):
         return col
 
     def from_address(self, table, address, *args):
+        '''Gets value(s) from :mod:`main.Table` according to the address such as
+        ``A1`` or ``A1:B2``. Values are fetched in the way that the final list
+        contains even empty (``u''``) values. It is not expected of user to use
+        :ref:`task` for strings and it won't even run. To get non-empty values
+        for a :ref:`task` use for example Python's ``filter()``::
+
+            values = filter(lambda x: len(str(x)), values)
+
+        This `filter`, however, will remain values such as ``None`` untouched.
+        '''
         values = []
         col_row = []  # [column, row] such as [x, y] |_
         if ':' not in address:
@@ -749,7 +888,7 @@ class Body(FloatLayout):
             table_cols = self.tables[table][1].cols
             table_rows = self.tables[table][1].rows
 
-            if r > 0 and c > 0 and r < table_rows and c < table_cols:
+            if 0 < r < table_rows and 0 < c < table_cols:
                 key = table_cols * (r + 1) - (table_cols - c)
                 item = self.tables[table][1].rv.data[key]
                 if item['r'] == r and item['c'] == c:
@@ -762,13 +901,29 @@ class Body(FloatLayout):
         return values
 
     def set_page(self, task, result, result_type='text', footer='time'):
+        '''Creates a :mod:`main.PageBox` for a result. The header consists of the
+        :ref:`task`'s name, the footer is by default the time when the result
+        was created and the content depends on `result_type` which can be -
+        text, image(path to image) or widget. If `result_type == 'widget'`,
+        result has to be an instance of a widget (obviously containing the
+        output), e.g.::
+
+            b = Button(text='my output')
+            set_page('MyTask', b, result_type='widget')
+
+        .. note:: When exporting pages into e.g. pdf(nyi), everything is
+           converted into image, therefore making fancy behaving widgets is
+           irrelevant.
+        '''
         page = PageBox()
         head = PaperLabel(text=task, size_hint_y=None, height='30dp')
 
         if result_type == 'text':
             content = PaperLabel(text=result)
-        elif result_type == 'graph':
+        elif result_type == 'image':
             content = Image(source=result)
+        elif result_type == 'widget':
+            content = result
 
         # turn off with footer=None
         if not footer:
@@ -792,22 +947,54 @@ class Body(FloatLayout):
         chars = re.findall(r'([a-zA-Z0-9.])', substring)
         return u''.join(chars)
 
-    def test(self, *args):
-        print 'ping: ', args
+    def update_tree(self, dt):
+        tree = self.ids.tree
+        lab = TreeViewLabel
+        for node in tree.iterate_all_nodes():
+            tree.remove_node(node)
+        root = tree.add_node(lab(text=self.app.project_name, is_open=True))
+        for path, folders, files in os.walk(self.app.project_dir):
+            if op.basename(self.app.project_dir) != op.basename(path):
+                dirname = op.basename(path).title()
+                parent = tree.add_node(lab(text=dirname, is_open=True), root)
+                for file in files:
+                    filename = op.basename(file)
+                    tree.add_node(lab(text=filename, is_open=True), parent)
 
 
 class KrySA(App):
+    '''The main class of the application through which is handled the
+    communication of other classes with getting an instance of the app via
+    ``App.get_running_app()``.
+
+    Other than that, it holds important variables of :ref:`project`, sql
+    blacklist for :ref:`sqlite` creating and updating or the application
+    properties themselves.
+    '''
     path = op.dirname(op.abspath(__file__))
     icon = path+'/data/icon.png'
-    project_exists = False
+    project_exists = BooleanProperty(False)
     project_name = ''
     project_dir = ''
     title = 'KrySA'
     sql_blacklist = ['DROP', 'EXEC', 'DECLARE', 'UPDATE', 'CREATE', 'DELETE',
                      'INSERT', 'JOIN', '=', '"', "'", ';']
 
+    def on_project_exists(self, instance, exists):
+        '''Checks change of :mod:`main.KrySA.project_exists` and if
+        :ref:`project` exists, schedules updating of its tree to 5 second
+        interval.
+        '''
+        if exists:
+            self.treeclock = Clock.schedule_interval(self.root.update_tree, 5)
+        else:
+            Clock.unschedule(self.treeclock)
+
     def build(self):
-        a = MenuDrop()
+        '''Default Kivy function for getting the root widget of application.
+        '''
+        # read MenuDrop if an idea of removing it comes up
+        MenuDrop()
         return Body()
 
 if __name__ == '__main__':
