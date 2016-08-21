@@ -31,3 +31,6 @@ Licenses
   [LICENSE](https://github.com/KeyWeeUsr/KrySA/blob/master/LICENSE.txt) file.
 - The original logo concept is based on [OpenClipArt](www.openclipart.org)'s
   CC0 licensed image.
+
+For more info about KrySA's license and licenses of used packages, please visit
+the [documentation](http://krysa.readthedocs.io/en/latest/license.html).

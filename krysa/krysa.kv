@@ -3,6 +3,7 @@
 #:import join os.path.join
 #:import Factory kivy.factory.Factory
 #:import ObjectProperty kivy.properties.ObjectProperty
+#:import wb webbrowser
 
 <Body>:
     ActionBar:
@@ -35,7 +36,7 @@
     BoxLayout:
         Splitter:
             size_hint: None, None
-            min_size: dp(150)
+            min_size: dp(160)
             height: root.height - dp(37)
             sizable_from: 'right'
             rescale_with_parent: True
@@ -111,21 +112,28 @@
             height: root.height - dp(37)
             sizable_from: 'left'
             rescale_with_parent: True
-            ScrollView:
-                size_hint_x: None
-                width: self.parent.width - dp(28)
-                pos: self.parent.pos[0] + dp(28), self.pos[1]
-                bar_width: 0
-                bar_color: 0, 0, 0, 0
-                bar_inactive_color: 0, 0, 0, 0
-                GridLayout
-                    id: results
-                    cols: 1
+            FloatLayout:
+                ScrollView:
+                    size_hint_x: None
+                    width: self.parent.width - dp(28)
+                    pos: self.parent.pos[0] + dp(28), self.pos[1]
+                    bar_width: 0
+                    bar_color: 0, 0, 0, 0
+                    bar_inactive_color: 0, 0, 0, 0
+                    GridLayout
+                        id: results
+                        cols: 1
+                        size_hint: None, None
+                        size: self.minimum_size
+                        Widget:
+                            size_hint_y: None
+                            height: dp(5)
+                Button:
+                    text: 'Show folder'
                     size_hint: None, None
-                    size: self.minimum_size
-                    Widget:
-                        size_hint_y: None
-                        height: dp(5)
+                    size: dp(100), dp(37)
+                    pos: self.parent.pos
+                    on_release: wb.open(join(app.project_dir, 'results'))
 
 <MenuDrop>:
     auto_width: False

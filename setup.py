@@ -33,6 +33,7 @@ if len(ver_split) != 3:
 setup(
     name=name,
     packages=files,
+    package_data={'': ['*.*', ]},
     install_requires=['kivy', 'numpy', 'scipy', 'matplotlib'],
     version=version,
     description='KrySA - Statistical analysis for rats',

@@ -6,8 +6,8 @@ Getting started
    the process.
 
 KrySA runs on Kivy framework, therefore it is possible to run it on any of
-available platforms for Kivy, mainly Windows, Linux and Mac. It requires some
-additional packages you'll need to install if you want to run it:
+available platforms for Kivy, mainly Windows, Linux and Mac with all required
+packages correctly compiled:
 
 - `Kivy <https://pypi.python.org/pypi/kivy>`_
 - `SciPy <https://pypi.python.org/pypi/scipy>`_
@@ -45,8 +45,8 @@ Windows, which will install Python together with Kivy. On other platforms use
 |kivyinstall|_ page as reference.
 
 .. note:: KrySA requires the latest version of Kivy. It's available either as
-   daily-builds on ``ppa`` or as a ``.whl`` files uploaded on Google Drive. If
-   none of those are good, compile Kivy from source.
+   daily-builds on ``ppa`` or as the ``.whl`` files uploaded on Google Drive.
+   If none of those are good, compile Kivy from source.
 
 Then it gets a little bit harder with SciPy and NumPy because those need to be
 compiled and it sometimes doesn't work with Windows. For this case we will use

@@ -28,5 +28,6 @@ Contents
    project
    task
    contribute
+   license
 
 .. include:: mod_index.rst

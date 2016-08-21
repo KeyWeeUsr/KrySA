@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.3.0
+# Version: 0.3.1
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -941,6 +941,10 @@ class Body(FloatLayout):
         page.add_widget(content)
         page.add_widget(foot)
         self.ids.results.add_widget(page, 1)
+
+        panel = self.ids.resultspanel
+        if panel.width == panel.min_size:
+            panel.width = panel.max_size
 
     @staticmethod
     def simple_chars(substring, from_undo):
