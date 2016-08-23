@@ -84,18 +84,18 @@ class Test(unittest.TestCase):
 
         # get data from krysa table
         end_pos = None
-        krysa_ndv = []
+        ndv = []
         for d in app.root.tables[0][1].rv.data:
             if 'c' in d.keys():
                 if d['type'] == int:
-                    krysa_ndv.append(int(d['text']))
+                    ndv.append(int(d['text']))
                 elif d['type'] == float:
-                    krysa_ndv.append(float(d['text']))
+                    ndv.append(float(d['text']))
                 else:
-                    krysa_ndv.append(d['text'])
+                    ndv.append(d['text'])
             if not end_pos and d['text'] == u'end':
                 end_pos = app.root.tables[0][1].rv.data.index(d)
-        krysa_ndv = [krysa_ndv[x:x+3] for x in xrange(0, len(krysa_ndv), 3)]
+        ndv = [ndv[x:x + 3] for x in xrange(0, len(ndv), 3)]
         self.assertEqual(len(app.root.tables), 1)
 
         # test data
@@ -104,7 +104,7 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x+3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
         try:
             c.execute('SELECT * FROM NewData2')
         except sqlite3.OperationalError:
@@ -115,12 +115,12 @@ class Test(unittest.TestCase):
             # values == sql values
             self.assertEqual(v, newdata_values[i])
             # values == KrySA values
-            self.assertEqual(krysa_ndv[i], newdata_values[i])
+            self.assertEqual(ndv[i], newdata_values[i])
             print v
 
         # change value in table
         app.root.tables[0][1].rv.data[end_pos]['text'] = u'new_end'
-        krysa_ndv[2][1] = u'new_end'
+        ndv[2][1] = u'new_end'
         newdata_values[2][1] = u'new_end'
         app.root._save_project()
         print app.project_dir, app.project_exists
@@ -129,14 +129,14 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x+3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
         conn.close()
         print 'NewData:'
         for i, v in enumerate(values):
             # values == sql values
             self.assertEqual(v, newdata_values[i])
             # values == KrySA values
-            self.assertEqual(krysa_ndv[i], newdata_values[i])
+            self.assertEqual(ndv[i], newdata_values[i])
             print v
 
         app.stop()

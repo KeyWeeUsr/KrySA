@@ -1,2 +1,4 @@
+kivy
+Cython>=0.23
 sphinx==1.4.4
 sphinx-autobuild

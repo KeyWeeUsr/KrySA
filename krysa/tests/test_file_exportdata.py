@@ -108,27 +108,27 @@ class Test(unittest.TestCase):
         newdata2_values = [[1, u'text', 1.1]]
 
         # get data from krysa table
-        krysa_ndv = []
+        ndv = []
         for d in app.root.tables[0][1].rv.data:
             if 'c' in d.keys():
                 if d['type'] == int:
-                    krysa_ndv.append(int(d['text']))
+                    ndv.append(int(d['text']))
                 elif d['type'] == float:
-                    krysa_ndv.append(float(d['text']))
+                    ndv.append(float(d['text']))
                 else:
-                    krysa_ndv.append(d['text'])
-        krysa_ndv = [krysa_ndv[x:x+3] for x in xrange(0, len(krysa_ndv), 3)]
+                    ndv.append(d['text'])
+        ndv = [ndv[x:x + 3] for x in xrange(0, len(ndv), 3)]
 
-        krysa_ndv2 = []
+        ndv2 = []
         for d in app.root.tables[1][1].rv.data:
             if 'c' in d.keys():
                 if d['type'] == int:
-                    krysa_ndv2.append(int(d['text']))
+                    ndv2.append(int(d['text']))
                 elif d['type'] == float:
-                    krysa_ndv2.append(float(d['text']))
+                    ndv2.append(float(d['text']))
                 else:
-                    krysa_ndv2.append(d['text'])
-        krysa_ndv2 = [krysa_ndv2[x:x+3] for x in xrange(0, len(krysa_ndv2), 3)]
+                    ndv2.append(d['text'])
+        ndv2 = [ndv2[x:x + 3] for x in xrange(0, len(ndv2), 3)]
 
         # test data
         self.assertTrue(op.exists(op.join(self.folder, 'test_export.sqlite')))
@@ -136,26 +136,26 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x+3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
         conn.close()
         print 'NewData:'
         for i, v in enumerate(values):
             # values == sql values
             self.assertEqual(v, newdata_values[i])
             # values == KrySA values
-            self.assertEqual(krysa_ndv[i], newdata_values[i])
+            self.assertEqual(ndv[i], newdata_values[i])
             print v
 
         conn = sqlite3.connect(op.join(self.folder, 'test_export.sqlite'))
         c = conn.cursor()
         c.execute('SELECT * FROM NewData2')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x+3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
         conn.close()
         print '\nNewData2:'
         for i, v in enumerate(values):
             self.assertEqual(v, newdata2_values[i])
-            self.assertEqual(krysa_ndv2[i], newdata2_values[i])
+            self.assertEqual(ndv2[i], newdata2_values[i])
             print v
 
         app.stop()

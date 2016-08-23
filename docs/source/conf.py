@@ -72,7 +72,7 @@ author = u'Peter Badida'
 # The short X.Y version.
 fpath = dn(op.abspath(__file__))
 try:
-    with open(fpath+"/../../krysa/main.py") as _f:
+    with open(op.join(dn(dn(fpath)), 'krysa', 'main.py')) as _f:
         for i, line in enumerate(_f):
             if i == 2:
                 version = line[len('# Version: '):-1]

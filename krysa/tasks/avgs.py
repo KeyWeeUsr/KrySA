@@ -35,11 +35,11 @@ def _avgs_gen(task, address, p, *args):
     values = task.from_address(task.tablenum, address.text)
     if p == 0:
         multiples = reduce(operator.mul, values, 1)
-        result = math.pow(multiples, 1/float(len(values)))
+        result = math.pow(multiples, 1 / float(len(values)))
         p = 'geometric'
     else:
         values = [math.pow(val, p) for val in values]
-        result = math.pow(math.fsum(values)/float(len(values)), 1/float(p))
+        result = math.pow(math.fsum(values) / float(len(values)), 1 / float(p))
     task.set_page('Generalized mean({})'.format(p), str(result), 'text')
 
 

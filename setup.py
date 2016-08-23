@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import sys
 import os.path as op
 from distutils import dir_util
 from distutils import sysconfig
@@ -9,8 +10,20 @@ from distutils.core import setup
 name = 'krysa'
 files = [name, ]
 
-# get folders relative to root
 root = op.dirname(op.abspath(__file__)) + op.sep
+
+# remove all *.pyc files here before packaging
+if 'sdist' in sys.argv:
+    rem_files = []
+    for path, folders, filenames in os.walk(root):
+        for file in filenames:
+            rem_files.append(op.join(path, file))
+    for file in rem_files:
+        if '.pyc' in file:
+            print('Removing {}'.format(file))
+            os.remove(file)
+
+# get folders relative to root
 for walk in os.walk(op.join(root, name)):
     for dirname in walk[1]:
         path = op.join(walk[0], dirname).replace(root, '')

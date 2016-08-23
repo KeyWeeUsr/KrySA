@@ -37,7 +37,7 @@ for doc in docs:
 print('Filtering files...')
 mods = []
 for doc in docs:
-    mod = doc.lstrip('krysa'+op.sep).replace(op.sep, '.')
+    mod = doc.lstrip('krysa' + op.sep).replace(op.sep, '.')
     mod = mod.replace('__init__.py', '')
     if not mod:
         continue

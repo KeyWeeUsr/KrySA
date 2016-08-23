@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.3.1
+# Version: 0.3.2
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -25,6 +25,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.uix.label import Label
 from time import gmtime, strftime
+from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
@@ -37,12 +38,25 @@ from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, \
-                            BooleanProperty, ListProperty
+    BooleanProperty, ListProperty
 
 import tasks
 import tasks.basic
 import tasks.avgs
 from tasks import Task
+
+
+class ResultGrid(GridLayout):
+    '''A black gridlayout, together with :mod:`main.Wrap` makes a table
+    container for results that need a table.
+    '''
+    pass
+
+
+class Wrap(Label):
+    '''A white label with automatically wrapped text.
+    '''
+    background_color = ListProperty([0, 0, 0, 0])
 
 
 class PageBox(BoxLayout):
@@ -202,8 +216,21 @@ class TableItem(TextInput):
     '''An item handling the behavior or each separate value in the
     :mod:`main.Table` such as updating/editing values in :ref:`data`.
     '''
+    def __init__(self, **kwargs):
+        super(TableItem, self).__init__(**kwargs)
+        self.bind(focus=self.on_focus)
+
+    def on_focus(self, widget, focused):
+        '''Makes sure the unconfirmed value is discarded e.g. when clicked
+        outside of the widget.
+        '''
+        if not focused:
+            self.text = self.old_text
+
     def update_value(self, txt, *args):
-        '''Updates the value on ``<enter>`` (``return``) confirm in :mod:`main.Table`.
+        '''On ``<enter>`` (``return``) key updates the values
+        :mod:`main.TableItem.text` and :mod:`main.TableItem.old_text` in
+        :mod:`main.Table`.
         '''
         data = []
         cols = self.cols - 1
@@ -211,10 +238,12 @@ class TableItem(TextInput):
         for i in self.origin.data:
             if 'cell' in i:
                 data.append(i)
-        chunks = [data[x:x+cols] for x in xrange(0, len(data), cols)]
+        chunks = [data[x:x + cols] for x in xrange(0, len(data), cols)]
 
         orig_type = type(chunks[self.r][self.c - 1])
-        self.origin.data[self.cols*(self.r+1)-(self.cols-self.c)]['text'] = txt
+        place = self.cols * (self.r + 1) - (self.cols - self.c)
+        self.origin.data[place]['text'] = txt
+        self.origin.data[place]['old_text'] = txt
         self.origin.refresh_from_data()
 
 
@@ -264,13 +293,17 @@ class Table(ScrollView):
                                              'size': self.number_size,
                                              'origin': self.rv})
                     else:
-                        self.rv.data.append({'text': self.labels[c-1]+ltr[c-1],
-                                             '_text': self.labels[c-1],
-                                             'disabled': True,
-                                             'cell': 'label' + str(c-1),
-                                             'type': type(u''),
-                                             'size': self.default_size,
-                                             'origin': self.rv})
+                        self.rv.data.append(
+                            {
+                                'text': self.labels[c - 1] + ltr[c - 1],
+                                '_text': self.labels[c - 1],
+                                'disabled': True,
+                                'cell': 'label' + str(c - 1),
+                                'type': type(u''),
+                                'size': self.default_size,
+                                'origin': self.rv
+                            }
+                        )
                 else:
                     if c == 0:
                         self.rv.data.append({'text': unicode(r),
@@ -298,17 +331,22 @@ class Table(ScrollView):
                             elif self.types[c - 1] == 'REAL':
                                 filter = 'float'
                                 text_type = type(1.1)
-                        self.rv.data.append({'text': unicode(val),
-                                             'disabled': False,
-                                             'cell': self.labels[c-1] + str(r),
-                                             'r': r,
-                                             'rows': self.rows,
-                                             'c': c,
-                                             'cols': self.cols,
-                                             'type': text_type,
-                                             'size': self.default_size,
-                                             'input_filter': filter,
-                                             'origin': self.rv})
+                        self.rv.data.append(
+                            {
+                                'text': unicode(val),
+                                'old_text': unicode(val),
+                                'disabled': False,
+                                'cell': self.labels[c - 1] + str(r),
+                                'r': r,
+                                'rows': self.rows,
+                                'c': c,
+                                'cols': self.cols,
+                                'type': text_type,
+                                'size': self.default_size,
+                                'input_filter': filter,
+                                'origin': self.rv
+                            }
+                        )
         if self.values:
             raise Exception('Not enough space for all values! \
                             Increase rows/cols!')
@@ -349,7 +387,7 @@ class ProcessFlow(BoxLayout, StencilView):
     def __init__(self, **kw):
         super(ProcessFlow, self).__init__(**kw)
         app = App.get_running_app()
-        self.texture = Image(source=app.path+'/data/grid.png').texture
+        self.texture = Image(source=app.path + '/data/grid.png').texture
         self.texture.wrap = 'repeat'
 
 
@@ -567,7 +605,9 @@ class Body(FloatLayout):
         # import from project automatically
         self._import_data([op.join(data, 'data.sqlite')])
 
-        # importing results still missing -> 0.3.x
+        # import results
+        for file in os.listdir(results):
+            self.set_page('', op.join(results, file), result_type='import')
 
     def close_project(self, *args):
         '''Clears all important variables, removes all :ref:`data` available in
@@ -687,7 +727,7 @@ class Body(FloatLayout):
             values = [item for item in c.fetchone()]
             max_cols = len(values)
             values += [item for sublist in c.fetchall() for item in sublist]
-            max_rows = int(math.ceil(len(values)/float(max_cols)))
+            max_rows = int(math.ceil(len(values) / float(max_cols)))
             self.tables.append((table, Table(max_cols=max_cols,
                                              max_rows=max_rows, pos=self.pos,
                                              size=self.size, values=values,
@@ -762,8 +802,8 @@ class Body(FloatLayout):
         for table in self.tables:
             col_string = ''
             max_cols = table[1].max_cols
-            columns = table[1].rv.data[1:max_cols+1]  # types need whole dict!
-            types = table[1].rv.data[max_cols+2:2*(max_cols+1)]
+            columns = table[1].rv.data[1:max_cols + 1]  # types need whole dict
+            types = table[1].rv.data[max_cols + 2:2 * (max_cols + 1)]
 
             for i, col in enumerate(columns):
                 try:
@@ -772,29 +812,38 @@ class Body(FloatLayout):
                     type = 'TEXT'
                 # force column to check inserted values
                 col_string += (
-                               col['_text'] + " " + type +
-                               " NOT NULL CHECK(typeof(" + col['_text'] +
-                               ") = '" + type.lower() + "'),"
-                               )
+                    col['_text'] + " " + type +
+                    " NOT NULL CHECK(typeof(" + col['_text'] +
+                    ") = '" + type.lower() + "'),"
+                )
 
             if col_string.endswith(','):
                 col_string = col_string[:-1]
-            c.execute("CREATE TABLE "+table[0]+"("+col_string+")")
+            c.execute(
+                "CREATE TABLE " + table[0] + "(" + col_string + ")"
+            )
             rows = self._extract_rows(table[1].rv.data)[max_cols:]
 
-            cnks = [rows[x:x+max_cols] for x in xrange(0, len(rows), max_cols)]
+            cnks = []
+            for x in xrange(0, len(rows), max_cols):
+                cnks.append(rows[x:x + max_cols])
             for chunk in cnks:
                 _chunk = []
                 for cnk in chunk:
                     if not isinstance(cnk, (str, unicode)):
                         _chunk.append(unicode(cnk))
                     else:
-                        _chunk.append('\''+cnk+'\'')
+                        _chunk.append('\'' + cnk + '\'')
                 values = ','.join(_chunk)
-                c.execute("INSERT INTO "+table[0]+" VALUES("+values+")")
+                c.execute(
+                    "INSERT INTO " + table[0] +
+                    " VALUES(" + values + ")"
+                )
             conn.commit()
         conn.close()
-        self.savedlg.dismiss()
+
+        if self.savedlg:
+            self.savedlg.dismiss()
 
     def _export_results(self, selection, *args):
         if not selection:
@@ -804,7 +853,7 @@ class Body(FloatLayout):
         result_wdg = self.ids.results
         for i, result in enumerate(reversed(self.ids.results.children)):
             try:
-                where = op.join(selection, str(i).zfill(3)+'.png')
+                where = op.join(selection, str(i).zfill(3) + '.png')
                 result.children[2].children[0].export_to_png(where)
             except IndexError:
                 print 'No results available.'
@@ -830,12 +879,30 @@ class Body(FloatLayout):
 
     @staticmethod
     def about(*args):
-        '''Displays `about` page of the app and includes other credits (todo).
+        '''Displays `about` page of the app and includes other credits.
         '''
         aboutdlg = Popup(title='About')
-        text = ('Copyright (C) 2016, KeyWeeUsr(Peter Badida)\n'
-                'License: GNU GPL v3.0\n'
-                'Find me @ https://github.com/KeyWeeUsr')
+        text = (
+            'Copyright (C) 2016, KeyWeeUsr(Peter Badida)\n'
+            'License: GNU GPL v3.0\n'
+            'Find me @ https://github.com/KeyWeeUsr\n\n'
+            'Used Software:\n\n'
+            'Python\n'
+            'Copyright (C) 2001-2016 Python Software Foundation\n'
+            'All rights reserved.\n\n'
+            'Kivy\n'
+            'Copyright (C) 2010-2016 Kivy Team and other contributors\n\n'
+            'NumPy\n'
+            'Copyright (C) 2005-2016, NumPy Developers.\n'
+            'All rights reserved.\n\n'
+            'SciPy\n'
+            'Copyright (C) 2003-2013 SciPy Developers.\n'
+            'All rights reserved.\n\n'
+            'MatPlotLib\n'
+            'Copyright (C) 2002-2016 John D. Hunter\n'
+            'All Rights Reserved\n'
+        )
+
         aboutdlg.content = Label(text=text)
         aboutdlg.open()
 
@@ -877,8 +944,8 @@ class Body(FloatLayout):
             end_row = int(match[1][1])
             col_range = end_col - start_col
             row_range = end_row - start_row
-            for col in range(start_col-1, end_col):
-                for row in range(start_row-1, end_row):
+            for col in range(start_col - 1, end_col):
+                for row in range(start_row - 1, end_row):
                     col_row.append([col + 1, row + 1])
                 start_row = int(match[0][1])
         while col_row:
@@ -911,22 +978,40 @@ class Body(FloatLayout):
             b = Button(text='my output')
             set_page('MyTask', b, result_type='widget')
 
-        .. note:: When exporting pages into e.g. pdf(nyi), everything is
-           converted into image, therefore making fancy behaving widgets is
-           irrelevant.
+        .. note:: When exporting pages, everything is converted into images
+           (pngs), therefore making fancy behaving widgets is irrelevant.
         '''
         page = PageBox()
         head = PaperLabel(text=task, size_hint_y=None, height='30dp')
 
         if result_type == 'text':
             content = PaperLabel(text=result)
-        elif result_type == 'image':
+        elif result_type in ['image', 'import']:
             content = Image(source=result)
+        elif 'table' in result_type:
+            # result == list of values
+            box = BoxLayout(orientation='vertical')
+            grid = ResultGrid(cols=int(result_type.strip('table')),
+                              padding=1, spacing=1, size_hint=[0.95, None],
+                              pos_hint={'center_x': 0.5})
+            grid.bind(minimum_height=grid.setter('height'))
+
+            for value in result:
+                grid.add_widget(Wrap(text=' ' + str(value), color=[0, 0, 0, 1],
+                                     background_color=[1, 1, 1, 1]))
+
+            box.add_widget(Widget())
+            box.add_widget(grid)
+            box.add_widget(Widget())
+            content = box
+
         elif result_type == 'widget':
             content = result
 
         # turn off with footer=None
-        if not footer:
+        if result_type == 'import':
+            pass
+        elif not footer:
             foot = PaperLabel(size_hint_y=None, height='30dp')
         else:
             if footer == 'time':
@@ -937,9 +1022,13 @@ class Body(FloatLayout):
             else:
                 foot = PaperLabel(text=footer, size_hint_y=None,
                                   height='30dp')
-        page.add_widget(head)
-        page.add_widget(content)
-        page.add_widget(foot)
+
+        if not result_type == 'import':
+            page.add_widget(head)
+            page.add_widget(content)
+            page.add_widget(foot)
+        else:
+            page.add_widget(content)
         self.ids.results.add_widget(page, 1)
 
         panel = self.ids.resultspanel
@@ -949,6 +1038,11 @@ class Body(FloatLayout):
     @staticmethod
     def simple_chars(substring, from_undo):
         chars = re.findall(r'([a-zA-Z0-9.])', substring)
+        return u''.join(chars)
+
+    @staticmethod
+    def address_chars(substring, from_undo):
+        chars = re.findall(r'([a-zA-Z0-9:])', substring)
         return u''.join(chars)
 
     def update_tree(self, dt):
@@ -976,7 +1070,7 @@ class KrySA(App):
     properties themselves.
     '''
     path = op.dirname(op.abspath(__file__))
-    icon = path+'/data/icon.png'
+    icon = path + '/data/icon.png'
     project_exists = BooleanProperty(False)
     project_name = ''
     project_dir = ''

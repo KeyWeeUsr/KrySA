@@ -49,6 +49,7 @@
                         root_options: dict(text='Project Tree')
                         size_hint_y: None
                         height: self.minimum_height
+
                 Splitter:
                     sizable_from: 'top'
                     BoxLayout:
@@ -59,9 +60,11 @@
                             ImgButton:
                                 source: 'data/clock.png'
                                 on_release: taskpanel.current = 'recent'
+
                             ImgButton
                                 source: 'data/star.png'
                                 on_release: taskpanel.current = 'favorite'
+
                         ScreenManager:
                             id: taskpanel
                             Screen:
@@ -76,6 +79,7 @@
                                             size_hint_y: None
                                             text: 'Recent Tasks'
                                             height: dp(30)
+
                             Screen:
                                 name: 'favorite'
                                 ScrollView:
@@ -88,6 +92,7 @@
                                             size_hint_y: None
                                             text: 'Favorite Tasks'
                                             height: dp(30)
+
         TabbedPanel:
             id: tabpanel
             tab_pos: 'bottom_mid'
@@ -98,6 +103,7 @@
                 text: 'Process Flow'
                 ProcessFlow:
                     id: flow
+
         Splitter:
             id: resultspanel
             canvas.before:
@@ -128,6 +134,7 @@
                         Widget:
                             size_hint_y: None
                             height: dp(5)
+
                 Button:
                     text: 'Show folder'
                     size_hint: None, None
@@ -157,6 +164,7 @@
     canvas:
         Color:
             rgba: 1, 1, 1, 0.9
+
         Rectangle:
             texture: root.texture
             size: self.size
@@ -169,6 +177,7 @@
     canvas.before:
         Color:
             rgba: 1, 1, 1, 0.9
+
         Rectangle:
             pos: self.pos
             size: self.size
@@ -214,7 +223,6 @@
         BoxLayout:
             size_hint_y: None
             height: dp(30)
-
             TextInput:
                 id: select
                 disabled: True
@@ -261,6 +269,7 @@
     canvas:
         Color:
             rgba: 0.2, 0.67, 0.85, 1
+
         Line:
             width: 2
             cap: 'none'
@@ -286,6 +295,7 @@
         orientation: 'vertical'
         Label:
             text: root.message
+
         BoxLayout:
             height: dp(60)
             size_hint_y: None
@@ -300,6 +310,7 @@
     TextInput:
         id: value
         input_filter: root.filter
+
     Button:
         id: valX
         size_hint_x: None
@@ -319,12 +330,14 @@
             id: colname
             text: 'Data'
             input_filter: app.root.simple_chars
+
         Button:
             id: colX
             size_hint_x: None
             width: dp(30)
             text: 'X'
             on_release: root.parent.remove_widget(root)
+
     Spinner:
         size_hint_y: None
         height: dp(30)
@@ -335,11 +348,13 @@
             if self.text == 'REAL': root.filter = 'float'
             elif self.text == 'INTEGER': root.filter = 'int'
             elif self.text == 'TEXT': root.filter = ObjectProperty(None)
+
     BoxLayout:
         size_hint_y: None
         height: dp(30)
         Label:
             text: 'Values'
+
         Button:
             id: valadd
             size_hint_x: None
@@ -348,12 +363,14 @@
             on_release:
                 coltype.disabled = True
                 vals.add_widget(Factory.NewDataValue(filter=root.filter))
+
     ScrollView:
         GridLayout:
             size_hint_y: None
             height: self.minimum_height
             cols: 1
             id: vals
+
     BoxLayout:
         Button:
             id: checklock
@@ -364,6 +381,7 @@
             check: (colname, vals)
             on_release:
                 root.checklock(self.disable, coltype, self.check)
+
         Button:
             size_hint_y: None
             height: dp(60)
@@ -381,12 +399,14 @@
                 id: table_name
                 hint_text: 'Data name'
                 input_filter: app.root.simple_chars
+
             Button:
                 id: columnadd
                 size_hint_x: None
                 width: dp(30)
                 text: '+'
                 on_release: columns.add_widget(Factory.NewDataColumn())
+
         ScrollView:
             GridLayout:
                 rows: 1
@@ -395,18 +415,21 @@
                 id: columns
 
 <Page@BoxLayout>:
+    orientation: 'vertical'
     canvas:
         Color:
             rgba: 0.2, 0.2, 0.2, 0.2
+
         Rectangle:
             size: [s + dp(4) for s in self.size]
             pos: self.pos[0] - dp(2), self.pos[1] - dp(2)
+
         Color:
             rgb: 1, 1, 1
+
         Rectangle:
             size: self.size
             pos: self.pos
-    orientation: 'vertical'
 
 <PageBox>:
     size_hint: None, None
@@ -418,9 +441,11 @@
             width: dp(2)
         Page:
             id: page
+
     Widget:
         size_hint_y: None
         height: dp(42)
+
     Button:
         size_hint: None, None
         size: dp(30), dp(30)
@@ -438,7 +463,29 @@
     canvas:
         Color:
             rgb: 1, 1, 1
+
         Rectangle:
             source: self.source
             size: [s - 6 for s in self.size]
             pos: [p + 3 for p in self.pos]
+
+<Wrap>:
+    size_hint_y:None
+    text_size:self.width,None
+    height:self.texture_size[1]
+    canvas.before:
+        Color:
+            rgba: root.background_color
+
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<ResultGrid>:
+    canvas:
+        Color:
+            rgba: 0, 0, 0, 0.8
+
+        Rectangle:
+            size: self.size
+            pos: self.pos
