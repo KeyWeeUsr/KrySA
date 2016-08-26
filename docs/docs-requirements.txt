@@ -1,4 +1,3 @@
 Cython>=0.23
-kivy
 sphinx==1.4.4
 sphinx-autobuild
