@@ -5,7 +5,7 @@ import sys
 import os.path as op
 from distutils import dir_util
 from distutils import sysconfig
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 name = 'krysa'
 files = [name, ]
@@ -23,14 +23,8 @@ if 'sdist' in sys.argv:
             print('Removing {}'.format(file))
             os.remove(file)
 
-# get folders relative to root
-for walk in os.walk(op.join(root, name)):
-    for dirname in walk[1]:
-        path = op.join(walk[0], dirname).replace(root, '')
-        files.append(op.join(path, '.'))
-
 # get version from main
-with open(op.join(root, "krysa/main.py")) as f:
+with open(op.join(root, 'krysa', 'main.py')) as f:
     for i, line in enumerate(f):
         if i == 2:
             version = line[len('# Version: '):-1]
@@ -45,8 +39,8 @@ if len(ver_split) != 3:
 
 setup(
     name=name,
-    packages=files,
-    package_data={'': ['*.*', ]},
+    packages=find_packages(),
+    include_package_data=True,
     install_requires=['kivy', 'numpy', 'scipy', 'matplotlib'],
     version=version,
     description='KrySA - Statistical analysis for rats',
