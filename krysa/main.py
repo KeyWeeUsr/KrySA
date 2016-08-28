@@ -6,13 +6,13 @@
 
 from kivy.config import Config
 import os
-if 'SPHINXBUILD' not in os.environ:
+if 'READTHEDOCS' not in os.environ:
     Config.set('graphics', 'window_state', 'maximized')
+    import numpy
+    import scipy
 import re
 import json
 import math
-import numpy
-import scipy
 import string
 import sqlite3
 import os.path as op
@@ -40,7 +40,6 @@ from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, \
     BooleanProperty, ListProperty
 
-import tasks  # remove?
 from tasks import Task
 from tasks.basic import Basic
 from tasks.avgs import Avgs
