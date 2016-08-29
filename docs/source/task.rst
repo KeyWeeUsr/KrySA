@@ -31,7 +31,9 @@ can create new :ref:`data` or a page in the :ref:`results` panel.
 Create a Task
 -------------
 
-Since KrySA uses Python, each :ref:`task` according to its category(file)
+.. note:: It's good to peek in :mod:`tasks.Task`.
+
+KrySA uses Python for :ref:`task` s. Each task according to its category(file)
 begins with a function named like this::
 
     def <category>_<task>(*args):
@@ -75,7 +77,7 @@ function takes two arguments - index of :ref:`data` (returned in
 Values are returned as a simple list of everything selected no matter what the
 type it is. Example::
 
-    values = [0, 1, u'hi']
+    values = [0, 1.0, u'hi']
     max(values)
     >>> u'hi'
 

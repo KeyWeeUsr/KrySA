@@ -77,7 +77,8 @@ class Task(Popup):
             self.ids.container.add_widget(wdg)
 
     def recalc_height(self, body, content):
-        """docs
+        """Recalculates the height of :mod:`tasks.Task` after a layout is
+        added, so that the children are clearly visible without any stretching.
         """
         confirms = self.ids.confirms
         content.height = sum([child.height for child in content.children])
@@ -93,7 +94,9 @@ class Task(Popup):
             return i
 
     def try_run(self, *args):
-        """docs
+        """Tries to run a :ref:`task` from the input a user specified and
+        closes the popup. If no such an action is possible, it'll show a popup
+        with an error and leave :mod:`tasks.Task` opened.
         """
         try:
             self.run(*args)

@@ -22,12 +22,14 @@ Minimum system requirements
 
 =============== ========================================================
 RAM             At least 256 MB
-Disk space      At least 400 MB free
+Disk space      At least 400 MB free(*)
 Resolution      Minimum of 800 x 600
 CPU             ? ? ?
 GPU             Anything with OpenGL 2.0 support should be enough
 Internet        Necessary for downloading requirements and updating
 =============== ========================================================
+
+\*if installing from scratch
 
 .. _install:
 
@@ -97,15 +99,11 @@ run::
 About docs
 ----------
 
-.. |rtd| replace:: HTML upload not available
-.. _rtd: https://docs.readthedocs.io/en/latest/contribute.html#initial-triage
+The documentation includes source with notes how most of the things work for
+example which widgets are connected, what's needed to call to make a custom
+:ref:`task` and other related stuff.
 
-The full documentation (including documented source) needs properly installed
-Kivy, which probably isn't possible in RTD environment itself due to required
-compilation. If compiled with e.g. Travis and then used for building the docs,
-RTD itself won't work this way (|rtd|_). Therefore there are two types of the
-docs:
-
-* *Simple:* A basic documentation intended for end-user
-
-* *Full:* Simple docs + source intended for :ref:`contribute`
+Each documented class or function/method will have a little `source` link on
+the right side. This will send you to its place in the code. In the code
+there are similar `docs` links (they'll return you back) at the same place as
+it was for the `source` in modules' documentation.

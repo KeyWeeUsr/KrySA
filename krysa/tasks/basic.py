@@ -9,7 +9,7 @@ class Basic(object):
     """
 
     def basic_count(*args):
-        """Opens a :mod`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
+        """Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
         from user :ref:`Data` address.
         """
         widget = AddressLayout()
@@ -32,7 +32,7 @@ class Basic(object):
         """
 
     def basic_min(*args):
-        """Opens a :mod`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
+        """Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
         from user :ref:`Data` address.
         """
         widget = AddressLayout()
@@ -51,7 +51,7 @@ class Basic(object):
         task.set_page('Minimum', str(min(values)), 'text')
 
     def basic_max(*args):
-        """Opens a :mod`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
+        """Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
         from user :ref:`Data` address.
         """
         widget = AddressLayout()
@@ -70,7 +70,7 @@ class Basic(object):
         task.set_page('Maximum', str(max(values)), 'text')
 
     def basic_small(*args):
-        """Opens a :mod`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
+        """Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
         `k`-th value from the :ref:`Task` s output.
         """
@@ -97,7 +97,7 @@ class Basic(object):
             pass
 
     def basic_large(self, *args):
-        """Opens a :mod`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
+        """Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
         `k`-th value from the :ref:`Task` s output.
         """
@@ -125,7 +125,7 @@ class Basic(object):
 
     def basic_freq(self, *args):
         """(Not fully tested yet)
-        Opens a :mod`tasks.Task` with a :mod:`tasks.FreqLayout` that
+        Opens a :mod:`tasks.Task` with a :mod:`tasks.FreqLayout` that
         gets from user:
 
         * :ref:`Data` address

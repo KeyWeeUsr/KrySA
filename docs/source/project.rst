@@ -128,7 +128,10 @@ Select ``File -> Export Data``, navigate to a folder you want to put the
 Results
 -------
 
-Nothing yet.
+Results are by default `.png` files in a resolution of 72DPI A4 page
+(595px x 842px) put in the `results` folder in the :ref:`project` folder.
+
+.. note:: Making a single file with all results is still under construction.
 
 .. _flow:
 

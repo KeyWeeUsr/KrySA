@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.3.3
+# Version: 0.3.4
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
 from kivy.config import Config
 import os
-if 'READTHEDOCS' not in os.environ:
+
+# local & RTD docs fix
+if 'BUILDDIR' not in os.environ:
     Config.set('graphics', 'window_state', 'maximized')
     import numpy
     import scipy
+
 import re
 import json
 import math
@@ -150,10 +153,27 @@ class NewDataColumn(BoxLayout):
                             error = ErrorPop(msg=msg)
                             error.open()
                             return
-                    if i.ids.value.text == '' and coltype.text == 'REAL':
-                        i.ids.value.text = '0.0'
-                    elif i.ids.value.text == '' and coltype.text == 'INTEGER':
-                        i.ids.value.text = '0'
+                    try:
+                        if not coltype.text == 'TEXT':
+                            float(i.ids.value.text)
+                    except ValueError:
+                        if coltype.text == 'REAL':
+                            i.ids.value.text = '0.0'
+                        elif coltype.text == 'INTEGER':
+                            i.ids.value.text = '0'
+
+    def paste(self, values, sep):
+        if sep == 'space':
+            values = values.split(' ')
+        elif sep == 'OS default':
+            values = values.split(os.linesep)
+        else:
+            values = values.split(sep[1:])
+        for val in values:
+            v = NewDataValue(filter=self.filter)
+            v.ids.value.text = val
+            self.ids.vals.add_widget(v)
+        self.ids.vals.parent.scroll_to(self.ids.vals.children[0])
 
 
 class NewDataLayout(BoxLayout):
@@ -716,8 +736,14 @@ class Body(FloatLayout):
             c.execute("pragma table_info({0})".format(table))
             table_info = c.fetchall()
             labels = [lbl[1] for lbl in table_info]
-            types = [type[2][0] for type in table_info]
+
             # allow only: INTEGER, REAL, TEXT
+            try:
+                types = [type[2][0] for type in table_info]
+            except IndexError:
+                error = ErrorPop(msg='Bad file: No defined types in columns!')
+                error.open()
+                return
 
             tabletab = TabbedPanelItem(text=table)
             self.ids.tabpanel.add_widget(tabletab)
@@ -731,7 +757,7 @@ class Body(FloatLayout):
                                              size=self.size, values=values,
                                              labels=labels)))
             tabletab.content = self.tables[-1][1]
-            self.opendlg.dismiss()
+        self.opendlg.dismiss()
         conn.close()
         # ToDo: implement automatic saving to Project's data.sqlite
         # ToDo: if the same table name exist in tables, add ' (2)' or something
@@ -840,8 +866,11 @@ class Body(FloatLayout):
             conn.commit()
         conn.close()
 
-        if self.savedlg:
+        try:
             self.savedlg.dismiss()
+        except AttributeError:
+            # either closed, or wasn't even opened
+            pass
 
     def _export_results(self, selection, *args):
         if not selection:

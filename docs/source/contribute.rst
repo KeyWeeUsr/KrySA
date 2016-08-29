@@ -22,7 +22,7 @@ and to make screenshots of. If you have KrySA already installed, there's a
 ``docs`` folder that contains the documentation.
 
 The documentation is written in |rst|_ which you can test either in some online
-editor (referencing files won't work, obviously) or localy as you have already
+editor (referencing files won't work, obviously) or localy if you have already
 installed Python. KrySA uses `Sphinx <https://sphinx-doc.org>`_ for converting
 |rst| to a html website. First install requirements from the ``.txt`` file. ::
 

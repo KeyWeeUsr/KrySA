@@ -1,9 +1,10 @@
+#:import wb webbrowser
+#:import join os.path.join
 #:import dp kivy.metrics.dp
 #:import isdir os.path.isdir
-#:import join os.path.join
 #:import Factory kivy.factory.Factory
+#:import Clipboard kivy.core.clipboard.Clipboard
 #:import ObjectProperty kivy.properties.ObjectProperty
-#:import wb webbrowser
 
 <Body>:
     ActionBar:
@@ -309,6 +310,7 @@
     filter: None
     TextInput:
         id: value
+        multiline: False
         input_filter: root.filter
 
     Button:
@@ -364,6 +366,25 @@
                 coltype.disabled = True
                 vals.add_widget(Factory.NewDataValue(filter=root.filter))
 
+    BoxLayout:
+        size_hint_y: None
+        height: dp(30)
+        Button:
+            text: 'Clear'
+            size_hint_x: 0.35
+            on_release: vals.clear_widgets()
+
+        Button:
+            text: 'Paste'
+            size_hint_x: 0.35
+            on_release: root.paste(Clipboard.paste(), pasteval.text)
+
+        Spinner:
+            id: pasteval
+            size_hint_x: 0.3
+            text: 'Separator'
+            values: ['OS default', 'space', '\\n', '\\t']
+
     ScrollView:
         GridLayout:
             size_hint_y: None
@@ -372,6 +393,8 @@
             id: vals
 
     BoxLayout:
+        size_hint_y: None
+        height: self.minimum_height
         Button:
             id: checklock
             size_hint_y: None
