@@ -5,13 +5,13 @@ import math
 
 
 class Basic(object):
-    """All :ref:`Task` s categorized as `basic` under one roof.
-    """
+    '''All :ref:`Task` s categorized as `basic` under one roof.
+    '''
 
     def basic_count(*args):
-        """Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
-        from user :ref:`Data` address.
-        """
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
+        gets from user :ref:`Data` address.
+        '''
         widget = AddressLayout()
         task = Task(title='Count', wdg=widget,
                     call=['Count', Basic.basic_count])
@@ -22,19 +22,19 @@ class Basic(object):
 
     @staticmethod
     def _basic_count(task, address, *args):
-        """Gets the values from address and returns the count.
-        """
+        '''Gets the values from address and returns the count.
+        '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Count', str(len(values)), 'text')
 
     def basic_countifs(self, *args):
-        """Not yet implemented.
-        """
+        '''Not yet implemented.
+        '''
 
     def basic_min(*args):
-        """Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
-        from user :ref:`Data` address.
-        """
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
+        gets from user :ref:`Data` address.
+        '''
         widget = AddressLayout()
         task = Task(title='Minimum', wdg=widget,
                     call=['Minimum', Basic.basic_min])
@@ -45,15 +45,15 @@ class Basic(object):
 
     @staticmethod
     def _basic_min(task, address, *args):
-        """Gets the values from address and returns a minimum.
-        """
+        '''Gets the values from address and returns a minimum.
+        '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Minimum', str(min(values)), 'text')
 
     def basic_max(*args):
-        """Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that gets
-        from user :ref:`Data` address.
-        """
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
+        gets from user :ref:`Data` address.
+        '''
         widget = AddressLayout()
         task = Task(title='Maximum', wdg=widget,
                     call=['Maximum', Basic.basic_max])
@@ -64,16 +64,16 @@ class Basic(object):
 
     @staticmethod
     def _basic_max(task, address, *args):
-        """Gets the values from address and returns a maximum.
-        """
+        '''Gets the values from address and returns a maximum.
+        '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Maximum', str(max(values)), 'text')
 
     def basic_small(*args):
-        """Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
         `k`-th value from the :ref:`Task` s output.
-        """
+        '''
         widget = SmallLargeLayout()
         task = Task(title='Small', wdg=widget,
                     call=['Small', Basic.basic_small])
@@ -85,9 +85,9 @@ class Basic(object):
 
     @staticmethod
     def _basic_small(task, address, k, *args):
-        """Gets the values from address and returns the `k`-th value from
+        '''Gets the values from address and returns the `k`-th value from
         the ascending list of sorted values.
-        """
+        '''
         values = task.from_address(task.tablenum, address.text)
         values = sorted(values)
         k = int(k.text) - 1
@@ -97,10 +97,10 @@ class Basic(object):
             pass
 
     def basic_large(self, *args):
-        """Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
         `k`-th value from the :ref:`Task` s output.
-        """
+        '''
         widget = SmallLargeLayout()
         task = Task(title='Large', wdg=widget,
                     call=['Large', Basic.basic_large])
@@ -112,9 +112,9 @@ class Basic(object):
 
     @staticmethod
     def _basic_large(task, address, k, *args):
-        """Gets the values from address and returns the `k`-th value from
+        '''Gets the values from address and returns the `k`-th value from
         the descending list of sorted values.
-        """
+        '''
         values = task.from_address(task.tablenum, address.text)
         values = sorted(values, reverse=True)
         k = int(k.text) - 1
@@ -124,7 +124,7 @@ class Basic(object):
             pass  # throw error k out of len(values) bounds, same for *_small
 
     def basic_freq(self, *args):
-        """(Not fully tested yet)
+        '''(Not fully tested yet)
         Opens a :mod:`tasks.Task` with a :mod:`tasks.FreqLayout` that
         gets from user:
 
@@ -133,7 +133,7 @@ class Basic(object):
         * type of frequency (`absolute`, `relative` or `cumulative`
         * number of bins (optional)
         * upper and lower limit (optional)
-        """
+        '''
         widget = FreqLayout()
         task = Task(title='Frequency', wdg=widget,
                     call=['Frequency', Basic.basic_freq])
@@ -154,7 +154,7 @@ class Basic(object):
 
     @staticmethod
     def _basic_freq(task, address, bins, limits, freq_type, intervals, *args):
-        """Gets the values from address and depending on the type of values
+        '''Gets the values from address and depending on the type of values
         dumps them either into bins of size 1 (integers) or into bins that
         consist of intervals (real numbers). Then according to the size of bins
         and limits of the frequency creates a table for chosen types of
@@ -165,9 +165,9 @@ class Basic(object):
 
             IndexError: index <max(values>) + 1> is out of bounds for axis 1
             with size <max(values>) + 1>
-        """
-        lowlimit, uplimit, limits_auto = limits
+        '''
         bins, bins_auto = bins
+        lowlimit, uplimit, limits_auto = limits
         absolute, relative, cumulative = freq_type
 
         values = task.from_address(task.tablenum, address.text)
@@ -195,7 +195,6 @@ class Basic(object):
 
             # something better than filter?
             relat = [float(val) for val in relat[0]]
-            relat = filter(None, relat)
             relat.insert(0, 'Relative')
             cols += 1
 
@@ -204,7 +203,6 @@ class Basic(object):
             cumul = cumfreq(values, numbins=bins,
                             defaultreallimits=(lowlimit, uplimit))
             cumul = [float(val) for val in cumul[0]]
-            cumul = sorted(list(set(cumul)))
             cumul.insert(0, 'Cumulative')
             cols += 1
 
@@ -216,8 +214,8 @@ class Basic(object):
                     absol_bins = math.ceil(math.sqrt(len(values)))
                 else:
                     absol_bins = bins
-                bin_size = float(uplimit - lowlimit) / float(absol_bins - 1)
-                clean = [(lowlimit + bin_size * i) for i in xrange(bins)]
+                bin_size = float(uplimit) / float(bins)
+                clean = [(lowlimit + bin_size * (i + 1)) for i in xrange(bins)]
 
             else:
                 clean = []
@@ -236,7 +234,10 @@ class Basic(object):
             cols += 1
 
         res = []
-        clean.insert(0, 'Value')
+        if intervals.active:
+            clean.insert(0, 'Value (<)')
+        else:
+            clean.insert(0, 'Value')
 
         if absol and not relat and not cumul:
             res = [r for items in zip(clean, absol) for r in items]

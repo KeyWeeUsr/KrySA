@@ -49,41 +49,41 @@ from tasks.avgs import Avgs
 
 
 class ResultGrid(GridLayout):
-    """A black gridlayout, together with :mod:`main.Wrap` makes a table
+    '''A black gridlayout, together with :mod:`main.Wrap` makes a table
     container for results that need a table.
-    """
+    '''
 
 
 class Wrap(Label):
-    """A white label with automatically wrapped text.
-    """
+    '''A white label with automatically wrapped text.
+    '''
     background_color = ListProperty([0, 0, 0, 0])
 
 
 class PageBox(BoxLayout):
-    """A layout that includes Page widget together with transparent separator.
+    '''A layout that includes Page widget together with transparent separator.
     It's used for adding new results from Tasks.
-    """
+    '''
     def __init__(self, **kwargs):
         super(PageBox, self).__init__(**kwargs)
         self.add_widget = self.ids.page.add_widget
 
 
 class PaperLabel(Label):
-    """A label with visual properties as a paper sheet.
-    """
+    '''A label with visual properties as a paper sheet.
+    '''
 
 
 class ImgButton(Button):
-    """A button with an image of square shape in the middle.
-    """
+    '''A button with an image of square shape in the middle.
+    '''
     source = StringProperty('')
 
 
 class ErrorPop(Popup):
-    """An error popup to let user know something is missing or typed wrong
+    '''An error popup to let user know something is missing or typed wrong
     when console is disabled.
-    """
+    '''
     message = StringProperty('')
 
     def __init__(self, **kw):
@@ -92,9 +92,9 @@ class ErrorPop(Popup):
 
 
 class NewDataValue(BoxLayout):
-    """A layout handling the behavior of inputs and button for each new
+    '''A layout handling the behavior of inputs and button for each new
     value in :ref:`data`.
-    """
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataValue, self).__init__(**kw)
@@ -102,9 +102,9 @@ class NewDataValue(BoxLayout):
 
 
 class NewDataColumn(BoxLayout):
-    """A layout handling the behavior of type, values(``NewDataValue``) and
+    '''A layout handling the behavior of type, values(``NewDataValue``) and
     some buttons for each new column in :ref:`data`.
-    """
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataColumn, self).__init__(**kw)
@@ -177,18 +177,18 @@ class NewDataColumn(BoxLayout):
 
 
 class NewDataLayout(BoxLayout):
-    """A layout handling the behavior of ``NewDataColumn`` and some inputs for
+    '''A layout handling the behavior of ``NewDataColumn`` and some inputs for
     each new value in :ref:`data`.
-    """
+    '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
         super(NewDataLayout, self).__init__(**kw)
 
 
 class CreateWizard(Popup):
-    """A popup handling the behavior for creating a new :ref:`data`,
+    '''A popup handling the behavior for creating a new :ref:`data`,
     i.e a wizard.
-    """
+    '''
     run = ObjectProperty(None)
 
     def __init__(self, **kw):
@@ -200,9 +200,9 @@ class CreateWizard(Popup):
 
 
 class Dialog(Popup):
-    """A dialog handling the behavior for creating or opening files e.g.
+    '''A dialog handling the behavior for creating or opening files e.g.
     :ref:`project` or :ref:`data`.
-    """
+    '''
     confirm = StringProperty('')
     run = ObjectProperty(None)
     dirs = BooleanProperty(False)
@@ -224,30 +224,30 @@ class Dialog(Popup):
 
 
 class SideItem(BoxLayout):
-    """Supposed to be a part of settings, most likely will be removed/replaced.
-    """
+    '''Supposed to be a part of settings, most likely will be removed/replaced.
+    '''
 
 
 class TableItem(TextInput):
-    """An item handling the behavior or each separate value in the
+    '''An item handling the behavior or each separate value in the
     :mod:`main.Table` such as updating/editing values in :ref:`data`.
-    """
+    '''
     def __init__(self, **kwargs):
         super(TableItem, self).__init__(**kwargs)
         self.bind(focus=self.on_focus)
 
     def on_focus(self, widget, focused):
-        """Makes sure the unconfirmed value is discarded e.g. when clicked
+        '''Makes sure the unconfirmed value is discarded e.g. when clicked
         outside of the widget.
-        """
+        '''
         if not focused:
             self.text = self.old_text
 
     def update_value(self, txt, *args):
-        """On ``<enter>`` (``return``) key updates the values
+        '''On ``<enter>`` (``return``) key updates the values
         :mod:`main.TableItem.text` and :mod:`main.TableItem.old_text` in
         :mod:`main.Table`.
-        """
+        '''
         data = []
         cols = self.cols - 1
 
@@ -264,11 +264,11 @@ class TableItem(TextInput):
 
 
 class Table(ScrollView):
-    """A view handling the behavior of the inputs from :ref:`sqlite`. Separates
+    '''A view handling the behavior of the inputs from :ref:`sqlite`. Separates
     the values from :ref:`sqlite` according to its :ref:`data`'s column types
     into three Python categories - `int`, `float` or `unicode` and assigns
     an alphabetic order for each column together with row number to each value.
-    """
+    '''
     # use with ....add_widget(Table(max_cols=3, max_rows=3))
     # Grid -> Scroll, grid as container - better for sizing and placing
 
@@ -369,8 +369,8 @@ class Table(ScrollView):
         self.add_widget(self.rv)
 
     def get_letters(self):
-        """Gets a list of letters the same length as :ref:`data`'s columns.
-        """
+        '''Gets a list of letters the same length as :ref:`data`'s columns.
+        '''
         letters = [chr(letter + 65) for letter in range(26)]
         result = []
         label = []
@@ -395,11 +395,11 @@ class Table(ScrollView):
 
 
 class ProcessFlow(BoxLayout, StencilView):
-    """A canvas on which will be displayed actions for each :ref:`data` related
+    '''A canvas on which will be displayed actions for each :ref:`data` related
     to them, such as used tasks connected with result of the tasks.
 
     (Not implemented yet)
-    """
+    '''
     def __init__(self, **kw):
         super(ProcessFlow, self).__init__(**kw)
         app = App.get_running_app()
@@ -408,10 +408,10 @@ class ProcessFlow(BoxLayout, StencilView):
 
 
 class SizedButton(Button):
-    """A button with width automatically customized according to text length of
+    '''A button with width automatically customized according to text length of
     its siblings, which makes every sibling the same size as the one with the
     longest text string.
-    """
+    '''
     def correct_width(self, *args):
         self.width = self.texture_size[0] + 8
         self.parent.parent.width = max([c.width for c in self.parent.children])
@@ -420,14 +420,14 @@ class SizedButton(Button):
 
 
 class MenuDrop(DropDown):
-    """A list of :mod:`main.SizedButton` s displayed as a menu, where each
+    '''A list of :mod:`main.SizedButton` s displayed as a menu, where each
     button may create another menu depending on the function bound to it. The
     main menu is handled through a single instance of :mod:`main.MenuDrop`
     which is instantiated before :mod:`main.Krysa.build` function.
 
     Each click/tap on the menu button then assigns a value to it from
     ``App.menu`` dictionary according to its name in `kv` file.
-    """
+    '''
     def __init__(self, **kw):
         app = App.get_running_app()
         app.drop = self
@@ -445,13 +445,13 @@ class MenuDrop(DropDown):
 
 
 class Body(FloatLayout):
-    """The main layout for the application. It handles menu values, their
+    '''The main layout for the application. It handles menu values, their
     appropriate functions, filtering of user's input and functions for
     accessing :ref:`sqlite` in :mod:`main.Table`.
-    """
+    '''
     def __init__(self, **kw):
-        """bla
-        """
+        '''bla
+        '''
         self.app = App.get_running_app()
         self.tables = []
         self.app.menu = {'file': (['New...', self.new],
@@ -481,8 +481,8 @@ class Body(FloatLayout):
         super(Body, self).__init__(**kw)
 
     def new(self, button, *args):
-        """Opens a submenu for ``New`` menu.
-        """
+        '''Opens a submenu for ``New`` menu.
+        '''
         d = DropDown(allow_sides=True, auto_width=False)
         buttons = []
 
@@ -505,9 +505,9 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _new_data(self, *args):
-        """Opens a wizard for creating a new :ref:`data` if a :ref:`project` is
+        '''Opens a wizard for creating a new :ref:`data` if a :ref:`project` is
         available or shows a warning if it doesn't exist.
-        """
+        '''
         if not self.app.project_exists:
             error = ErrorPop(msg='No project exists!')
             error.open()
@@ -518,9 +518,9 @@ class Body(FloatLayout):
         self.wiz_newdata.open()
 
     def _save_data(self, wizard, *args):
-        """Gets data from the wizard, puts them into :mod:`main.Table` and exports them
+        '''Gets data from the wizard, puts them into :mod:`main.Table` and exports them
         into :ref:`sqlite`.
-        """
+        '''
         labels = []
         types = []
         values = []
@@ -599,9 +599,9 @@ class Body(FloatLayout):
         self.opendlg.open()
 
     def _open_project(self, selection, *args):
-        """Opens a :ref:`project` from path selected in ``Dialog`` and imports
+        '''Opens a :ref:`project` from path selected in ``Dialog`` and imports
         :ref:`sqlite`.
-        """
+        '''
         if not selection:
             return
         else:
@@ -628,9 +628,9 @@ class Body(FloatLayout):
             self.set_page('', op.join(results, file), result_type='import')
 
     def close_project(self, *args):
-        """Clears all important variables, removes all :ref:`data` available in
+        '''Clears all important variables, removes all :ref:`data` available in
         :mod:`main.Table` and switches to :mod:`main.ProcessFlow`.
-        """
+        '''
         # call this before a new project
         self.app.project_exists = False
         self.app.project_dir = ''
@@ -657,9 +657,9 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _save_project(self, selection=None, fname=None, *args):
-        """Saves a :ref:`project` to path selected in ``Dialog`` and exports
+        '''Saves a :ref:`project` to path selected in ``Dialog`` and exports
         :ref:`sqlite`.
-        """
+        '''
         if not selection:
             if not self.app.project_exists:
                 return
@@ -710,9 +710,9 @@ class Body(FloatLayout):
         self.opendlg.open()
 
     def _import_data(self, selection, *args):
-        """Imports :ref:`sqlite` from path selected in ``Dialog`` and puts it
+        '''Imports :ref:`sqlite` from path selected in ``Dialog`` and puts it
         to :mod:`main.Table`.
-        """
+        '''
         # limit table name and column name to [a-zA-Z]
 
         # CREATE TABLE test(
@@ -771,7 +771,7 @@ class Body(FloatLayout):
 
     @staticmethod
     def _extract_rows(data):
-        """Extract values from :mod:`main.Table`'s dictionary into a flat list.
+        '''Extract values from :mod:`main.Table`'s dictionary into a flat list.
 
         Example:
 
@@ -781,7 +781,7 @@ class Body(FloatLayout):
         ===== ===== =====
 
         [u'Data1', u'Data2', u'Data3', u'1', 2.0, 3, ...]
-        """
+        '''
         rows = []
         for item in data:
             try:
@@ -809,9 +809,9 @@ class Body(FloatLayout):
         return rows
 
     def _export_data(self, selection, fname, *args):
-        """Exports all available :ref:`data` (visible as tabs) as :ref:`sqlite`
+        '''Exports all available :ref:`data` (visible as tabs) as :ref:`sqlite`
         into path selected in ``Dialog``.
-        """
+        '''
         col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL'}
         if not selection:
             return
@@ -906,8 +906,8 @@ class Body(FloatLayout):
 
     @staticmethod
     def about(*args):
-        """Displays `about` page of the app and includes other credits.
-        """
+        '''Displays `about` page of the app and includes other credits.
+        '''
         aboutdlg = Popup(title='About')
         text = (
             'Copyright (C) 2016, KeyWeeUsr(Peter Badida)\n'
@@ -947,7 +947,7 @@ class Body(FloatLayout):
         return col
 
     def from_address(self, table, address, *args):
-        """Gets value(s) from :mod:`main.Table` according to the address such as
+        '''Gets value(s) from :mod:`main.Table` according to the address such as
         ``A1`` or ``A1:B2``. Values are fetched in the way that the final list
         contains even empty (``u''``) values. It is not expected of user to use
         :ref:`task` for strings and it won't even run. To get non-empty values
@@ -956,7 +956,7 @@ class Body(FloatLayout):
             values = filter(lambda x: len(str(x)), values)
 
         This `filter`, however, will remain values such as ``None`` untouched.
-        """
+        '''
         values = []
         col_row = []  # [column, row] such as [x, y] |_
         if ':' not in address:
@@ -995,7 +995,7 @@ class Body(FloatLayout):
         return values
 
     def set_page(self, task, result, result_type='text', footer='time'):
-        """Creates a :mod:`main.PageBox` for a result. The header consists of the
+        '''Creates a :mod:`main.PageBox` for a result. The header consists of the
         :ref:`task`'s name, the footer is by default the time when the result
         was created and the content depends on `result_type` which can be -
         text, image(path to image) or widget. If `result_type == 'widget'`,
@@ -1007,7 +1007,7 @@ class Body(FloatLayout):
 
         .. note:: When exporting pages, everything is converted into images
            (pngs), therefore making fancy behaving widgets is irrelevant.
-        """
+        '''
         page = PageBox()
         head = PaperLabel(text=task, size_hint_y=None, height='30dp')
 
@@ -1088,14 +1088,14 @@ class Body(FloatLayout):
 
 
 class KrySA(App):
-    """The main class of the application through which is handled the
+    '''The main class of the application through which is handled the
     communication of other classes with getting an instance of the app via
     ``App.get_running_app()``.
 
     Other than that, it holds important variables of :ref:`project`, sql
     blacklist for :ref:`sqlite` creating and updating or the application
     properties themselves.
-    """
+    '''
     path = op.dirname(op.abspath(__file__))
     icon = path + '/data/icon.png'
     project_exists = BooleanProperty(False)
@@ -1107,18 +1107,18 @@ class KrySA(App):
                      'INSERT', 'JOIN', '=', '"', "'", ';']
 
     def on_project_exists(self, instance, exists):
-        """Checks change of :mod:`main.KrySA.project_exists` and if
+        '''Checks change of :mod:`main.KrySA.project_exists` and if
         :ref:`project` exists, schedules updating of its tree to 5 second
         interval.
-        """
+        '''
         if exists:
             self.treeclock = Clock.schedule_interval(self.root.update_tree, 5)
         else:
             Clock.unschedule(self.treeclock)
 
     def build(self):
-        """Default Kivy function for getting the root widget of application.
-        """
+        '''Default Kivy function for getting the root widget of application.
+        '''
         # read MenuDrop if an idea of removing it comes up
         MenuDrop()
         return Body()

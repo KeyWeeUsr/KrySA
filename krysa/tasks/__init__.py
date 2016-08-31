@@ -1,8 +1,8 @@
-"""
+'''
 .. toctree::
    mod_krysa_tasks_basic
    mod_krysa_tasks_avgs
-"""
+'''
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -18,25 +18,25 @@ Builder.load_file(op.join(op.dirname(op.abspath(__file__)), 'tasks.kv'))
 
 
 class AddressLayout(BoxLayout):
-    """Simple layout that consists of single restricted input widget fetching
+    '''Simple layout that consists of single restricted input widget fetching
     only ``[a-zA-Z0-9:]`` values i.e. address.
-    """
+    '''
 
 
 class SmallLargeLayout(BoxLayout):
-    """Layout that consists of multiple restricted input widgets for address
+    '''A layout that consists of multiple restricted input widgets for address
     and `k` value.
-    """
+    '''
 
 
 class AvgsLayout(BoxLayout):
-    """Layout that consists of multiple restricted input widgets for address
+    '''Layout that consists of multiple restricted input widgets for address
     and `p` (power) value for the formula of generalized mean.
-    """
+    '''
     def floatfilter(self, substring, from_undo):
-        """A function filtering everything that is not `-` symbol, floating
+        '''A function filtering everything that is not `-` symbol, floating
         point symbol(`.`) or a number.
-        """
+        '''
         txt = self.ids.power.text
         if '-' in txt and '.' not in txt:
             chars = re.findall(r'([0-9.])', substring)
@@ -51,21 +51,21 @@ class AvgsLayout(BoxLayout):
 
 
 class FreqLayout(BoxLayout):
-    """Layout that consists of multiple checkboxes and restricted input widgets
+    '''Layout that consists of multiple checkboxes and restricted input widgets
     for address, type of values, type of output frequency and limits of the
     input values.
-    """
+    '''
 
 
 class Task(Popup):
-    """A popup handling the basic choosing of :ref:`data` from available
+    '''A popup handling the basic choosing of :ref:`data` from available
     :ref:`sqlite` in the application.
-    """
+    '''
     run = ObjectProperty(None)
 
     def __init__(self, **kw):
-        """docs
-        """
+        '''docs
+        '''
         super(Task, self).__init__(**kw)
         self.app = App.get_running_app()
         self.run = kw.get('run')
@@ -77,9 +77,9 @@ class Task(Popup):
             self.ids.container.add_widget(wdg)
 
     def recalc_height(self, body, content):
-        """Recalculates the height of :mod:`tasks.Task` after a layout is
+        '''Recalculates the height of :mod:`tasks.Task` after a layout is
         added, so that the children are clearly visible without any stretching.
-        """
+        '''
         confirms = self.ids.confirms
         content.height = sum([child.height for child in content.children])
         body.height = sum([child.height for child in body.children])
@@ -87,17 +87,17 @@ class Task(Popup):
 
     @staticmethod
     def get_table_pos(text, values, *args):
-        """docs
-        """
+        '''docs
+        '''
         gen = (i for i, val in enumerate(values) if val == text)
         for i in gen:
             return i
 
     def try_run(self, *args):
-        """Tries to run a :ref:`task` from the input a user specified and
+        '''Tries to run a :ref:`task` from the input a user specified and
         closes the popup. If no such an action is possible, it'll show a popup
         with an error and leave :mod:`tasks.Task` opened.
-        """
+        '''
         try:
             self.run(*args)
             if self.call:

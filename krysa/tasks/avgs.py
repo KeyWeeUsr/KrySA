@@ -5,11 +5,11 @@ import math
 
 
 class Avgs(object):
-    """All :ref:`Task` s categorized as `averages` under one roof.
-    """
+    '''All :ref:`Task` s categorized as `averages` under one roof.
+    '''
 
     def avgs_gen(*args):
-        """Generalized mean:
+        '''Generalized mean:
 
         .. math::
            \\big(\\frac{1}{n}\\sum_{i=1}^n  x_{i}^{p} \\big)^\\frac{1}{p},
@@ -21,7 +21,7 @@ class Avgs(object):
         * p == 2: quadratic
         * p == 3: cubic
         * etc...
-        """
+        '''
         widget = AvgsLayout()
         task = Task(title='Count', wdg=widget,
                     call=['Count', Avgs.avgs_gen])
@@ -33,10 +33,10 @@ class Avgs(object):
 
     @staticmethod
     def _avgs_gen(task, address, p, *args):
-        """Gets the values from address and depending on `p` (power) value
+        '''Gets the values from address and depending on `p` (power) value
         returns either exceptional case for `p == 0` (geometric mean), or
         value from the generalized mean's formula.
-        """
+        '''
         try:
             if p == '-0':
                 p = 0.0
@@ -56,24 +56,24 @@ class Avgs(object):
         task.set_page('Generalized mean({})'.format(p), str(result), 'text')
 
     def avgs_inter(*args):
-        """(Not yet implemented)
-        """
+        '''(Not yet implemented)
+        '''
 
     def avgs_mid(*args):
-        """(Not yet implemented)
-        """
+        '''(Not yet implemented)
+        '''
 
     def avgs_trim(*args):
-        """(Not yet implemented)
-        """
+        '''(Not yet implemented)
+        '''
 
     def avgs_median(*args):
-        """(Not yet implemented)
-        """
+        '''(Not yet implemented)
+        '''
 
     def avgs_mode(*args):
-        """(Not yet implemented)
-        """
+        '''(Not yet implemented)
+        '''
 
     names = (('Generalized', avgs_gen),
              ('Interquartile', avgs_inter),
