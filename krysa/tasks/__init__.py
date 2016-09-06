@@ -30,7 +30,7 @@ class SmallLargeLayout(BoxLayout):
 
 
 class AvgsLayout(BoxLayout):
-    '''Layout that consists of multiple restricted input widgets for address
+    '''A layout that consists of multiple restricted input widgets for address
     and `p` (power) value for the formula of generalized mean.
     '''
     def floatfilter(self, substring, from_undo):
@@ -51,11 +51,15 @@ class AvgsLayout(BoxLayout):
 
 
 class FreqLayout(BoxLayout):
-    '''Layout that consists of multiple checkboxes and restricted input widgets
-    for address, type of values, type of output frequency and limits of the
-    input values.
+    '''A layout that consists of multiple checkboxes and restricted input
+    widgets for address, type of values, type of output frequency and
+    limits of the input values.
     '''
 
+
+class SortLayout(BoxLayout):
+    '''Docs.
+    '''
 
 class Task(Popup):
     '''A popup handling the basic choosing of :ref:`data` from available

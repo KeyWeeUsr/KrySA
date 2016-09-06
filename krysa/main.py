@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.3.4
+# Version: 0.3.5
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -46,6 +46,7 @@ from kivy.properties import StringProperty, ObjectProperty, \
 from tasks import Task
 from tasks.basic import Basic
 from tasks.avgs import Avgs
+from tasks.manipulate import Manipulate
 
 
 class ResultGrid(GridLayout):
@@ -473,7 +474,8 @@ class Body(FloatLayout):
                                   ['_Protect Data', self.test],
                                   ['_Go To...', self.test],),
                          'tasks': (['Basic', self.basic],
-                                   ['_Averages', self.avgs],),
+                                   ['_Averages', self.avgs],
+                                   ['Manipulate', self.manipulate],),
                          'help': (['_KrySA Help', self.test],
                                   ['_Getting Started Tutorial', self.test],
                                   ['About KrySA', self.about],),
@@ -905,6 +907,15 @@ class Body(FloatLayout):
         drop.open(button)
 
     @staticmethod
+    def manipulate(button, *args):
+        drop = DropDown(allow_sides=True, auto_width=False)
+        for t in Manipulate.names:
+            but = SizedButton(text=t[0])
+            but.bind(on_release=t[1])
+            drop.add_widget(but)
+        drop.open(button)
+
+    @staticmethod
     def about(*args):
         '''Displays `about` page of the app and includes other credits.
         '''
@@ -946,7 +957,7 @@ class Body(FloatLayout):
                 col = col * 26 + (ord(c.upper()) - ord('A')) + 1
         return col
 
-    def from_address(self, table, address, *args):
+    def from_address(self, table, address, extended=False, *args):
         '''Gets value(s) from :mod:`main.Table` according to the address such as
         ``A1`` or ``A1:B2``. Values are fetched in the way that the final list
         contains even empty (``u''``) values. It is not expected of user to use
@@ -963,26 +974,44 @@ class Body(FloatLayout):
             match = re.findall(r'([a-zA-Z]+)([0-9]+)', address)
             col_row.append([self.get_column(match[0][0]), match[0][1]])
         else:
-            addresses = address.split(':')
-            match = re.findall(r'([a-zA-Z]+)([0-9]+)', ' '.join(addresses))
-            start_col = self.get_column(match[0][0])
-            start_row = int(match[0][1])
-            end_col = self.get_column(match[1][0])
-            end_row = int(match[1][1])
-            col_range = end_col - start_col
-            row_range = end_row - start_row
+            if 'all' in address:
+                start_col = 1
+                start_row = 1
+                end_col = self.tables[table][1].cols
+                end_row = self.tables[table][1].rows
+            else:
+                addresses = address.split(':')
+                match = re.findall(r'([a-zA-Z]+)([0-9]+)', ' '.join(addresses))
+                start_col = self.get_column(match[0][0])
+                start_row = int(match[0][1])
+                end_col = self.get_column(match[1][0])
+                end_row = int(match[1][1])
             for col in range(start_col - 1, end_col):
                 for row in range(start_row - 1, end_row):
                     col_row.append([col + 1, row + 1])
-                start_row = int(match[0][1])
+
+        col_range = 0
+        row_range = 0
+        val_place = [None, None]  # [column, row]
         while col_row:
             c, r = col_row.pop(0)
             c = int(c)
             r = int(r)
+
             table_cols = self.tables[table][1].cols
             table_rows = self.tables[table][1].rows
 
             if 0 < r < table_rows and 0 < c < table_cols:
+                # increment ranges
+                if extended:
+                    if val_place[0] != c:
+                        val_place[0] = c
+                        col_range += 1
+                    if val_place[1] != r:
+                        val_place[1] = r
+                        row_range += 1
+
+                # get values
                 key = table_cols * (r + 1) - (table_cols - c)
                 item = self.tables[table][1].rv.data[key]
                 if item['r'] == r and item['c'] == c:
@@ -992,7 +1021,11 @@ class Body(FloatLayout):
                         values.append(int(item['text']))
                     else:
                         values.append(item['text'])
-        return values
+        if extended:
+            row_range = row_range / int(col_range)
+            return values, col_range, row_range
+        else:
+            return values
 
     def set_page(self, task, result, result_type='text', footer='time'):
         '''Creates a :mod:`main.PageBox` for a result. The header consists of the
