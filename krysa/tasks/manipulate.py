@@ -1,3 +1,4 @@
+from kivy.uix.tabbedpanel import TabbedPanelItem
 from . import Task, SortLayout
 from functools import partial
 
@@ -14,36 +15,44 @@ class Manipulate(object):
         widget = SortLayout()
         task = Task(title='Sort', wdg=widget,
                     call=['Sort', Manipulate.manip_sort])
+        task.tablecls = task.app.tablecls
         task.run = partial(Manipulate._manip_sort,
                            task,
-                           task.ids.container.children[0].ids.sort_type.text)
+                           task.ids.container.children[0].ids.sort_type)
         task.open()
 
     @staticmethod
     def _manip_sort(task, sort_type, *args):
         '''Gets the values from address and returns the count.
         '''
-        values = task.from_address(task.tablenum, ':all')
-        task.set_page('Sort', str(len(values)), 'text')
-        return
-        # data here:
-        rows = task.app.root._extract_rows(table[1].rv.data)[max_cols:]
+        sort_type = 'Asc' not in sort_type.text
+        values, cols, rows = task.from_address(task.tablenum,
+                                               ':all', extended=True)
 
-        cnks = []
-        for x in xrange(0, len(rows), max_cols):
-            cnks.append(rows[x:x + max_cols])
-        for chunk in cnks:
-            _chunk = []
-            for cnk in chunk:
-                if not isinstance(cnk, (str, unicode)):
-                    _chunk.append(unicode(cnk))
-                else:
-                    _chunk.append('\'' + cnk + '\'')
-            values = ','.join(_chunk)
-            c.execute(
-                "INSERT INTO " + table[0] +
-                " VALUES(" + values + ")"
-            )
+        # get separated cols to sort
+        chunks = []
+        for x in xrange(0, len(values), rows):
+            chunks.append(values[x:x + rows])
+
+        # add Table
+        table = task.ids.tablesel.text
+        tabletab = TabbedPanelItem(text=table + '_sorted')
+        task.app.root.ids.tabpanel.add_widget(tabletab)
+        # sort here
+        values = []
+        for val in chunks:
+            values.append(sorted(val, reverse=sort_type))
+
+        values = zip(*values)
+        values = [v for vals in values for v in vals]
+        labels = ['Column {}'.format(i + 1) for i in range(cols)]
+        task.app.root.tables.append((
+            table, task.tablecls(max_cols=cols, max_rows=rows,
+                                 pos=task.app.root.pos,
+                                 size=task.app.root.size,
+                                 values=values, labels=labels)
+        ))
+        tabletab.content = task.app.root.tables[-1][1]
 
     def manip_filter(*args):
         '''(Not yet implemented)

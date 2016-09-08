@@ -1022,7 +1022,12 @@ class Body(FloatLayout):
                     else:
                         values.append(item['text'])
         if extended:
-            row_range = row_range / int(col_range)
+            if row_range < col_range:
+                # return 1 manually if only one row
+                # otherwise row_range == 0
+                row_range = 1
+            else:
+                row_range = row_range / int(col_range)
             return values, col_range, row_range
         else:
             return values
@@ -1136,6 +1141,7 @@ class KrySA(App):
     project_dir = ''
     title = 'KrySA'
     errorcls = ErrorPop
+    tablecls = Table
     sql_blacklist = ['DROP', 'EXEC', 'DECLARE', 'UPDATE', 'CREATE', 'DELETE',
                      'INSERT', 'JOIN', '=', '"', "'", ';']
 
