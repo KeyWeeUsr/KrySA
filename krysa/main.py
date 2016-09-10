@@ -993,13 +993,14 @@ class Body(FloatLayout):
         col_range = 0
         row_range = 0
         val_place = [None, None]  # [column, row]
+        table_cols = self.tables[table][1].cols
+        table_rows = self.tables[table][1].rows
+        labels = self.tables[table][1].labels
+
         while col_row:
             c, r = col_row.pop(0)
             c = int(c)
             r = int(r)
-
-            table_cols = self.tables[table][1].cols
-            table_rows = self.tables[table][1].rows
 
             if 0 < r < table_rows and 0 < c < table_cols:
                 # increment ranges
@@ -1028,7 +1029,7 @@ class Body(FloatLayout):
                 row_range = 1
             else:
                 row_range = row_range / int(col_range)
-            return values, col_range, row_range
+            return values, col_range, row_range, labels
         else:
             return values
 

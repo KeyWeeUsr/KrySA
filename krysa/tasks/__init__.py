@@ -2,6 +2,7 @@
 .. toctree::
    mod_krysa_tasks_basic
    mod_krysa_tasks_avgs
+   mod_krysa_tasks_manipulate
 '''
 
 from kivy.app import App
@@ -60,6 +61,7 @@ class FreqLayout(BoxLayout):
 class SortLayout(BoxLayout):
     '''Docs.
     '''
+
 
 class Task(Popup):
     '''A popup handling the basic choosing of :ref:`data` from available

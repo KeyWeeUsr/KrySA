@@ -97,6 +97,8 @@
         TabbedPanel:
             id: tabpanel
             tab_pos: 'bottom_mid'
+            on_children:
+                self.tab_width=max([t.texture_size[0] for t in self.tab_list])
             do_default_tab: False
             size_hint_y: None
             height: root.height - dp(37)

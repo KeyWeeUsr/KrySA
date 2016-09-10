@@ -10,7 +10,7 @@ class Manipulate(object):
 
     def manip_sort(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address.
+        gets from user :ref:`data` address.
         '''
         widget = SortLayout()
         task = Task(title='Sort', wdg=widget,
@@ -23,29 +23,30 @@ class Manipulate(object):
 
     @staticmethod
     def _manip_sort(task, sort_type, *args):
-        '''Gets the values from address and returns the count.
+        '''Gets the values from address, sorts each column either ascending
+        or descending and returns a new :mod:`main.Table`
         '''
         sort_type = 'Asc' not in sort_type.text
-        values, cols, rows = task.from_address(task.tablenum,
-                                               ':all', extended=True)
+        from_address = task.from_address(task.tablenum, ':all', extended=True)
+        values, cols, rows, labels = from_address
 
         # get separated cols to sort
         chunks = []
         for x in xrange(0, len(values), rows):
             chunks.append(values[x:x + rows])
 
-        # add Table
-        table = task.ids.tablesel.text
-        tabletab = TabbedPanelItem(text=table + '_sorted')
-        task.app.root.ids.tabpanel.add_widget(tabletab)
-        # sort here
         values = []
         for val in chunks:
             values.append(sorted(val, reverse=sort_type))
 
+        # add Table
+        table = task.ids.tablesel.text
+        table += ' (desc)' if sort_type else ' (asc)'
+        tabletab = TabbedPanelItem(text=table)
+        task.app.root.ids.tabpanel.add_widget(tabletab)
+
         values = zip(*values)
         values = [v for vals in values for v in vals]
-        labels = ['Column {}'.format(i + 1) for i in range(cols)]
         task.app.root.tables.append((
             table, task.tablecls(max_cols=cols, max_rows=rows,
                                  pos=task.app.root.pos,
