@@ -8,7 +8,7 @@ from kivy.config import Config
 import os
 
 # local & RTD docs fix
-if 'BUILDDIR' not in os.environ:
+if not any(['BUILDDIR' in os.environ, 'READTHEDOCS' in os.environ]):
     Config.set('graphics', 'window_state', 'maximized')
     import numpy
     import scipy
