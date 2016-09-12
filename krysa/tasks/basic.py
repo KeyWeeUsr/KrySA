@@ -6,11 +6,15 @@ import math
 
 class Basic(object):
     '''All :ref:`Task` s categorized as `basic` under one roof.
+
+    .. versionadded:: 0.1.0
     '''
 
     def basic_count(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
         gets from user :ref:`Data` address.
+
+        .. versionadded:: 0.1.0
         '''
         widget = AddressLayout()
         task = Task(title='Count', wdg=widget,
@@ -23,6 +27,8 @@ class Basic(object):
     @staticmethod
     def _basic_count(task, address, *args):
         '''Gets the values from address and returns the count.
+
+        .. versionadded:: 0.1.0
         '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Count', str(len(values)), 'text')
@@ -34,6 +40,8 @@ class Basic(object):
     def basic_min(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
         gets from user :ref:`Data` address.
+
+        .. versionadded:: 0.1.0
         '''
         widget = AddressLayout()
         task = Task(title='Minimum', wdg=widget,
@@ -46,6 +54,8 @@ class Basic(object):
     @staticmethod
     def _basic_min(task, address, *args):
         '''Gets the values from address and returns a minimum.
+
+        .. versionadded:: 0.1.0
         '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Minimum', str(min(values)), 'text')
@@ -53,6 +63,8 @@ class Basic(object):
     def basic_max(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
         gets from user :ref:`Data` address.
+
+        .. versionadded:: 0.1.0
         '''
         widget = AddressLayout()
         task = Task(title='Maximum', wdg=widget,
@@ -65,6 +77,8 @@ class Basic(object):
     @staticmethod
     def _basic_max(task, address, *args):
         '''Gets the values from address and returns a maximum.
+
+        .. versionadded:: 0.1.0
         '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Maximum', str(max(values)), 'text')
@@ -73,6 +87,8 @@ class Basic(object):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
         `k`-th value from the :ref:`Task` s output.
+
+        .. versionadded:: 0.1.0
         '''
         widget = SmallLargeLayout()
         task = Task(title='Small', wdg=widget,
@@ -87,6 +103,8 @@ class Basic(object):
     def _basic_small(task, address, k, *args):
         '''Gets the values from address and returns the `k`-th value from
         the ascending list of sorted values.
+
+        .. versionadded:: 0.1.0
         '''
         values = task.from_address(task.tablenum, address.text)
         values = sorted(values)
@@ -100,6 +118,8 @@ class Basic(object):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
         `k`-th value from the :ref:`Task` s output.
+
+        .. versionadded:: 0.1.0
         '''
         widget = SmallLargeLayout()
         task = Task(title='Large', wdg=widget,
@@ -114,6 +134,8 @@ class Basic(object):
     def _basic_large(task, address, k, *args):
         '''Gets the values from address and returns the `k`-th value from
         the descending list of sorted values.
+
+        .. versionadded:: 0.1.0
         '''
         values = task.from_address(task.tablenum, address.text)
         values = sorted(values, reverse=True)
@@ -133,6 +155,8 @@ class Basic(object):
         * type of frequency (`absolute`, `relative` or `cumulative`
         * number of bins (optional)
         * upper and lower limit (optional)
+
+        .. versionadded:: 0.3.2
         '''
         widget = FreqLayout()
         task = Task(title='Frequency', wdg=widget,
@@ -165,6 +189,8 @@ class Basic(object):
 
             IndexError: index <max(values>) + 1> is out of bounds for axis 1
             with size <max(values>) + 1>
+
+        .. versionadded:: 0.3.2
         '''
         bins, bins_auto = bins
         lowlimit, uplimit, limits_auto = limits

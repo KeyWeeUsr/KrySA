@@ -6,11 +6,15 @@ from functools import partial
 class Manipulate(object):
     '''All :ref:`Task` s categorized as being able to `manipulate` data.
     A result after manipulation is a new data.
+
+    .. versionadded:: 0.3.5
     '''
 
     def manip_sort(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
         gets from user :ref:`data` address.
+
+        .. versionadded:: 0.3.5
         '''
         widget = SortLayout()
         task = Task(title='Sort', wdg=widget,
@@ -25,6 +29,8 @@ class Manipulate(object):
     def _manip_sort(task, sort_type, *args):
         '''Gets the values from address, sorts each column either ascending
         or descending and returns a new :mod:`main.Table`
+
+        .. versionadded:: 0.3.5
         '''
         sort_type = 'Asc' not in sort_type.text
         from_address = task.from_address(task.tablenum, ':all', extended=True)

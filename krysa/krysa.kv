@@ -115,6 +115,7 @@
                 Rectangle:
                     pos: self.pos[0] + dp(13), self.pos[1]
                     size: self.size
+
             size_hint: None, None
             min_size: dp(12)
             max_size: dp(650)
@@ -286,6 +287,7 @@
     canvas:
         Color:
             rgba: 1, 1, 1, 0.8
+
         Rectangle:
             size: self.size
             pos: self.pos
@@ -404,15 +406,13 @@
             text: 'Check & Lock'
             disable: [self, colname, coltype, colX, valadd, vals.children]
             check: (colname, vals)
-            on_release:
-                root.checklock(self.disable, coltype, self.check)
+            on_release: root.checklock(self.disable, coltype, self.check)
 
         Button:
             size_hint_y: None
             height: dp(60)
             text: 'Unlock'
-            on_release:
-                root.free(checklock.disable)
+            on_release: root.free(checklock.disable)
 
 <NewDataLayout>:
     BoxLayout:
@@ -464,6 +464,7 @@
         Widget:
             size_hint_x: None
             width: dp(2)
+
         Page:
             id: page
 

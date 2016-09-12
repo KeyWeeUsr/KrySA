@@ -6,6 +6,8 @@ import math
 
 class Avgs(object):
     '''All :ref:`Task` s categorized as `averages` under one roof.
+
+    .. versionadded:: 0.2.4
     '''
 
     def avgs_gen(*args):
@@ -21,6 +23,8 @@ class Avgs(object):
         * p == 2: quadratic
         * p == 3: cubic
         * etc...
+
+        .. versionadded:: 0.2.4
         '''
         widget = AvgsLayout()
         task = Task(title='Count', wdg=widget,
@@ -36,6 +40,8 @@ class Avgs(object):
         '''Gets the values from address and depending on `p` (power) value
         returns either exceptional case for `p == 0` (geometric mean), or
         value from the generalized mean's formula.
+
+        .. versionadded:: 0.2.4
         '''
         try:
             if p == '-0':

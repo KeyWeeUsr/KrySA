@@ -52,11 +52,15 @@ from tasks.manipulate import Manipulate
 class ResultGrid(GridLayout):
     '''A black gridlayout, together with :mod:`main.Wrap` makes a table
     container for results that need a table.
+
+    .. versionadded:: 0.3.2
     '''
 
 
 class Wrap(Label):
     '''A white label with automatically wrapped text.
+
+    .. versionadded:: 0.3.2
     '''
     background_color = ListProperty([0, 0, 0, 0])
 
@@ -64,6 +68,8 @@ class Wrap(Label):
 class PageBox(BoxLayout):
     '''A layout that includes Page widget together with transparent separator.
     It's used for adding new results from Tasks.
+
+    .. versionadded:: 0.2.0
     '''
     def __init__(self, **kwargs):
         super(PageBox, self).__init__(**kwargs)
@@ -72,11 +78,15 @@ class PageBox(BoxLayout):
 
 class PaperLabel(Label):
     '''A label with visual properties as a paper sheet.
+
+    .. versionadded:: 0.2.0
     '''
 
 
 class ImgButton(Button):
     '''A button with an image of square shape in the middle.
+
+    .. versionadded:: 0.2.0
     '''
     source = StringProperty('')
 
@@ -84,6 +94,8 @@ class ImgButton(Button):
 class ErrorPop(Popup):
     '''An error popup to let user know something is missing or typed wrong
     when console is disabled.
+
+    .. versionadded:: 0.1.2
     '''
     message = StringProperty('')
 
@@ -95,6 +107,8 @@ class ErrorPop(Popup):
 class NewDataValue(BoxLayout):
     '''A layout handling the behavior of inputs and button for each new
     value in :ref:`data`.
+
+    .. versionadded:: 0.1.4
     '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
@@ -105,6 +119,8 @@ class NewDataValue(BoxLayout):
 class NewDataColumn(BoxLayout):
     '''A layout handling the behavior of type, values(``NewDataValue``) and
     some buttons for each new column in :ref:`data`.
+
+    .. versionadded:: 0.1.4
     '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
@@ -112,6 +128,12 @@ class NewDataColumn(BoxLayout):
 
     @staticmethod
     def free(items):
+        '''Frees all locked cells in the column except a column type. If
+        a wrong type is used, removing the whole column is necessary.
+        (protection against corrupting :ref:`sqlite`)
+
+        .. versionadded:: 0.1.4
+        '''
         for item in items:
             if hasattr(item, 'disabled'):
                 try:
@@ -129,6 +151,14 @@ class NewDataColumn(BoxLayout):
                         i.disabled = False
 
     def checklock(self, disable, coltype, check, *args):
+        '''Disables all cells in the column, then check them against a list
+        of strings that could be used to corrupt :ref:`sqlite` . If the check
+        is done without an error, another check is made to protect against
+        using an empty string ``''`` as a value, which if used inappropriately
+        results in a crash.
+
+        .. versionadded:: 0.1.4
+        '''
         msg = 'Please remove any SQL keyword present in the column!'
 
         for item in disable:
@@ -164,6 +194,19 @@ class NewDataColumn(BoxLayout):
                             i.ids.value.text = '0'
 
     def paste(self, values, sep):
+        '''Paste a value(s) from a user's clipboard as a column values. A user
+        can choose what kind of separator was used on the values, for example::
+
+            1 2 3 4 5     # (space)
+            1\\t2\\t3\\t4\\t  # (tab)
+            1\\n2\\n3\\n4\\n  # Unix-like new line character (<enter>/<return>)
+
+        If in doubt and your values were copied from a column (e.g.
+        spreadsheet), use `OS default`, which will choose between ``\\n``
+        (Unix-like) or ``\\r\\n`` (Windows) new line separators.
+
+        .. versionadded:: 0.3.4
+        '''
         if sep == 'space':
             values = values.split(' ')
         elif sep == 'OS default':
@@ -180,6 +223,8 @@ class NewDataColumn(BoxLayout):
 class NewDataLayout(BoxLayout):
     '''A layout handling the behavior of ``NewDataColumn`` and some inputs for
     each new value in :ref:`data`.
+
+    .. versionadded:: 0.1.3
     '''
     def __init__(self, **kw):
         self.app = App.get_running_app()
@@ -189,6 +234,8 @@ class NewDataLayout(BoxLayout):
 class CreateWizard(Popup):
     '''A popup handling the behavior for creating a new :ref:`data`,
     i.e a wizard.
+
+    .. versionadded:: 0.1.3
     '''
     run = ObjectProperty(None)
 
@@ -203,6 +250,8 @@ class CreateWizard(Popup):
 class Dialog(Popup):
     '''A dialog handling the behavior for creating or opening files e.g.
     :ref:`project` or :ref:`data`.
+
+    .. versionadded:: 0.1.0
     '''
     confirm = StringProperty('')
     run = ObjectProperty(None)
@@ -226,12 +275,16 @@ class Dialog(Popup):
 
 class SideItem(BoxLayout):
     '''Supposed to be a part of settings, most likely will be removed/replaced.
+
+    .. versionadded:: 0.1.0
     '''
 
 
 class TableItem(TextInput):
     '''An item handling the behavior or each separate value in the
     :mod:`main.Table` such as updating/editing values in :ref:`data`.
+
+    .. versionadded:: 0.1.0
     '''
     def __init__(self, **kwargs):
         super(TableItem, self).__init__(**kwargs)
@@ -248,6 +301,8 @@ class TableItem(TextInput):
         '''On ``<enter>`` (``return``) key updates the values
         :mod:`main.TableItem.text` and :mod:`main.TableItem.old_text` in
         :mod:`main.Table`.
+
+        .. versionadded:: 0.1.0
         '''
         data = []
         cols = self.cols - 1
@@ -269,6 +324,8 @@ class Table(ScrollView):
     the values from :ref:`sqlite` according to its :ref:`data`'s column types
     into three Python categories - `int`, `float` or `unicode` and assigns
     an alphabetic order for each column together with row number to each value.
+
+    .. versionadded:: 0.1.0
     '''
     # use with ....add_widget(Table(max_cols=3, max_rows=3))
     # Grid -> Scroll, grid as container - better for sizing and placing
@@ -371,6 +428,8 @@ class Table(ScrollView):
 
     def get_letters(self):
         '''Gets a list of letters the same length as :ref:`data`'s columns.
+
+        .. versionadded:: 0.1.0
         '''
         letters = [chr(letter + 65) for letter in range(26)]
         result = []
@@ -386,18 +445,28 @@ class Table(ScrollView):
         return result
 
     def lock(self, disabled=True):
+        '''docs
+
+        .. versionadded:: 0.1.0
+        '''
         for i in self.rv.data:
             if 'cell' in i and 'label' not in i['cell']:
                 i['disabled'] = disabled
         self.rv.refresh_from_data()
 
     def clean(self, *args):
+        '''Removes all data from :mod:`main.Table`
+
+        .. versionadded:: 0.1.0
+        '''
         self.rv.data = []
 
 
 class ProcessFlow(BoxLayout, StencilView):
     '''A canvas on which will be displayed actions for each :ref:`data` related
     to them, such as used tasks connected with result of the tasks.
+
+    .. versionadded:: 0.1.0
 
     (Not implemented yet)
     '''
@@ -412,6 +481,8 @@ class SizedButton(Button):
     '''A button with width automatically customized according to text length of
     its siblings, which makes every sibling the same size as the one with the
     longest text string.
+
+    .. versionadded:: 0.1.0
     '''
     def correct_width(self, *args):
         self.width = self.texture_size[0] + 8
@@ -428,6 +499,8 @@ class MenuDrop(DropDown):
 
     Each click/tap on the menu button then assigns a value to it from
     ``App.menu`` dictionary according to its name in `kv` file.
+
+    .. versionadded:: 0.1.0
     '''
     def __init__(self, **kw):
         app = App.get_running_app()
@@ -449,10 +522,10 @@ class Body(FloatLayout):
     '''The main layout for the application. It handles menu values, their
     appropriate functions, filtering of user's input and functions for
     accessing :ref:`sqlite` in :mod:`main.Table`.
+
+    .. versionadded:: 0.1.0
     '''
     def __init__(self, **kw):
-        '''bla
-        '''
         self.app = App.get_running_app()
         self.tables = []
         self.app.menu = {'file': (['New...', self.new],
@@ -484,6 +557,8 @@ class Body(FloatLayout):
 
     def new(self, button, *args):
         '''Opens a submenu for ``New`` menu.
+
+        .. versionadded:: 0.1.0
         '''
         d = DropDown(allow_sides=True, auto_width=False)
         buttons = []
@@ -498,6 +573,11 @@ class Body(FloatLayout):
         d.open(button)
 
     def _new_project(self, *args):
+        '''Closes already opened :ref:`project` if available and opens a dialog
+        for creating a new one.
+
+        .. versionadded:: 0.1.2
+        '''
         self.close_project()
         self.savedlg = Dialog(title='New Project',
                               confirm='Save',
@@ -509,6 +589,8 @@ class Body(FloatLayout):
     def _new_data(self, *args):
         '''Opens a wizard for creating a new :ref:`data` if a :ref:`project` is
         available or shows a warning if it doesn't exist.
+
+        .. versionadded:: 0.1.3
         '''
         if not self.app.project_exists:
             error = ErrorPop(msg='No project exists!')
@@ -522,6 +604,8 @@ class Body(FloatLayout):
     def _save_data(self, wizard, *args):
         '''Gets data from the wizard, puts them into :mod:`main.Table` and exports them
         into :ref:`sqlite`.
+
+        .. versionadded:: 0.1.4
         '''
         labels = []
         types = []
@@ -603,6 +687,8 @@ class Body(FloatLayout):
     def _open_project(self, selection, *args):
         '''Opens a :ref:`project` from path selected in ``Dialog`` and imports
         :ref:`sqlite`.
+
+        .. versionadded:: 0.1.7
         '''
         if not selection:
             return
@@ -632,6 +718,8 @@ class Body(FloatLayout):
     def close_project(self, *args):
         '''Clears all important variables, removes all :ref:`data` available in
         :mod:`main.Table` and switches to :mod:`main.ProcessFlow`.
+
+        .. versionadded:: 0.1.0
         '''
         # call this before a new project
         self.app.project_exists = False
@@ -661,6 +749,8 @@ class Body(FloatLayout):
     def _save_project(self, selection=None, fname=None, *args):
         '''Saves a :ref:`project` to path selected in ``Dialog`` and exports
         :ref:`sqlite`.
+
+        .. versionadded:: 0.1.2
         '''
         if not selection:
             if not self.app.project_exists:
@@ -714,6 +804,8 @@ class Body(FloatLayout):
     def _import_data(self, selection, *args):
         '''Imports :ref:`sqlite` from path selected in ``Dialog`` and puts it
         to :mod:`main.Table`.
+
+        .. versionadded:: 0.1.0
         '''
         # limit table name and column name to [a-zA-Z]
 
@@ -783,6 +875,8 @@ class Body(FloatLayout):
         ===== ===== =====
 
         [u'Data1', u'Data2', u'Data3', u'1', 2.0, 3, ...]
+
+        .. versionadded:: 0.1.0
         '''
         rows = []
         for item in data:
@@ -813,6 +907,8 @@ class Body(FloatLayout):
     def _export_data(self, selection, fname, *args):
         '''Exports all available :ref:`data` (visible as tabs) as :ref:`sqlite`
         into path selected in ``Dialog``.
+
+        .. versionadded:: 0.1.1
         '''
         col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL'}
         if not selection:
@@ -875,6 +971,7 @@ class Body(FloatLayout):
             pass
 
     def _export_results(self, selection, *args):
+        # 0.3.0
         if not selection:
             return
         for file in os.listdir(selection):
@@ -918,6 +1015,8 @@ class Body(FloatLayout):
     @staticmethod
     def about(*args):
         '''Displays `about` page of the app and includes other credits.
+
+        .. versionadded:: 0.1.0
         '''
         aboutdlg = Popup(title='About')
         text = (
@@ -961,12 +1060,19 @@ class Body(FloatLayout):
         '''Gets value(s) from :mod:`main.Table` according to the address such as
         ``A1`` or ``A1:B2``. Values are fetched in the way that the final list
         contains even empty (``u''``) values. It is not expected of user to use
-        :ref:`task` for strings and it won't even run. To get non-empty values
-        for a :ref:`task` use for example Python's ``filter()``::
+        :ref:`task` for strings and most of them won't even run. To get
+        non-empty values for a :ref:`task` use for example Python's
+        ``filter()``::
 
             values = filter(lambda x: len(str(x)), values)
 
         This `filter`, however, will remain values such as ``None`` untouched.
+
+        .. versionadded:: 0.1.0
+
+        .. versionchanged:: 0.3.5
+           Added extended options and a possibility to get ``:all`` values from
+           data.
         '''
         values = []
         col_row = []  # [column, row] such as [x, y] |_
@@ -1046,6 +1152,11 @@ class Body(FloatLayout):
 
         .. note:: When exporting pages, everything is converted into images
            (pngs), therefore making fancy behaving widgets is irrelevant.
+
+        .. versionadded:: 0.2.0
+
+        .. versionchanged:: 0.3.2
+           Added tables as a result type.
         '''
         page = PageBox()
         head = PaperLabel(text=task, size_hint_y=None, height='30dp')
@@ -1150,6 +1261,8 @@ class KrySA(App):
         '''Checks change of :mod:`main.KrySA.project_exists` and if
         :ref:`project` exists, schedules updating of its tree to 5 second
         interval.
+
+        .. versionadded:: 0.3.0
         '''
         if exists:
             self.treeclock = Clock.schedule_interval(self.root.update_tree, 5)

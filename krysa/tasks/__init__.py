@@ -27,12 +27,16 @@ class AddressLayout(BoxLayout):
 class SmallLargeLayout(BoxLayout):
     '''A layout that consists of multiple restricted input widgets for address
     and `k` value.
+
+    .. versionadded:: 0.1.0
     '''
 
 
 class AvgsLayout(BoxLayout):
     '''A layout that consists of multiple restricted input widgets for address
     and `p` (power) value for the formula of generalized mean.
+
+    .. versionadded:: 0.2.4
     '''
     def floatfilter(self, substring, from_undo):
         '''A function filtering everything that is not `-` symbol, floating
@@ -55,17 +59,26 @@ class FreqLayout(BoxLayout):
     '''A layout that consists of multiple checkboxes and restricted input
     widgets for address, type of values, type of output frequency and
     limits of the input values.
+
+    .. versionadded:: 0.3.2
     '''
 
 
 class SortLayout(BoxLayout):
     '''Docs.
+
+    .. versionadded:: 0.3.5
     '''
 
 
 class Task(Popup):
     '''A popup handling the basic choosing of :ref:`data` from available
     :ref:`sqlite` in the application.
+
+    .. versionadded:: 0.1.0
+
+    .. versionchanged:: 0.2.3
+       Placed into a separated module.
     '''
     run = ObjectProperty(None)
 
@@ -85,6 +98,8 @@ class Task(Popup):
     def recalc_height(self, body, content):
         '''Recalculates the height of :mod:`tasks.Task` after a layout is
         added, so that the children are clearly visible without any stretching.
+
+        .. versionadded:: 0.3.2
         '''
         confirms = self.ids.confirms
         content.height = sum([child.height for child in content.children])
@@ -93,7 +108,10 @@ class Task(Popup):
 
     @staticmethod
     def get_table_pos(text, values, *args):
-        '''docs
+        '''Returns an index of selected :mod:`main.Table` from all available
+        in the list.
+
+        .. versionadded:: 0.1.0
         '''
         gen = (i for i, val in enumerate(values) if val == text)
         for i in gen:
@@ -103,6 +121,8 @@ class Task(Popup):
         '''Tries to run a :ref:`task` from the input a user specified and
         closes the popup. If no such an action is possible, it'll show a popup
         with an error and leave :mod:`tasks.Task` opened.
+
+        .. versionadded:: 0.2.0
         '''
         try:
             self.run(*args)
