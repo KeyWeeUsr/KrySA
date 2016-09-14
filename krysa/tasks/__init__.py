@@ -65,9 +65,27 @@ class FreqLayout(BoxLayout):
 
 
 class SortLayout(BoxLayout):
-    '''Docs.
+    '''A layout that consists only of a spinner with two values:
+
+    * Ascending
+    * Descending
+
+    The :ref:`task` with this layout is using
+    :mod:`tasks.manipulate.Manipulate._manip_sort`.
 
     .. versionadded:: 0.3.5
+    '''
+
+
+class AppendLayout(BoxLayout):
+    '''A layout that consists of a spinner with two values:
+
+    * Rows
+    * Columns
+
+    and a restricted input that allows only integers.
+
+    .. versionadded:: 0.3.6
     '''
 
 
