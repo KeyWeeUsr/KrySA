@@ -180,12 +180,21 @@
         values: ['Ascending', 'Descending']
 
 <AppendLayout>:
-    Spinner:
-        id: what
-        text: 'Append type'
-        values: ['Rows', 'Columns']
+    orientation: 'vertical'
+    BoxLayout:
+        Spinner:
+            id: what
+            text: 'Append type'
+            values: ['Rows', 'Columns']
 
-    SingleTI:
-        id: amount
-        hint_text: 'amount'
-        input_filter: 'int'
+        SingleTI:
+            id: amount
+            hint_text: 'amount'
+            input_filter: 'int'
+
+    BoxLayout:
+        Label:
+            text: 'Overwrite'
+
+        CheckBox:
+            id: overwrite

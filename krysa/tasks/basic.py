@@ -187,8 +187,8 @@ class Basic(object):
         May return a warning if `intervals` option isn't checked for values
         containing real numbers::
 
-            IndexError: index <max(values>) + 1> is out of bounds for axis 1
-            with size <max(values>) + 1>
+            IndexError: index max(<values>) + 1> is out of bounds for axis 1
+            with size max(<values>) + 1>
 
         .. versionadded:: 0.3.2
         '''

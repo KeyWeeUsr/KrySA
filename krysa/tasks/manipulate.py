@@ -83,17 +83,22 @@ class Manipulate(object):
         task.run = partial(Manipulate._manip_append,
                            task,
                            task.ids.container.children[0].ids.what,
-                           task.ids.container.children[0].ids.amount)
+                           task.ids.container.children[0].ids.amount,
+                           task.ids.container.children[0].ids.overwrite)
         task.open()
 
     @staticmethod
-    def _manip_append(task, append_type, amount, *args):
+    def _manip_append(task, append_type, amount, overwrite, *args):
         '''Gets the amount of empty rows / cols to append from user and
-        returns a new, altered :mod:`main.Table`.
+        either returns a new, altered :mod:`main.Table` of selected one, or
+        appends directly to the selected Table.
 
         .. versionadded:: 0.3.6
+        .. versionchanged:: 0.3.7
+            Added overwriting of selected :mod:`main.Table`
         '''
         append_type = append_type.text
+        overwrite = overwrite.active
         amount = int(amount.text) if amount.text else 0
 
         # Stop the task if no amount (or =0) is specified
@@ -125,9 +130,16 @@ class Manipulate(object):
                         chunk.append(u'')
 
             # add Table
-            table = task.ids.tablesel.text + ' (append {})'.format(str(amount))
+            tab_pos = 0
+            table = task.ids.tablesel.text
             tabletab = TabbedPanelItem(text=table)
-            task.app.root.ids.tabpanel.add_widget(tabletab)
+            if overwrite:
+                tab_pos = task.tablenum + 1
+                old_tab = task.app.root.ids.tabpanel.tab_list[tab_pos]
+                task.app.root.ids.tabpanel.remove_widget(old_tab)
+            else:
+                table += ' (append {})'.format(str(amount))
+            task.app.root.ids.tabpanel.add_widget(tabletab, tab_pos)
 
             # zip chunks to values, flatten values
             values = zip(*chunks)
@@ -135,13 +147,20 @@ class Manipulate(object):
 
             # increase row count by new rows, make new table
             rows += amount
-            task.app.root.tables.append((
+            new_table = (
                 table, task.tablecls(max_cols=cols, max_rows=rows,
                                      pos=task.app.root.pos,
                                      size=task.app.root.size,
                                      values=values, labels=labels)
-            ))
-            tabletab.content = task.app.root.tables[-1][1]
+            )
+
+            # place newly created table into tab's content
+            if overwrite:
+                task.app.root.tables[tab_pos - 1] = new_table
+                tabletab.content = task.app.root.tables[tab_pos - 1][1]
+            else:
+                task.app.root.tables.append(new_table)
+                tabletab.content = task.app.root.tables[-1][1]
         else:
             return
 

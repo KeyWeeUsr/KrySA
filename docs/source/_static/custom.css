@@ -1,5 +1,6 @@
 code.xref {
-    font-family: 'goudy old style', 'minion pro', 'bell mt', Georgia, 'Hiragino Mincho Pro', serif;
+    font-family: 'goudy old style', 'minion pro', 'bell mt', 'Georgia', 'Hiragino Mincho Pro', 'serif';
+    background-color: transparent !important;
 }
 
 pre {
