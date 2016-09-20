@@ -11,6 +11,7 @@ from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.textinput import TextInput
 from kivy.properties import ObjectProperty
 import re
 import os.path as op
@@ -38,11 +39,22 @@ class AvgsLayout(BoxLayout):
 
     .. versionadded:: 0.2.4
     '''
+
+
+class FloatInput(TextInput):
+    '''A TextInput with float filter.
+
+    .. versionadded:: 0.3.8
+    '''
+    def __init__(self, **kwargs):
+        super(FloatInput, self).__init__(**kwargs)
+        self.input_filter = self.floatfilter
+
     def floatfilter(self, substring, from_undo):
         '''A function filtering everything that is not `-` symbol, floating
         point symbol(`.`) or a number.
         '''
-        txt = self.ids.power.text
+        txt = self.text
         if '-' in txt and '.' not in txt:
             chars = re.findall(r'([0-9.])', substring)
         elif '.' in txt:

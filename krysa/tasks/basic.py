@@ -1,6 +1,11 @@
+'''
+.. |b| replace:: bins
+.. _b: http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
+'''
+
 from . import Task, AddressLayout, SmallLargeLayout, FreqLayout
-from scipy.stats import relfreq, cumfreq
 from functools import partial
+from numpy import histogram
 import math
 
 
@@ -146,17 +151,17 @@ class Basic(object):
             pass  # throw error k out of len(values) bounds, same for *_small
 
     def basic_freq(self, *args):
-        '''(Not fully tested yet)
-        Opens a :mod:`tasks.Task` with a :mod:`tasks.FreqLayout` that
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.FreqLayout` that
         gets from user:
 
-        * :ref:`Data` address
-        * type of values (`interval` for real numbers)
+        * :ref:`data` address
         * type of frequency (`absolute`, `relative` or `cumulative`
-        * number of bins (optional)
-        * upper and lower limit (optional)
+        * |b|_
+        * lower and upper limit (optional, by default takes `min` and `max`)
 
         .. versionadded:: 0.3.2
+        .. versionchanged:: 0.3.8
+           Switched to NumPy's `histogram` which is more flexible.
         '''
         widget = FreqLayout()
         task = Task(title='Frequency', wdg=widget,
@@ -165,41 +170,46 @@ class Basic(object):
             Basic._basic_freq,
             task,
             task.ids.container.children[0].ids.name,
-            (task.ids.container.children[0].ids.bins,
-             task.ids.container.children[0].ids.bins_auto),
+            (task.ids.container.children[0].ids.binmanager,
+             task.ids.container.children[0].ids.bins,
+             task.ids.container.children[0].ids.bingrid,
+             task.ids.container.children[0].ids.binstr),
             (task.ids.container.children[0].ids.lowlimit,
              task.ids.container.children[0].ids.uplimit,
              task.ids.container.children[0].ids.limits_auto),
             (task.ids.container.children[0].ids.absolute,
              task.ids.container.children[0].ids.relative,
-             task.ids.container.children[0].ids.cumulative),
-            task.ids.container.children[0].ids.intervals)
+             task.ids.container.children[0].ids.cumulative))
         task.open()
 
     @staticmethod
-    def _basic_freq(task, address, bins, limits, freq_type, intervals, *args):
-        '''Gets the values from address and depending on the type of values
-        dumps them either into bins of size 1 (integers) or into bins that
-        consist of intervals (real numbers). Then according to the size of bins
-        and limits of the frequency creates a table for chosen types of
-        frequency.
+    def _basic_freq(task, address, bins, limits, freq_type, *args):
+        '''Gets the values from address and depending on the inputed bins:
 
-        May return a warning if `intervals` option isn't checked for values
-        containing real numbers::
+        * `Count` of equal-width bins
+        * `Edges` manually created edges for non-uniform bin widths. It already
+          contains minimum and maximum of the values list.
+        * `Calculate` uses NumPy's way for creating an optimal bin width.
 
-            IndexError: index max(<values>) + 1> is out of bounds for axis 1
-            with size max(<values>) + 1>
+        Then according to the size of bins and limits of the frequency creates
+        a table for chosen types of frequency.
 
         .. versionadded:: 0.3.2
+        .. versionchanged:: 0.3.8
+           Switch from SciPy's frequency functions to NumPy's `histogram` which
+           removes `intervals` option as this is already handled by histogram.
         '''
-        bins, bins_auto = bins
+
+        # input variables
+        bin_type, bins, bingrid, binstr = bins
         lowlimit, uplimit, limits_auto = limits
         absolute, relative, cumulative = freq_type
 
+        # setting variables
         values = task.from_address(task.tablenum, address.text)
         values = [float(val) for val in values]
         values = sorted(values)
-        cols = 1
+        cols = 2
 
         if limits_auto.active:
             lowlimit = min(values)
@@ -208,80 +218,83 @@ class Basic(object):
             lowlimit = float(lowlimit.text)
             uplimit = float(uplimit.text)
 
-        # get correct bins if no input
-        if bins_auto.active:
-            bins = uplimit + 1
-        else:
+        # get either int of bins or float list of edges
+        bin_type = bin_type.current
+        if bin_type == 'Count':
             bins = int(bins.text)
+        elif bin_type == 'Edges':
+            bins = [float(child.text) for child in bingrid.children]
+            bins = sorted(bins)
+            if bins[0] > min(values):
+                bins = [min(values)] + bins
+            if bins[-1] < max(values):
+                bins = bins + [max(values)]
+        elif bin_type == 'Calculate':
+            bins = binstr.su
+
+        # get base for results
+        histo, edges = histogram(values, bins=bins, range=(lowlimit, uplimit))
+        values_len = float(len(values))
+
+        # set edge values
+        left = []
+        right = []
+        for i in xrange(len(edges)):
+            left.append(edges[i])
+            try:
+                right.append(edges[i+1])
+            except IndexError:
+                right.append('-')
+
+        # "float(val)" to convert from numpy's type
+        absol = []
+        if absolute.active:
+            absol = [float(val) for val in histo]
+            absol.insert(0, 'Absolute')
+            cols += 1
 
         relat = []
         if relative.active:
-            relat = relfreq(values, numbins=bins,
-                            defaultreallimits=(lowlimit, uplimit))
-
-            # something better than filter?
-            relat = [float(val) for val in relat[0]]
+            relat = [float(val) / values_len for val in histo]
             relat.insert(0, 'Relative')
             cols += 1
 
         cumul = []
         if cumulative.active:
-            cumul = cumfreq(values, numbins=bins,
-                            defaultreallimits=(lowlimit, uplimit))
-            cumul = [float(val) for val in cumul[0]]
+            if not relative.active:
+                _relat = [float(val) / values_len for val in histo]
+            else:
+                _relat = relat[1:]
+
+            previous = 0
+            for i in xrange(len(histo)):
+                cumul.append(previous + float(_relat[i]))
+                previous += float(_relat[i])
             cumul.insert(0, 'Cumulative')
             cols += 1
 
-        absol = []
-        if absolute.active:
-            absol.append('Absolute')
-            if intervals.active:
-                if bins_auto.active:
-                    absol_bins = math.ceil(math.sqrt(len(values)))
-                else:
-                    absol_bins = bins
-                bin_size = float(uplimit) / float(bins)
-                clean = [(lowlimit + bin_size * (i + 1)) for i in xrange(bins)]
-
-            else:
-                clean = []
-                for val in values:
-                    if val not in clean:
-                        clean.append(val)
-
-                for item in clean:
-                    absol.append(values.count(item))
-
-            for i, c in enumerate(cumul[1:]):
-                if i == 0 or i == len(cumul[1:]):
-                    absol.append(c)
-                else:
-                    absol.append(c - cumul[1:][i - 1])
-            cols += 1
-
-        res = []
-        if intervals.active:
-            clean.insert(0, 'Value (<)')
-        else:
-            clean.insert(0, 'Value')
+        # zipping & exporting results
+        rs = []
+        left.insert(0, 'Lower edge')
+        right.insert(0, 'Upper edge')
 
         if absol and not relat and not cumul:
-            res = [r for items in zip(clean, absol) for r in items]
+            rs = [r for items in zip(left, right, absol) for r in items]
         elif absol and relat and not cumul:
-            res = [r for items in zip(clean, absol, relat) for r in items]
+            rs = [r for items in zip(left, right, absol, relat) for r in items]
         elif absol and cumul and not relat:
-            res = [r for items in zip(clean, absol, cumul) for r in items]
+            rs = [r for items in zip(left, right, absol, cumul) for r in items]
         elif relat and not absol and not cumul:
-            res = [r for items in zip(clean, relat) for r in items]
+            rs = [r for items in zip(left, right, relat) for r in items]
         elif relat and cumul and not absol:
-            res = [r for items in zip(clean, relat, cumul) for r in items]
+            rs = [r for items in zip(left, right, relat, cumul) for r in items]
         elif cumul and not absol and not relat:
-            res = [r for items in zip(clean, cumul) for r in items]
+            rs = [r for items in zip(left, right, cumul) for r in items]
         elif absol and relat and cumul:
-            zipped = zip(clean, absol, relat, cumul)
-            res = [r for items in zipped for r in items]
+            zipped = zip(left, right, absol, relat, cumul)
+            rs = [r for items in zipped for r in items]
 
-        task.set_page('Frequency', res, 'table{}'.format(cols))
+        task.set_page('Frequency', rs, 'table{}'.format(cols))
 
     names = (('Count', basic_count),
              ('_Count ifs', basic_countifs),

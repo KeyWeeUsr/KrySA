@@ -2,6 +2,21 @@
     multiline: False
     input_filter: app.root.address_chars
 
+<FloatInput>:
+
+<GreyLabel@Label>:
+    canvas:
+        Color:
+            rgba: 0.7, 0.7, 0.7, 0.05
+        Rectangle:
+            size: self.size
+            pos: self.pos
+
+<FreqInput@FloatInput>:
+    width: dp(90)
+    size_hint_x: None
+    hint_text: '< number'
+
 <Task>:
     size_hint: 0.5, None
     pos_hint: {'center': [0.5, 0.5]}
@@ -72,8 +87,9 @@
         Label:
             text: 'p ='
 
-        SingleTI:
+        FloatInput:
             id: power
+            multiline: False
             input_filter: root.floatfilter
 
     Label:
@@ -81,7 +97,7 @@
 
 <FreqLayout>:
     size_hint_y: None
-    height: dp(170)
+    height: dp(200)
     orientation: 'vertical'
     BoxLayout:
         Label:
@@ -90,66 +106,107 @@
         SingleTI:
             id: name
 
-        Label:
-            text: 'Intervals'
-
-        CheckBox:
-            id: intervals
-
     BoxLayout:
+        GreyLabel:
+            text: 'Limits:'
+            size_hint_x: 0.1
+
         BoxLayout:
+            size_hint_x: 0.4
             BoxLayout:
-                size_hint_x: None
-                width: dp(80)
                 Label:
                     text: 'Auto'
 
                 CheckBox:
-                    id: bins_auto
+                    id: limits_auto
+                    size_hint_x: 0.25
                     active: True
-                    on_active: bins.disabled = True if self.active else False
+                    on_active:
+                        lowlimit.disabled = True if self.active else False
+                        uplimit.disabled = True if self.active else False
+
+        BoxLayout:
+            size_hint_x: 0.5
+            SingleTI:
+                id: lowlimit
+                disabled: True
+                hint_text: 'Lower limit (default = min)'
+                input_filter: 'float'
 
             SingleTI:
-                id: bins
+                id: uplimit
                 disabled: True
-                hint_text: 'Number of bins'
-                input_filter: 'int'
-
-        BoxLayout:
-            BoxLayout:
-                orientation: 'vertical'
-                size_hint_x: None
-                width: dp(80)
-                BoxLayout:
-                    Label:
-                        text: 'Auto'
-
-                    CheckBox:
-                        id: limits_auto
-                        active: True
-                        on_active:
-                            lowlimit.disabled = True if self.active else False
-                            uplimit.disabled = True if self.active else False
-
-            BoxLayout:
-                orientation: 'vertical'
-                SingleTI:
-                    id: lowlimit
-                    disabled: True
-                    hint_text: 'Lower limit (default = 0)'
-                    input_filter: 'float'
-
-                SingleTI:
-                    id: uplimit
-                    disabled: True
-                    hint_text: 'Upper limit (default = max + 1)'
-                    input_filter: 'float'
+                hint_text: 'Upper limit (default = max)'
+                input_filter: 'float'
 
     BoxLayout:
-        Label:
+        GreyLabel:
+            text: 'Bins:'
+            size_hint_x: 0.1
+
+        Spinner:
+            text: 'Count'
+            size_hint_x: 0.2
+            values: ['Count', 'Edges', 'Calculate']
+            on_text:
+                binmanager.transition.direction = 'up'
+                binmanager.current = self.text
+
+        ScreenManager:
+            id: binmanager
+            size_hint_x: 0.7
+            Screen:
+                name: 'Count'
+                BoxLayout:
+                    SingleTI:
+                        id: bins
+                        hint_text: 'Number of bins'
+                        input_filter: 'int'
+
+            Screen:
+                name: 'Edges'
+                BoxLayout:
+                    ScrollView:
+                        id: binscroll
+                        size_hint_x: 0.9
+                        do_scroll_y: False
+                        GridLayout:
+                            id: bingrid
+                            rows: 1
+                            size_hint_x: None
+                            width: self.minimum_width
+                            FreqInput:
+
+                    Button:
+                        text: '+'
+                        size_hint_x: 0.1
+                        on_release:
+                            bingrid.add_widget(Factory.FreqInput())
+                            binscroll.scroll_x = 1
+
+            Screen:
+                name: 'Calculate'
+                BoxLayout:
+                    Spinner:
+                        id: binstr
+                        text: 'auto'
+                        value: 'auto'
+                        su:
+                            ['auto', 'fd', 'doane', 'scott',
+                            'rice', 'sturges', 'sqrt']
+                        values:
+                            ['Automatic', 'Freedman Diaconis Estimator',
+                            'Doane', 'Scott', 'Rice', 'Sturges', 'Square root']
+                        on_text:
+                            self.value = self.su[self.values.index(self.text)]
+
+    BoxLayout:
+        GreyLabel:
             text: 'Type:'
+            size_hint_x: 0.1
 
         BoxLayout:
+            size_hint_x: 0.9
             Label:
                 text: 'absolute'
 
@@ -157,7 +214,6 @@
                 id: absolute
                 active: True
 
-        BoxLayout:
             Label:
                 text: 'relative'
 
@@ -165,7 +221,6 @@
                 id: relative
                 active: True
 
-        BoxLayout:
             Label:
                 text: 'cumulative'
 
