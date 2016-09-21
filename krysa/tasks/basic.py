@@ -170,6 +170,7 @@ class Basic(object):
             Basic._basic_freq,
             task,
             task.ids.container.children[0].ids.name,
+            task.ids.container.children[0].ids.precision,
             (task.ids.container.children[0].ids.binmanager,
              task.ids.container.children[0].ids.bins,
              task.ids.container.children[0].ids.bingrid,
@@ -183,7 +184,19 @@ class Basic(object):
         task.open()
 
     @staticmethod
-    def _basic_freq(task, address, bins, limits, freq_type, *args):
+    def _basic_freq_prec(input_list, precision, *args):
+        if precision == '':
+            return input_list
+        try:
+            precision = int(precision)
+        except ValueError:
+            raise Exception('Bad precision input!')
+        if precision:
+            return [round(item, precision) for item in input_list]
+
+
+    @staticmethod
+    def _basic_freq(task, address, precision, bins, limits, freq_type, *args):
         '''Gets the values from address and depending on the inputed bins:
 
         * `Count` of equal-width bins
@@ -194,16 +207,22 @@ class Basic(object):
         Then according to the size of bins and limits of the frequency creates
         a table for chosen types of frequency.
 
+        If necessary, you can set the maximal amount of decimal digits for the
+        frequency outputs.
+
         .. versionadded:: 0.3.2
         .. versionchanged:: 0.3.8
            Switch from SciPy's frequency functions to NumPy's `histogram` which
            removes `intervals` option as this is already handled by histogram.
+        .. versionchanged:: 0.3.9
+           Added precision.
         '''
 
         # input variables
         bin_type, bins, bingrid, binstr = bins
         lowlimit, uplimit, limits_auto = limits
         absolute, relative, cumulative = freq_type
+        precision = precision.text
 
         # setting variables
         values = task.from_address(task.tablenum, address.text)
@@ -226,9 +245,9 @@ class Basic(object):
             bins = [float(child.text) for child in bingrid.children]
             bins = sorted(bins)
             if bins[0] > min(values):
-                bins = [min(values)] + bins
+                bins.insert(0, min(values))
             if bins[-1] < max(values):
-                bins = bins + [max(values)]
+                bins.extend(max(values))
         elif bin_type == 'Calculate':
             bins = binstr.su
 
@@ -255,7 +274,11 @@ class Basic(object):
 
         relat = []
         if relative.active:
-            relat = [float(val) / values_len for val in histo]
+            if absol:
+                relat = [val / values_len for val in absol[1:]]
+            else:
+                relat = [float(val) / values_len for val in histo]
+            relat = Basic._basic_freq_prec(relat, precision)
             relat.insert(0, 'Relative')
             cols += 1
 
@@ -270,6 +293,7 @@ class Basic(object):
             for i in xrange(len(histo)):
                 cumul.append(previous + float(_relat[i]))
                 previous += float(_relat[i])
+            cumul = Basic._basic_freq_prec(cumul, precision)
             cumul.insert(0, 'Cumulative')
             cols += 1
 

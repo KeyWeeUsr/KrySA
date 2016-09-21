@@ -106,6 +106,13 @@
         SingleTI:
             id: name
 
+        Label:
+            text: 'Precision'
+
+        SingleTI:
+            id: precision
+            input_filter: 'int'
+
     BoxLayout:
         GreyLabel:
             text: 'Limits:'
@@ -183,6 +190,12 @@
                         on_release:
                             bingrid.add_widget(Factory.FreqInput())
                             binscroll.scroll_x = 1
+
+                    Button:
+                        text: 'X'
+                        size_hint_x: 0.1
+                        on_release:
+                            bingrid.remove_widget(bingrid.children[0])  #edge
 
             Screen:
                 name: 'Calculate'

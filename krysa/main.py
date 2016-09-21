@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.3.8
+# Version: 0.3.9
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -971,7 +971,6 @@ class Body(FloatLayout):
             pass
 
     def _export_results(self, selection, *args):
-        # 0.3.0
         if not selection:
             return
         for file in os.listdir(selection):
