@@ -101,6 +101,33 @@ class AppendLayout(BoxLayout):
     '''
 
 
+class StandLayout(BoxLayout):
+    '''(Not yet implemented)
+    A layout that consists of a spinner with types of available
+    standardization for values.
+
+    * Standard score
+        .. math:: X' = \\frac {X - \\mu}{\\sigma}
+
+    * Student's t-statistic
+        .. math:: X' = \\frac {X - {\\overline {X}}}{s}
+
+    * Studentized residual
+        .. math::
+           \\frac {{\\hat {\\epsilon}}_{i}}{{\\hat {\\sigma}}_{i}}
+           =\\frac {X_{i}-{\\hat {\\mu}}_{i}}{{\\hat {\\sigma}}_{i}}
+
+    * Standardized moment
+        .. math:: \\frac {\\mu _{k}}{\\sigma ^{k}}
+
+    * Coefficient of variation
+        .. math:: \\frac {\\sigma}{\\mu}
+
+    * Feature scaling
+        .. math:: X'=a + \\frac {(X-X_{\\min})(b-a)}{X_{\\max}-X_{\\min}}
+    '''
+
+
 class Task(Popup):
     '''A popup handling the basic choosing of :ref:`data` from available
     :ref:`sqlite` in the application.

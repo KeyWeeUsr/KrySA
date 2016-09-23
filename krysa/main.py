@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.3.9
+# Version: 0.3.10
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -547,7 +547,7 @@ class Body(FloatLayout):
                                   ['_Protect Data', self.test],
                                   ['_Go To...', self.test],),
                          'tasks': (['Basic', self.basic],
-                                   ['_Averages', self.avgs],
+                                   ['Averages', self.avgs],
                                    ['Manipulate', self.manipulate],),
                          'help': (['_KrySA Help', self.test],
                                   ['_Getting Started Tutorial', self.test],

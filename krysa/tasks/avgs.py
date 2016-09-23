@@ -1,5 +1,6 @@
-from . import Task, AvgsLayout
+from . import Task, AvgsLayout, AddressLayout
 from functools import partial, reduce
+from collections import Counter
 import operator
 import math
 
@@ -43,13 +44,11 @@ class Avgs(object):
 
         .. versionadded:: 0.2.4
         '''
-        try:
-            if p == '-0':
-                p = 0.0
-            else:
-                p = float(p.text)
-        except ValueError, SyntaxError:
-            return
+        if p == '-0':
+            p = 0.0
+        else:
+            p = float(p.text)
+
         values = task.from_address(task.tablenum, address.text)
         if p in [0, -0]:
             multiples = reduce(operator.mul, values, 1)
@@ -74,23 +73,74 @@ class Avgs(object):
         '''
 
     def avgs_median(*args):
-        '''(Not yet implemented)
+        '''Median:
+
+        .. math::
+            \\tilde x = \\left \\{ \\begin {array}{lr}
+            \\frac {n}{2} \in \\mathbb{N}:&
+            \\frac {x_{\\frac {n}{2}} + x_{\\frac {n}{2}+1}}{2}
+            \\\\
+            \\frac {n+1}{2} \in \\mathbb{N}:& x_{\\lceil \\frac {n}{2} \\rceil}
+            \\end{array} \\right.
+
+        .. versionadded:: 0.3.10
         '''
+        widget = AddressLayout()
+        task = Task(title='Median', wdg=widget,
+                    call=['Median', Avgs.avgs_median])
+        task.run = partial(Avgs._avgs_median,
+                           task,
+                           task.ids.container.children[0].ids.name)
+        task.open()
+
+    @staticmethod
+    def _avgs_median(task, address, *args):
+        values = task.from_address(task.tablenum, address.text)
+        print values
+        length = len(values)
+        pos = int(round(length / 2.0))
+        if length == 1:
+            result = values[0]
+        elif length % 2:
+            result = values[pos - 1]
+        else:
+            result = int(values[pos - 1] + values[pos]) / 2.0
+        task.set_page('Median', str(result), 'text')
 
     def avgs_mode(*args):
-        '''(Not yet implemented)
+        '''Mode returns the most common value from the list of values.
+        If there's more than a single value with the same amount of
+        occurency, all values with the same occurency are returned.
+
+        .. versionadded:: 0.3.10
         '''
+        widget = AddressLayout()
+        task = Task(title='Mode', wdg=widget,
+                    call=['Mode', Avgs.avgs_mode])
+        task.run = partial(Avgs._avgs_mode,
+                           task,
+                           task.ids.container.children[0].ids.name)
+        task.open()
+
+    @staticmethod
+    def _avgs_mode(task, address, *args):
+        values = task.from_address(task.tablenum, address.text)
+        length = len(values)
+        data = Counter(values)
+        occurs = data.most_common(length)
+        results = []
+        for oc in occurs:
+            if not results:
+                results.append(oc)
+            else:
+                if results[-1][1] == oc[1]:
+                    results.append(oc)
+        results = [str(r[0]) for r in results]
+        task.set_page('Mode', ', '.join(results), 'text')
 
     names = (('Generalized', avgs_gen),
-             ('Interquartile', avgs_inter),
-             ('Midrange', avgs_mid),
-             ('Trimmed', avgs_trim),
+             ('_Interquartile', avgs_inter),
+             ('_Midrange', avgs_mid),
+             ('_Trimmed', avgs_trim),
              ('Median', avgs_median),
              ('Mode', avgs_mode))
-
-    # statistics.mean()
-    # numpy.mean(values)
-    # scipy.stats.gmean(values)
-    # scipy.stats.hmean(values)
-    # 1/2 * ( max(x) + min(x) )
-    # scipy.stats.tmean(values, limits)
