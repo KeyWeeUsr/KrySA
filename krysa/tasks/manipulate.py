@@ -1,5 +1,5 @@
+from . import Task, SortLayout, AppendLayout, StandLayout
 from kivy.uix.tabbedpanel import TabbedPanelItem
-from . import Task, SortLayout, AppendLayout
 from functools import partial
 
 
@@ -13,7 +13,8 @@ class Manipulate(object):
     def manip_sort(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SortLayout` that gets
         from user the table which will be sorted and the type of sorting
-        (`Ascending` or `Descending`).
+        (`Ascending` or `Descending`). The function creates a new
+        :mod:`main.Table`
 
         .. versionadded:: 0.3.5
         '''
@@ -21,18 +22,14 @@ class Manipulate(object):
         task = Task(title='Sort', wdg=widget,
                     call=['Sort', Manipulate.manip_sort])
         task.tablecls = task.app.tablecls
+        container = task.ids.container.children[0]
         task.run = partial(Manipulate._manip_sort,
                            task,
-                           task.ids.container.children[0].ids.sort_type)
+                           container.ids.sort_type)
         task.open()
 
     @staticmethod
     def _manip_sort(task, sort_type, *args):
-        '''Gets the values from address, sorts each column either ascending
-        or descending and returns a new :mod:`main.Table`
-
-        .. versionadded:: 0.3.5
-        '''
         sort_type = 'Asc' not in sort_type.text
         from_address = task.from_address(task.tablenum, ':all', extended=True)
         values, cols, rows, labels = from_address
@@ -71,32 +68,30 @@ class Manipulate(object):
         from user :mod:`main.Table`, type of append and an amount of empty
         rows / cols to append.
 
-        .. note:: Appending new columns don't work for now. When such an action
-           is possible, this note will be removed.
+        The function either returns a new, altered :mod:`main.Table` of
+        selected one, or appends directly to the selected :class:`main.Table`.
 
-        .. versionadded:: 0.3.6
-        '''
-        widget = AppendLayout()
-        task = Task(title='Append', wdg=widget,
-                    call=['Append', Manipulate.manip_append])
-        task.tablecls = task.app.tablecls
-        task.run = partial(Manipulate._manip_append,
-                           task,
-                           task.ids.container.children[0].ids.what,
-                           task.ids.container.children[0].ids.amount,
-                           task.ids.container.children[0].ids.overwrite)
-        task.open()
-
-    @staticmethod
-    def _manip_append(task, append_type, amount, overwrite, *args):
-        '''Gets the amount of empty rows / cols to append from user and
-        either returns a new, altered :mod:`main.Table` of selected one, or
-        appends directly to the selected Table.
+        .. note:: Appending new columns doesn't work for now. When such
+           an action is possible, this note will be removed.
 
         .. versionadded:: 0.3.6
         .. versionchanged:: 0.3.7
             Added overwriting of selected :mod:`main.Table`
         '''
+        widget = AppendLayout()
+        task = Task(title='Append', wdg=widget,
+                    call=['Append', Manipulate.manip_append])
+        task.tablecls = task.app.tablecls
+        container = task.ids.container.children[0]
+        task.run = partial(Manipulate._manip_append,
+                           task,
+                           container.ids.what,
+                           container.ids.amount,
+                           container.ids.overwrite)
+        task.open()
+
+    @staticmethod
+    def _manip_append(task, append_type, amount, overwrite, *args):
         append_type = append_type.text
         overwrite = overwrite.active
         amount = int(amount.text) if amount.text else 0
@@ -172,8 +167,27 @@ class Manipulate(object):
         '''(Not yet implemented)
         '''
 
+    def manip_stand(*args):
+        '''(Not yet implemented)
+        Standardizing specified columns from data according to various
+        types of standardiztion.
+        '''
+        widget = StandLayout()
+        task = Task(title='Standardize', wdg=widget,
+                    call=['Standardize', Manipulate.manip_stand])
+        task.tablecls = task.app.tablecls
+        container = task.ids.container.children[0]
+        task.run = partial(Manipulate._manip_stand,
+                           task)
+        task.open()
+
+    @staticmethod
+    def _manip_stand(task, *args):
+        pass
+
     names = (('Sort', manip_sort),
              ('_Filter', manip_filter),
              ('Append', manip_append),
              ('_Split', manip_split),   # split into two data(columns, rows)
-             ('_Merge', manip_merge))
+             ('_Merge', manip_merge),
+             ('_Standardize', manip_stand))

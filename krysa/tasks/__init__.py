@@ -140,8 +140,6 @@ class Task(Popup):
     run = ObjectProperty(None)
 
     def __init__(self, **kw):
-        '''docs
-        '''
         super(Task, self).__init__(**kw)
         self.app = App.get_running_app()
         self.run = kw.get('run')

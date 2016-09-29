@@ -17,24 +17,21 @@ class Basic(object):
 
     def basic_count(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address.
+        gets from user :ref:`Data` address. Creates a result page with count.
 
         .. versionadded:: 0.1.0
         '''
         widget = AddressLayout()
         task = Task(title='Count', wdg=widget,
                     call=['Count', Basic.basic_count])
+        container = task.ids.container.children[0]
         task.run = partial(Basic._basic_count,
                            task,
-                           task.ids.container.children[0].ids.name)
+                           container.ids.name)
         task.open()
 
     @staticmethod
     def _basic_count(task, address, *args):
-        '''Gets the values from address and returns the count.
-
-        .. versionadded:: 0.1.0
-        '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Count', str(len(values)), 'text')
 
@@ -44,73 +41,64 @@ class Basic(object):
 
     def basic_min(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address.
+        gets from user :ref:`Data` address. Creates a result page with minimum.
 
         .. versionadded:: 0.1.0
         '''
         widget = AddressLayout()
         task = Task(title='Minimum', wdg=widget,
                     call=['Minimum', Basic.basic_min])
+        container = task.ids.container.children[0]
         task.run = partial(Basic._basic_min,
                            task,
-                           task.ids.container.children[0].ids.name)
+                           container.ids.name)
         task.open()
 
     @staticmethod
     def _basic_min(task, address, *args):
-        '''Gets the values from address and returns a minimum.
-
-        .. versionadded:: 0.1.0
-        '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Minimum', str(min(values)), 'text')
 
     def basic_max(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address.
+        gets from user :ref:`Data` address. Creates a result page with maximum.
 
         .. versionadded:: 0.1.0
         '''
         widget = AddressLayout()
         task = Task(title='Maximum', wdg=widget,
                     call=['Maximum', Basic.basic_max])
+        container = task.ids.container.children[0]
         task.run = partial(Basic._basic_max,
                            task,
-                           task.ids.container.children[0].ids.name)
+                           container.ids.name)
         task.open()
 
     @staticmethod
     def _basic_max(task, address, *args):
-        '''Gets the values from address and returns a maximum.
-
-        .. versionadded:: 0.1.0
-        '''
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Maximum', str(max(values)), 'text')
 
     def basic_small(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
-        `k`-th value from the :ref:`Task` s output.
+        `k`-th value from the :ref:`Task` s output. Creates a result page with
+        the `k`-th value.
 
         .. versionadded:: 0.1.0
         '''
         widget = SmallLargeLayout()
         task = Task(title='Small', wdg=widget,
                     call=['Small', Basic.basic_small])
+        container = task.ids.container.children[0]
         task.run = partial(Basic._basic_small,
                            task,
-                           task.ids.container.children[0].ids.name,
-                           task.ids.container.children[0].ids.order)
+                           container.ids.name,
+                           container.ids.order)
         task.open()
 
     @staticmethod
     def _basic_small(task, address, k, *args):
-        '''Gets the values from address and returns the `k`-th value from
-        the ascending list of sorted values.
-
-        .. versionadded:: 0.1.0
-        '''
         values = task.from_address(task.tablenum, address.text)
         values = sorted(values)
         k = int(k.text) - 1
@@ -122,26 +110,23 @@ class Basic(object):
     def basic_large(self, *args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
-        `k`-th value from the :ref:`Task` s output.
+        `k`-th value from the :ref:`Task` s output. Creates a result page with
+        `k`-th value.
 
         .. versionadded:: 0.1.0
         '''
         widget = SmallLargeLayout()
         task = Task(title='Large', wdg=widget,
                     call=['Large', Basic.basic_large])
+        container = task.ids.container.children[0]
         task.run = partial(Basic._basic_large,
                            task,
-                           task.ids.container.children[0].ids.name,
-                           task.ids.container.children[0].ids.order)
+                           container.ids.name,
+                           container.ids.order)
         task.open()
 
     @staticmethod
     def _basic_large(task, address, k, *args):
-        '''Gets the values from address and returns the `k`-th value from
-        the descending list of sorted values.
-
-        .. versionadded:: 0.1.0
-        '''
         values = task.from_address(task.tablenum, address.text)
         values = sorted(values, reverse=True)
         k = int(k.text) - 1
@@ -159,28 +144,40 @@ class Basic(object):
         * |b|_
         * lower and upper limit (optional, by default takes `min` and `max`)
 
+        Depending on the inputed bins:
+
+        * `Count` of equal-width bins
+        * `Edges` manually created edges for non-uniform bin widths. It already
+          contains minimum and maximum of the values list.
+        * `Calculate` uses NumPy's way for creating an optimal bin width.
+
+        The function creates a result page with a table for chosen types of
+        frequency. If necessary, you can set the maximal amount of decimal
+        digits for the frequency outputs.
+
         .. versionadded:: 0.3.2
         .. versionchanged:: 0.3.8
-           Switched to NumPy's `histogram` which is more flexible.
+           Switch from SciPy's frequency functions to NumPy's `histogram` which
+           removes `intervals` option as this is already handled by histogram.
+        .. versionchanged:: 0.3.9
+           Added precision.
         '''
+
         widget = FreqLayout()
         task = Task(title='Frequency', wdg=widget,
                     call=['Frequency', Basic.basic_freq])
+        container = task.ids.container.children[0]
         task.run = partial(
             Basic._basic_freq,
             task,
-            task.ids.container.children[0].ids.name,
-            task.ids.container.children[0].ids.precision,
-            (task.ids.container.children[0].ids.binmanager,
-             task.ids.container.children[0].ids.bins,
-             task.ids.container.children[0].ids.bingrid,
-             task.ids.container.children[0].ids.binstr),
-            (task.ids.container.children[0].ids.lowlimit,
-             task.ids.container.children[0].ids.uplimit,
-             task.ids.container.children[0].ids.limits_auto),
-            (task.ids.container.children[0].ids.absolute,
-             task.ids.container.children[0].ids.relative,
-             task.ids.container.children[0].ids.cumulative))
+            container.ids.name,
+            container.ids.precision,
+            (container.ids.binmanager, container.ids.bins,
+             container.ids.bingrid, container.ids.binstr),
+            (container.ids.lowlimit, container.ids.uplimit,
+             container.ids.limits_auto),
+            (container.ids.absolute, container.ids.relative,
+             container.ids.cumulative))
         task.open()
 
     @staticmethod
@@ -194,30 +191,8 @@ class Basic(object):
         if precision:
             return [round(item, precision) for item in input_list]
 
-
     @staticmethod
     def _basic_freq(task, address, precision, bins, limits, freq_type, *args):
-        '''Gets the values from address and depending on the inputed bins:
-
-        * `Count` of equal-width bins
-        * `Edges` manually created edges for non-uniform bin widths. It already
-          contains minimum and maximum of the values list.
-        * `Calculate` uses NumPy's way for creating an optimal bin width.
-
-        Then according to the size of bins and limits of the frequency creates
-        a table for chosen types of frequency.
-
-        If necessary, you can set the maximal amount of decimal digits for the
-        frequency outputs.
-
-        .. versionadded:: 0.3.2
-        .. versionchanged:: 0.3.8
-           Switch from SciPy's frequency functions to NumPy's `histogram` which
-           removes `intervals` option as this is already handled by histogram.
-        .. versionchanged:: 0.3.9
-           Added precision.
-        '''
-
         # input variables
         bin_type, bins, bingrid, binstr = bins
         lowlimit, uplimit, limits_auto = limits
@@ -261,7 +236,7 @@ class Basic(object):
         for i in xrange(len(edges)):
             left.append(edges[i])
             try:
-                right.append(edges[i+1])
+                right.append(edges[i + 1])
             except IndexError:
                 right.append('-')
 
@@ -298,27 +273,26 @@ class Basic(object):
             cols += 1
 
         # zipping & exporting results
-        rs = []
         left.insert(0, 'Lower edge')
         right.insert(0, 'Upper edge')
 
         if absol and not relat and not cumul:
-            rs = [r for items in zip(left, right, absol) for r in items]
+            zipped = zip(left, right, absol)
         elif absol and relat and not cumul:
-            rs = [r for items in zip(left, right, absol, relat) for r in items]
+            zipped = zip(left, right, absol, relat)
         elif absol and cumul and not relat:
-            rs = [r for items in zip(left, right, absol, cumul) for r in items]
+            zipped = zip(left, right, absol, cumul)
         elif relat and not absol and not cumul:
-            rs = [r for items in zip(left, right, relat) for r in items]
+            zipped = zip(left, right, relat)
         elif relat and cumul and not absol:
-            rs = [r for items in zip(left, right, relat, cumul) for r in items]
+            zipped = zip(left, right, relat, cumul)
         elif cumul and not absol and not relat:
-            rs = [r for items in zip(left, right, cumul) for r in items]
+            zipped = zip(left, right, cumul)
         elif absol and relat and cumul:
             zipped = zip(left, right, absol, relat, cumul)
-            rs = [r for items in zipped for r in items]
 
-        task.set_page('Frequency', rs, 'table{}'.format(cols))
+        result = [r for items in zipped for r in items]
+        task.set_page('Frequency', result, 'table{}'.format(cols))
 
     names = (('Count', basic_count),
              ('_Count ifs', basic_countifs),

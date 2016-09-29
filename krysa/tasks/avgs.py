@@ -12,7 +12,9 @@ class Avgs(object):
     '''
 
     def avgs_gen(*args):
-        '''Generalized mean:
+        '''Gets the values from address and depending on `p` (power) value
+        returns either exceptional case for `p == 0` (geometric mean), or
+        a value from the generalized mean's formula:
 
         .. math::
            \\big(\\frac{1}{n}\\sum_{i=1}^n  x_{i}^{p} \\big)^\\frac{1}{p},
@@ -30,20 +32,15 @@ class Avgs(object):
         widget = AvgsLayout()
         task = Task(title='Count', wdg=widget,
                     call=['Count', Avgs.avgs_gen])
+        container = task.ids.container.children[0]
         task.run = partial(Avgs._avgs_gen,
                            task,
-                           task.ids.container.children[0].ids.name,
-                           task.ids.container.children[0].ids.power)
+                           container.ids.name,
+                           container.ids.power)
         task.open()
 
     @staticmethod
     def _avgs_gen(task, address, p, *args):
-        '''Gets the values from address and depending on `p` (power) value
-        returns either exceptional case for `p == 0` (geometric mean), or
-        value from the generalized mean's formula.
-
-        .. versionadded:: 0.2.4
-        '''
         if p == '-0':
             p = 0.0
         else:
@@ -77,10 +74,11 @@ class Avgs(object):
 
         .. math::
             \\tilde x = \\left \\{ \\begin {array}{lr}
-            \\frac {n}{2} \in \\mathbb{N}:&
-            \\frac {x_{\\frac {n}{2}} + x_{\\frac {n}{2}+1}}{2}
-            \\\\
-            \\frac {n+1}{2} \in \\mathbb{N}:& x_{\\lceil \\frac {n}{2} \\rceil}
+                \\frac {n}{2} \in \\mathbb{N}:&
+                    \\frac {x_{\\frac {n}{2}} + x_{\\frac {n}{2}+1}}{2}
+                \\\\
+                \\frac {n+1}{2} \in \\mathbb{N}:&
+                    x_{\\lceil \\frac {n}{2} \\rceil}
             \\end{array} \\right.
 
         .. versionadded:: 0.3.10
@@ -88,9 +86,10 @@ class Avgs(object):
         widget = AddressLayout()
         task = Task(title='Median', wdg=widget,
                     call=['Median', Avgs.avgs_median])
+        container = task.ids.container.children[0]
         task.run = partial(Avgs._avgs_median,
                            task,
-                           task.ids.container.children[0].ids.name)
+                           container.ids.name)
         task.open()
 
     @staticmethod
@@ -117,9 +116,10 @@ class Avgs(object):
         widget = AddressLayout()
         task = Task(title='Mode', wdg=widget,
                     call=['Mode', Avgs.avgs_mode])
+        container = task.ids.container.children[0]
         task.run = partial(Avgs._avgs_mode,
                            task,
-                           task.ids.container.children[0].ids.name)
+                           container.ids.name)
         task.open()
 
     @staticmethod
