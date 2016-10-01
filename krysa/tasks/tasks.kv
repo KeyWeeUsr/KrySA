@@ -189,13 +189,14 @@
                         size_hint_x: 0.1
                         on_release:
                             bingrid.add_widget(Factory.FreqInput())
-                            binscroll.scroll_x = 1
+                            binscroll.scroll_to(bingrid.children[0])
 
                     Button:
                         text: 'X'
                         size_hint_x: 0.1
+                        bgc: bingrid.children
                         on_release:
-                            bingrid.remove_widget(bingrid.children[0])  #edge
+                            if self.bgc: bingrid.remove_widget(self.bgc[0])
 
             Screen:
                 name: 'Calculate'
