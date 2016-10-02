@@ -6,7 +6,7 @@ import os.path as op
 print('Creating modules from {}'.format(op.basename(__file__)))
 include_exts = ('.py',)
 exclude_dirs = ('test_Project',)
-exclude_files = ('dropdown.py', '__main__.py', 'test_file_')
+exclude_files = ('dropdown.py', '__main__.py', 'test_file_', 'test_tasks_')
 
 mod_sep = u' » '
 
