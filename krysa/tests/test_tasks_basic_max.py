@@ -66,7 +66,7 @@ class Test(unittest.TestCase):
 
         for addr in address:
             taskcls = Basic()
-            taskcls.basic_count()
+            taskcls.basic_max()
 
             children = app.root_window.children
             for c in children:
@@ -81,7 +81,7 @@ class Test(unittest.TestCase):
             body[-3].children[0].dispatch('on_release')
 
         # get results and test
-        expected = reversed([1, 52, 4, 4, 4, 4, 16, 1])
+        expected = reversed([3.3, 13.13, 2.2, 2.2, 13.13, 13.13, 10.10, 13.13])
         results = app.root.ids.results
         skipone = False  # if top padding with widget present
         for c in results.children:
@@ -92,11 +92,11 @@ class Test(unittest.TestCase):
         for i, exp in enumerate(expected):
             i = i + 1 if skipone else i
             # Result -> Page -> container -> result
-            result = int(results.children[i].ids.page.children[1].text)
+            result = float(results.children[i].ids.page.children[1].text)
             self.assertEqual(result, exp)
         app.stop()
 
-    def test_tasks_basic_count(self):
+    def test_tasks_basic_max(self):
         self.path = op.dirname(op.abspath(__file__))
         if not op.exists(op.join(self.path, 'test_folder')):
             os.mkdir(op.join(self.path, 'test_folder'))

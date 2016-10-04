@@ -61,12 +61,12 @@ class Test(unittest.TestCase):
         new_data = app.root.wiz_newdata.run()
 
         # open Task's popup and get task
-        address = ['B3', 'A1:D13', 'A1:B2', 'C1:D2',
-                   'A12:B13', 'C12:D13', 'B3:C10', 'D13']
-
+        k = '3'
+        address = ['A1:D13', 'A1:B2', 'C1:D2',
+                   'A12:B13', 'C12:D13', 'B3:C10']
         for addr in address:
             taskcls = Basic()
-            taskcls.basic_count()
+            taskcls.basic_large()
 
             children = app.root_window.children
             for c in children:
@@ -77,11 +77,12 @@ class Test(unittest.TestCase):
             # fill the task
             body = task.children[0].children[0].children[0].children
             body[-1].text = 'NewData'
-            body[-2].children[0].children[0].text = addr
+            body[-2].children[0].children[-1].children[0].text = addr
+            body[-2].children[0].children[-2].children[0].text = k
             body[-3].children[0].dispatch('on_release')
 
         # get results and test
-        expected = reversed([1, 52, 4, 4, 4, 4, 16, 1])
+        expected = reversed([12.12, 1.1, 1.1, 12.12, 12.12, 9.9])
         results = app.root.ids.results
         skipone = False  # if top padding with widget present
         for c in results.children:
@@ -92,11 +93,11 @@ class Test(unittest.TestCase):
         for i, exp in enumerate(expected):
             i = i + 1 if skipone else i
             # Result -> Page -> container -> result
-            result = int(results.children[i].ids.page.children[1].text)
+            result = float(results.children[i].ids.page.children[1].text)
             self.assertEqual(result, exp)
         app.stop()
 
-    def test_tasks_basic_count(self):
+    def test_tasks_basic_large(self):
         self.path = op.dirname(op.abspath(__file__))
         if not op.exists(op.join(self.path, 'test_folder')):
             os.mkdir(op.join(self.path, 'test_folder'))

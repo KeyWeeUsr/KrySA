@@ -92,9 +92,10 @@ Final functions would look like this::
         widget = CountLayout()
         task = Task(title='Count', wdg=widget,
                     call=['Count', basic_count])
+        container = task.ids.container.children[0]
         task.run = partial(_basic_count,
                            task,
-                           task.ids.container.children[0].ids.name)
+                           container.ids.name)
         task.open()
 
     def _basic_count(task, address, *args):

@@ -2,8 +2,8 @@ KrySA
 =====
 
 .. image:: _static/head.png
-    :align: right
-    :width: 256
+   :align: right
+   :width: 256
 
 `Statistical analysis for rats.`
 

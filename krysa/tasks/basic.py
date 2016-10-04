@@ -57,7 +57,7 @@ class Basic(object):
     @staticmethod
     def _basic_min(task, address, *args):
         values = task.from_address(task.tablenum, address.text)
-        task.set_page('Minimum', str(min(values)), 'text')
+        task.set_page('Minimum', str(min(list(set(values)))), 'text')
 
     def basic_max(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
@@ -77,7 +77,7 @@ class Basic(object):
     @staticmethod
     def _basic_max(task, address, *args):
         values = task.from_address(task.tablenum, address.text)
-        task.set_page('Maximum', str(max(values)), 'text')
+        task.set_page('Maximum', str(max(list(set(values)))), 'text')
 
     def basic_small(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
@@ -100,7 +100,7 @@ class Basic(object):
     @staticmethod
     def _basic_small(task, address, k, *args):
         values = task.from_address(task.tablenum, address.text)
-        values = sorted(values)
+        values = sorted(list(set(values)))
         k = int(k.text) - 1
         try:
             task.set_page('Small ({}.)'.format(k + 1), str(values[k]), 'text')
@@ -128,7 +128,7 @@ class Basic(object):
     @staticmethod
     def _basic_large(task, address, k, *args):
         values = task.from_address(task.tablenum, address.text)
-        values = sorted(values, reverse=True)
+        values = sorted(list(set(values)), reverse=True)
         k = int(k.text) - 1
         try:
             task.set_page('Large ({}.)'.format(k + 1), str(values[k]), 'text')

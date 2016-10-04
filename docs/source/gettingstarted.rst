@@ -73,18 +73,18 @@ the `official repository <https://github.com/KeyWeeUsr/KrySA>`_.
    KrySA is available on `PyPi <https://pypi.python.org/pypi/krysa>`_, simply
    type::
 
-        pip install krysa
+       pip install krysa
 
    and then run it with::
 
-        python -m krysa
+       python -m krysa
 
 #. Git
 
    Clone the whole repository and be able to update KrySA when a new version
    arrives with a simple ``git pull``. ::
 
-        git clone https://github.com/KeyWeeUsr/KrySA
+       git clone https://github.com/KeyWeeUsr/KrySA
 
 #. Zip
 
