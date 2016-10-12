@@ -209,22 +209,30 @@ class Basic(object):
             lowlimit = min(values)
             uplimit = max(values)
         else:
-            lowlimit = float(lowlimit.text)
-            uplimit = float(uplimit.text)
+            if lowlimit.text and uplimit.text:
+                lowlimit = float(lowlimit.text)
+                uplimit = float(uplimit.text)
+            else:
+                raise Exception(
+                    'Manual limits enabled! '
+                    'You need to enter both lower and upper limit.')
 
         # get either int of bins or float list of edges
         bin_type = bin_type.current
         if bin_type == 'Count':
-            bins = int(bins.text)
+            if bins.text:
+                bins = int(bins.text)
+            else:
+                raise Exception('No count of bins entered!')
         elif bin_type == 'Edges':
             bins = [float(child.text) for child in bingrid.children]
             bins = sorted(bins)
             if bins[0] > min(values):
                 bins.insert(0, min(values))
             if bins[-1] < max(values):
-                bins.extend(max(values))
+                bins.extend([max(values)])
         elif bin_type == 'Calculate':
-            bins = binstr.su
+            bins = binstr.value
 
         # get base for results
         histo, edges = histogram(values, bins=bins, range=(lowlimit, uplimit))

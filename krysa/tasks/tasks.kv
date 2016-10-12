@@ -120,17 +120,16 @@
 
         BoxLayout:
             size_hint_x: 0.4
-            BoxLayout:
-                Label:
-                    text: 'Auto'
+            Label:
+                text: 'Auto'
 
-                CheckBox:
-                    id: limits_auto
-                    size_hint_x: 0.25
-                    active: True
-                    on_active:
-                        lowlimit.disabled = True if self.active else False
-                        uplimit.disabled = True if self.active else False
+            CheckBox:
+                id: limits_auto
+                size_hint_x: 0.25
+                active: True
+                on_active:
+                    lowlimit.disabled = True if self.active else False
+                    uplimit.disabled = True if self.active else False
 
         BoxLayout:
             size_hint_x: 0.5
@@ -164,11 +163,10 @@
             size_hint_x: 0.7
             Screen:
                 name: 'Count'
-                BoxLayout:
-                    SingleTI:
-                        id: bins
-                        hint_text: 'Number of bins'
-                        input_filter: 'int'
+                SingleTI:
+                    id: bins
+                    hint_text: 'Number of bins'
+                    input_filter: 'int'
 
             Screen:
                 name: 'Edges'
