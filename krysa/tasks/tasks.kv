@@ -266,4 +266,66 @@
         CheckBox:
             id: overwrite
 
+<LinePlotLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(260)
+    TextInput:
+        size_hint_y: None
+        height: dp(60)
+        id: title
+        hint_text: 'Title'
+
+    BoxLayout:
+        size_hint_y: 0.7
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'X values'
+
+            SingleTI:
+                id: xname
+
+            BoxLayout:
+                Label:
+                    text: 'First value as label:'
+
+                CheckBox:
+                    id: xcheck
+                    on_active: xlabel.disabled = self.active
+
+            TextInput:
+                id: xlabel
+                hint_text: 'X axis label'
+
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Y values'
+
+            SingleTI:
+                id: yname
+
+            BoxLayout:
+                Label:
+                    text: 'First value as label:'
+
+                CheckBox:
+                    id: ycheck
+                    on_active: ylabel.disabled = self.active
+
+            TextInput:
+                id: ylabel
+                hint_text: 'Y axis label'
+    BoxLayout:
+        size_hint_y: 0.3
+        Spinner:
+            id: plotcolor
+            values: ['r', 'g', 'b']
+            text: 'r'
+        Spinner:
+            id: plotshape
+            values: ['-', '--', 'o', 's', '^']
+            text: '-'
+
 <StandLayout>:

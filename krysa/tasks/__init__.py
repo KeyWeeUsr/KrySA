@@ -3,6 +3,7 @@
    mod_krysa_tasks_basic
    mod_krysa_tasks_avgs
    mod_krysa_tasks_manipulate
+   mod_krysa_tasks_plot
 '''
 
 from kivy.app import App
@@ -17,6 +18,11 @@ import re
 import os.path as op
 
 Builder.load_file(op.join(op.dirname(op.abspath(__file__)), 'tasks.kv'))
+
+
+class LinePlotLayout(BoxLayout):
+    '''Add docs!
+    '''
 
 
 class AddressLayout(BoxLayout):

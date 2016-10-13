@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.4.2
+# Version: 0.4.3
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -47,6 +47,7 @@ from tasks import Task
 from tasks.basic import Basic
 from tasks.avgs import Avgs
 from tasks.manipulate import Manipulate
+from tasks.plot import Plot
 
 
 class ResultGrid(GridLayout):
@@ -548,7 +549,8 @@ class Body(FloatLayout):
                                   ['_Go To...', self.test],),
                          'tasks': (['Basic', self.basic],
                                    ['Averages', self.avgs],
-                                   ['Manipulate', self.manipulate],),
+                                   ['Manipulate', self.manipulate],
+                                   ['Plot', self.plot],),
                          'help': (['_KrySA Help', self.test],
                                   ['_Getting Started Tutorial', self.test],
                                   ['About KrySA', self.about],),
@@ -1006,6 +1008,15 @@ class Body(FloatLayout):
     def manipulate(button, *args):
         drop = DropDown(allow_sides=True, auto_width=False)
         for t in Manipulate.names:
+            but = SizedButton(text=t[0])
+            but.bind(on_release=t[1])
+            drop.add_widget(but)
+        drop.open(button)
+
+    @staticmethod
+    def plot(button, *args):
+        drop = DropDown(allow_sides=True, auto_width=False)
+        for t in Plot.names:
             but = SizedButton(text=t[0])
             but.bind(on_release=t[1])
             drop.add_widget(but)
