@@ -1,4 +1,4 @@
-from . import Task, PointPlotLayout
+from . import Task, LinePlotLayout
 from matplotlib import pyplot
 from functools import partial
 import os.path as op
