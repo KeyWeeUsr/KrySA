@@ -8,6 +8,7 @@
     canvas:
         Color:
             rgba: 0.7, 0.7, 0.7, 0.05
+
         Rectangle:
             size: self.size
             pos: self.pos
@@ -269,15 +270,15 @@
 <LinePlotLayout>:
     orientation: 'vertical'
     size_hint_y: None
-    height: dp(260)
+    height: dp(350)
     TextInput:
         size_hint_y: None
-        height: dp(60)
+        height: dp(40)
         id: title
         hint_text: 'Title'
 
     BoxLayout:
-        size_hint_y: 0.7
+        size_hint_y: 0.35
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -285,14 +286,7 @@
 
             SingleTI:
                 id: xname
-
-            BoxLayout:
-                Label:
-                    text: 'First value as label:'
-
-                CheckBox:
-                    id: xcheck
-                    on_active: xlabel.disabled = self.active
+                hint_text: 'address'
 
             TextInput:
                 id: xlabel
@@ -305,27 +299,64 @@
 
             SingleTI:
                 id: yname
-
-            BoxLayout:
-                Label:
-                    text: 'First value as label:'
-
-                CheckBox:
-                    id: ycheck
-                    on_active: ylabel.disabled = self.active
+                hint_text: 'address'
 
             TextInput:
                 id: ylabel
                 hint_text: 'Y axis label'
+
     BoxLayout:
-        size_hint_y: 0.3
-        Spinner:
-            id: plotcolor
-            values: ['r', 'g', 'b']
-            text: 'r'
-        Spinner:
-            id: plotshape
-            values: ['-', '--', 'o', 's', '^']
-            text: '-'
+        size_hint_y: 0.1
+        Label:
+            text: 'First value as label:'
+
+        CheckBox:
+            id: labelcheck
+            on_active:
+                xlabel.disabled = self.active
+                ylabel.disabled = self.active
+
+    Label:
+        size_hint_y: 0.1
+        text: 'Axes properties'
+
+    BoxLayout:
+        size_hint_y: 0.45
+        orientation: 'vertical'
+        GridLayout:
+            cols: 2
+            FloatInput:
+                id: xmin
+                hint_text: 'X axis minimum'
+
+            FloatInput:
+                id: ymin
+                hint_text: 'Y axis minimum'
+
+            FloatInput:
+                id: xmax
+                hint_text: 'X axis maximum'
+
+            FloatInput:
+                id: ymax
+                hint_text: 'Y axis maximum'
+
+        GridLayout:
+            cols: 2
+            Label:
+                text: 'Color'
+
+            Label:
+                text: 'Line style'
+
+            Spinner:
+                id: plotcolor
+                values: ['r', 'g', 'b']
+                text: 'r'
+
+            Spinner:
+                id: plotshape
+                values: ['-', '--', 'o', 's', '^']
+                text: '-'
 
 <StandLayout>:

@@ -775,9 +775,11 @@ class Body(FloatLayout):
         selection = op.join(selection, fname.split('.')[0])
         data = op.join(selection, 'data')
         results = op.join(selection, 'results')
+        plots = op.join(selection, 'plots')
         if selection != self.app.project_dir:
             os.mkdir(data)
             os.mkdir(results)
+            os.mkdir(plots)
         if op.exists(op.join(selection, fname)):
             os.remove(op.join(selection, fname))
 
