@@ -188,8 +188,15 @@ class Basic(object):
             precision = int(precision)
         except ValueError:
             raise Exception('Bad precision input!')
+
+        final = []
         if precision:
-            return [round(item, precision) for item in input_list]
+            for item in input_list:
+                if isinstance(item, (str, unicode)):
+                    final.append(item)
+                else:
+                    final.append(round(item, precision))
+        return final
 
     @staticmethod
     def _basic_freq(task, address, precision, bins, limits, freq_type, *args):
@@ -242,9 +249,9 @@ class Basic(object):
         left = []
         right = []
         for i in xrange(len(edges)):
-            left.append(edges[i])
+            left.append(float(edges[i]))
             try:
-                right.append(edges[i + 1])
+                right.append(float(edges[i + 1]))
             except IndexError:
                 right.append('-')
 
@@ -281,6 +288,8 @@ class Basic(object):
             cols += 1
 
         # zipping & exporting results
+        left = Basic._basic_freq_prec(left, precision)
+        right = Basic._basic_freq_prec(right, precision)
         left.insert(0, 'Lower edge')
         right.insert(0, 'Upper edge')
 
@@ -300,7 +309,11 @@ class Basic(object):
             zipped = zip(left, right, absol, relat, cumul)
 
         result = [r for items in zipped for r in items]
-        task.set_page('Frequency', result, 'table{}'.format(cols))
+        bin_type = binstr.text if 'Calc' in bin_type else bin_type
+        bins = ', bins=' + str(bins) if 'Count' in bin_type else ''
+        params = '{}{}'.format(bin_type, bins)
+        task.set_page('Frequency({})'.format(params),
+                      result, 'table{}'.format(cols))
 
     names = (('Count', basic_count),
              ('_Count ifs', basic_countifs),

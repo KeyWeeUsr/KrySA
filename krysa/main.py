@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.4.3
+# Version: 0.4.4
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -1186,8 +1186,13 @@ class Body(FloatLayout):
             grid.bind(minimum_height=grid.setter('height'))
 
             for value in result:
-                grid.add_widget(Wrap(text=' ' + str(value), color=[0, 0, 0, 1],
-                                     background_color=[1, 1, 1, 1]))
+                if isinstance(value, (float, int)):
+                    val = repr(value)
+                else:
+                    val = str(value)
+                grid.add_widget(Wrap(text=val, color=[0, 0, 0, 1],
+                                     background_color=[1, 1, 1, 1],
+                                     padding_x=3))
 
             box.add_widget(Widget())
             box.add_widget(grid)
