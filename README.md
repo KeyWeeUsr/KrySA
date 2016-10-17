@@ -9,6 +9,8 @@ KrySA
 <img src="https://img.shields.io/pypi/pyversions/krysa.svg" /></a>
 <a href="https://pypi.python.org/pypi/krysa" target="_blank">
 <img src="https://img.shields.io/pypi/v/krysa.svg" /></a>
+<a href="https://travis-ci.org/KeyWeeUsr/KrySA" target="_blank">
+<img src="https://travis-ci.org/KeyWeeUsr/KrySA.svg?branch=master" /></a>
 
 _Statistical analysis for rats._
 
