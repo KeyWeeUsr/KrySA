@@ -3,21 +3,19 @@ python:
   - "2.7"
 dist: trusty
 before_install:
-  - wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
-  - bash Miniconda2-latest-Linux-x86_64.sh -b
-  - export PATH=$HOME/miniconda3/bin:$PATH
   - sudo add-apt-repository ppa:zoogie/sdl2-snapshots -y
-  - sudo add-apt-repository ppa:gstreamer-developers/ppa -y
   - sudo apt-get update;
   - sudo apt-get -y install libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libsdl2-mixer-dev;
   - sudo apt-get -y install python-dev libsmpeg-dev libswscale-dev libavformat-dev libavcodec-dev libjpeg-dev libtiff4-dev libX11-dev libmtdev-dev;
   - sudo apt-get -y install python-setuptools build-essential libgl1-mesa-dev libgles2-mesa-dev;
   - sudo apt-get -y install xvfb pulseaudio;
+  - export DISPLAY=:99.0;
+  - /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1280x720x24 -ac +extension GLX;
 install:
   - python -m pip install --upgrade pip
   - pip install kivyunittest
   - pip install Cython>=0.23
-  - pip install http://github.com/kivy/kivy/zipball/master --verbose
+  - pip install http://github.com/kivy/kivy/zipball/master --verbose -I
   - pip install -r docs/docs-requirements.txt
   - pip install .
 script:
