@@ -27,6 +27,7 @@ Contents
    gettingstarted
    project
    task
+   gallery
    contribute
    license
 

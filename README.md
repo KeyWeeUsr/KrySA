@@ -3,14 +3,14 @@ KrySA
 
 <img align="right" height="256" src="https://raw.githubusercontent.com/KeyWeeUsr/KrySA/master/krysa/data/logo.png"/>
 
+<a href="https://travis-ci.org/KeyWeeUsr/KrySA" target="_blank">
+<img src="https://travis-ci.org/KeyWeeUsr/KrySA.svg?branch=master" /></a>
 <a href="http://badida.sk/krysa" target="_blank">
 <img src="https://readthedocs.org/projects/krysa/badge/?version=latest" /></a>
 <a href="https://pypi.python.org/pypi/krysa" target="_blank">
 <img src="https://img.shields.io/pypi/pyversions/krysa.svg" /></a>
 <a href="https://pypi.python.org/pypi/krysa" target="_blank">
 <img src="https://img.shields.io/pypi/v/krysa.svg" /></a>
-<a href="https://travis-ci.org/KeyWeeUsr/KrySA" target="_blank">
-<img src="https://travis-ci.org/KeyWeeUsr/KrySA.svg?branch=master" /></a>
 
 _Statistical analysis for rats._
 
@@ -25,6 +25,9 @@ KrySA is written in [Python 2.7](https://python.org) using
 [Kivy](https://kivy.org) framework together with
 [packages](http://krysa.readthedocs.io/en/latest/gettingstarted.html).
 To run it you have to have all of them installed.
+
+You can find more about KrySA, source documentation and screenshots
+[here](http://badida.sk/krysa).
 
 Licenses
 --------
