@@ -270,15 +270,14 @@
 <LinePlotLayout>:
     orientation: 'vertical'
     size_hint_y: None
-    height: dp(350)
+    height: dp(370)
     TextInput:
-        size_hint_y: None
-        height: dp(40)
+        size_hint_y: 0.1
         id: title
         hint_text: 'Title'
 
     BoxLayout:
-        size_hint_y: 0.35
+        size_hint_y: 0.3
         BoxLayout:
             orientation: 'vertical'
             Label:
@@ -306,7 +305,7 @@
                 hint_text: 'Y axis label'
 
     BoxLayout:
-        size_hint_y: 0.1
+        size_hint_y: 0.05
         Label:
             text: 'First value as label:'
 
@@ -317,11 +316,11 @@
                 ylabel.disabled = self.active
 
     Label:
-        size_hint_y: 0.1
+        size_hint_y: 0.05
         text: 'Axes properties'
 
     BoxLayout:
-        size_hint_y: 0.45
+        size_hint_y: 0.5
         orientation: 'vertical'
         GridLayout:
             cols: 2
@@ -358,5 +357,13 @@
                 id: plotshape
                 values: ['-', '--', 'o', 's', '^']
                 text: '-'
+
+        BoxLayout:
+            size_hint_y: 0.32
+            Label:
+                text: 'Show grid'
+
+            CheckBox:
+                id: showgrid
 
 <StandLayout>:

@@ -92,8 +92,9 @@ class Test(unittest.TestCase):
                 box_values.children[-1].children[0].text = '20'
 
                 # set line options
-                box_values.children[-2].children[1].text = 'g'
-                box_values.children[-2].children[0].text = 's'
+                box_values.children[-2].children[-3].text = 'g'
+                box_values.children[-2].children[-4].text = 's'
+                box_values.children[-3].children[0].active = True
                 body[-3].children[0].dispatch('on_release')
 
         # get results and test

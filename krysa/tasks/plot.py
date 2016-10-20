@@ -46,13 +46,14 @@ class Plot(object):
                            container.ids.ymin,
                            container.ids.ymax,
                            container.ids.plotcolor,
-                           container.ids.plotshape,)
+                           container.ids.plotshape,
+                           container.ids.showgrid)
         task.open()
 
     @staticmethod
     def _plot_line(task, title, xaddress, yaddress, labelcheck,
                    xlabel, ylabel, xmin, xmax, ymin, ymax, plotcolor,
-                   plotshape, *args):
+                   plotshape, showgrid, *args):
         res_dir = op.join(task.app.project_dir, 'plots')
         idx = len([f for f in os.listdir(res_dir) if f.startswith('plot')]) + 1
 
@@ -75,7 +76,7 @@ class Plot(object):
         # set up plot
         pyplot.hold(False)
         fig = pyplot.figure()
-        pyplot.title(title.text)
+        fig.suptitle(title.text, fontsize='x-large')
 
         # pop the first value to become axis label
         if labelcheck.active:
@@ -103,6 +104,7 @@ class Plot(object):
 
         # dump to file and clean
         pyplot.axis(axes)
+        pyplot.grid(showgrid.active)
         result = op.join(res_dir, 'plot{}.png'.format(idx))
         pyplot.savefig(result)
         pyplot.cla()
