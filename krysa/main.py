@@ -714,7 +714,7 @@ class Body(FloatLayout):
         self._import_data([op.join(data, 'data.sqlite')])
 
         # import results
-        for file in os.listdir(results):
+        for file in sorted(os.listdir(results)):
             self.set_page('', op.join(results, file), result_type='import')
 
     def close_project(self, *args):
