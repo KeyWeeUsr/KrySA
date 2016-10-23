@@ -1,35 +1,39 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.4.5
+# Version: 0.5.0
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
+# Setting maximized Window
 from kivy.config import Config
 import os
 
-# local & RTD docs fix
+# Local & RTD docs fix
 if not any(['BUILDDIR' in os.environ, 'READTHEDOCS' in os.environ]):
     Config.set('graphics', 'window_state', 'maximized')
-    import numpy
-    import scipy
 
+# Python-only imports
 import re
 import json
 import math
 import string
 import sqlite3
 import os.path as op
-from kivy.app import App
-from kivy.clock import Clock
 from functools import partial
+from time import gmtime, strftime
+
+# Kivy imports
+from kivy.app import App
+from kivy.metrics import dp
+from kivy.clock import Clock
 from dropdown import DropDown
 from kivy.logger import Logger
 from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.uix.label import Label
-from time import gmtime, strftime
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
+from kivy.graphics import Color, Line
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
 from kivy.uix.scrollview import ScrollView
@@ -37,12 +41,15 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.stencilview import StencilView
+from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.recyclegridlayout import RecycleGridLayout
 from kivy.properties import StringProperty, ObjectProperty, \
     BooleanProperty, ListProperty
 
+# KrySA packages
+import utils
 from tasks import Task
 from tasks.basic import Basic
 from tasks.avgs import Avgs
@@ -463,19 +470,182 @@ class Table(ScrollView):
         self.rv.data = []
 
 
-class ProcessFlow(BoxLayout, StencilView):
-    '''A canvas on which will be displayed actions for each :ref:`data` related
-    to them, such as used tasks connected with result of the tasks.
+class ProcessFlowSep(Widget):
+    '''A line separator between :mod:`main.ProcessFlowMain` items.
+    The line can be either horizontal or vertical.
+
+    :Parameters:
+       `orientation`: string
+          Choose a string from ['horizontal', 'vertical'], defaults to
+          `horizontal`.
+
+    .. versionadded:: 0.5.0
+    '''
+    def __init__(self, **kwargs):
+        super(ProcessFlowSep, self).__init__(**kwargs)
+        self.orientation = kwargs.get('orientation', 'horizontal')
+        if self.orientation == 'vertical':
+            self.height = dp(64)
+            points = [self.pos[0],
+                      self.pos[1] + self.size[1] / 2.0,
+                      self.pos[0] + self.size[0],
+                      self.pos[1] + self.size[1] / 2.0]
+        elif self.orientation == 'horizontal':
+            self.width = dp(64)
+            points = [self.pos[0] + self.size[0] / 2.0,
+                      self.pos[1],
+                      self.pos[0] + self.size[0] / 2.0,
+                      self.pos[1] + self.size[1]]
+        with self.canvas:
+            Color(0, 0, 0, 1)
+            Line(points=points, width=1)
+
+
+class ProcessFlowMain(ButtonBehavior, BoxLayout):
+    '''An item on the :mod:`main.ProcessFlow`, provides a label
+    with its name, an icon and a touch behavior that opens its
+    target with system's default program for such target.
+
+    .. versionadded:: 0.5.0
+    '''
+    source = StringProperty('')
+
+    def __init__(self, **kwargs):
+        self.name = kwargs.pop('name')
+        app = App.get_running_app()
+        link = kwargs.get('link')
+        source = kwargs.get('source')
+        super(ProcessFlowMain, self).__init__(**kwargs)
+        if link:
+            self.bind(on_release=link)
+        if source:
+            self.source = source
+        else:
+            self.source = op.join(app.path, 'data', 'head.png')
+
+
+class ProcessFlow(FloatLayout, StencilView):
+    '''A canvas on which are displayed files in project folders with
+    a touch event opening them in the default program.
+
+    ToDo: more items such as displaying tasks.
 
     .. versionadded:: 0.1.0
-
-    (Not implemented yet)
+    .. versionchanged:: 0.5.0
+       Implemented icons with a behavior representing the :ref:`project`
+       structure.
     '''
-    def __init__(self, **kw):
-        super(ProcessFlow, self).__init__(**kw)
-        app = App.get_running_app()
-        self.texture = Image(source=app.path + '/data/grid.png').texture
+    def __init__(self, **kwargs):
+        super(ProcessFlow, self).__init__(**kwargs)
+        self.app = App.get_running_app()
+        self.app.flow = self
+        self.texture = Image(source=self.app.path + '/data/grid.png').texture
         self.texture.wrap = 'repeat'
+        self.boxes = {}
+
+    def add_project(self):
+        '''Adds a root item for the other items on the :mod:`main.ProcessFlow`.
+
+        .. versionadded:: 0.5.0
+        '''
+        project = ProcessFlowMain
+        pos = [dp(50), self.size[1] - dp(132)]
+        self.boxes['project'] = pos
+        self.add_widget(project(name=self.app.project_name, pos=pos))
+
+    def add_mainitem(self, name, link):
+        '''Adds a main item on the same level as the :ref:`project`.
+
+        :Parameters:
+           `name`: string
+              Used as a text for label.
+           `link`: path (string)
+              Used for a touch event.
+
+        .. versionadded:: 0.5.0
+        '''
+        mainitem = ProcessFlowMain
+        sep = ProcessFlowSep
+        if 'mainitems' in self.boxes.keys():
+            sep_pos = [dp(66), self.boxes['mainitems'][-1][1] - dp(132)]
+            pos = [dp(50), self.boxes['mainitems'][-1][1] - dp(264), name]
+            sep_height = sep_pos[1] - pos[1] - dp(8)
+            self.boxes['mainitems'].append(pos)
+        else:
+            sep_pos = [dp(66), self.boxes['project'][1] - dp(132)]
+            pos = [dp(50), self.boxes['project'][1] - dp(264), name]
+            sep_height = sep_pos[1] - pos[1] - dp(8)
+            self.boxes['mainitems'] = [list(pos), ]
+        link = utils.create_bind(link)
+        path = op.join(self.app.path, 'data')
+        if name == 'plots':
+            image = op.join(path, 'head_plots.png')
+        elif name == 'data':
+            image = op.join(path, 'head_data.png')
+        elif name == 'results':
+            image = op.join(path, 'head_image.png')
+        else:
+            image = ''
+        self.add_widget(sep(pos=sep_pos, height=sep_height))
+        self.add_widget(mainitem(name=name, pos=pos[:2],
+                                 link=link, source=image))
+
+    def add_subitem(self, name, link, parent):
+        '''Adds a subitem under an existing :mod:`main.ProcessFlowMain`.
+
+        :Parameters:
+           `name`: string
+              Used as a text for label
+           `link`: path (string)
+              Used for a touch event
+           `parent`: string
+              Used to create a key for subitems e.g. `myparent-subitems`
+
+        .. versionadded:: 0.5.0
+        '''
+        mainitem = ProcessFlowMain
+        sep = ProcessFlowSep
+        parent_pos = None
+        for p in self.boxes['mainitems']:
+            if parent in p[2]:
+                parent_pos, parent = p[:2], p[2]
+        subitems = '{}-subitems'.format(parent)
+
+        if subitems in self.boxes.keys():
+            sep_pos = [self.boxes[subitems][-1][0] + dp(100),
+                       self.boxes[subitems][-1][1] + dp(16)]
+            pos = [self.boxes[subitems][-1][0] + dp(200),
+                   self.boxes[subitems][-1][1]]
+            sep_width = pos[0] - sep_pos[0] - dp(16)
+            self.boxes[subitems].append(pos)
+        else:
+            sep_pos = [parent_pos[0] + dp(100), parent_pos[1] + dp(16)]
+            pos = [self.boxes['project'][0] + dp(200), parent_pos[1]]
+            sep_width = pos[0] - sep_pos[0] - dp(16)
+            self.boxes[subitems] = [list(pos), ]
+        link = utils.create_bind(link)
+        self.add_widget(sep(pos=sep_pos, width=sep_width,
+                            orientation='vertical'))
+        self.add_widget(mainitem(name=name, pos=pos, link=link))
+
+    def resize(self, *args):
+        '''Resizes the :mod:`main.ProcessFlow` to encapsulate its children.
+
+        .. versionadded:: 0.5.0
+        '''
+        # should be better handled in the future
+        width = sum([c.width for c in self.children])
+        if width > dp(2000):
+            self.width = width
+
+    def flush(self):
+        '''Removes every item previously added to :mod:`main.ProcessFlow`
+        and cleans all stored positions.
+
+        .. versionadded:: 0.5.0
+        '''
+        self.boxes = {}
+        self.clear_widgets()
 
 
 class SizedButton(Button):
@@ -699,6 +869,7 @@ class Body(FloatLayout):
 
         data = op.join(selection, 'data')
         results = op.join(selection, 'results')
+        plots = op.join(selection, 'plots')
 
         self.app.project_exists = True
         self.app.project_dir = selection
@@ -716,6 +887,9 @@ class Body(FloatLayout):
         # import results
         for file in sorted(os.listdir(results)):
             self.set_page('', op.join(results, file), result_type='import')
+
+        # load items to ProcessFlow
+        self.flow_reload()
 
     def close_project(self, *args):
         '''Clears all important variables, removes all :ref:`data` available in
@@ -798,6 +972,9 @@ class Body(FloatLayout):
 
         # exporting results to pdf -> 0.3.x
         self._export_results(results)
+
+        # load items to ProcessFlow
+        self.flow_reload()
 
     def import_data(self, *args):
         self.opendlg = Dialog(title='Import Data',
@@ -986,6 +1163,32 @@ class Body(FloatLayout):
                 result.children[2].children[0].export_to_png(where)
             except IndexError:
                 print 'No results available.'
+
+    def flow_reload(self):
+        # get folders
+        fold = self.app.project_dir
+        data = op.join(fold, 'data')
+        results = op.join(fold, 'results')
+        plots = op.join(fold, 'plots')
+
+        # remove anything in ProcessFlow
+        # and add a Project icon
+        self.app.flow.flush()
+        self.app.flow.add_project()
+        self.flow_init([data, results, plots])
+
+    def flow_init(self, folders=None):
+        # first create and place main items according
+        # to the Project item position, then place
+        # subitems according to the their parent's pos
+        for fold in folders:
+            if op.isdir(fold):
+                self.app.flow.add_mainitem(name=op.basename(fold),
+                                           link=fold)
+            for sub in sorted(os.listdir(fold)):
+                self.app.flow.add_subitem(name=op.basename(sub),
+                                          link=op.join(fold, sub),
+                                          parent=op.basename(fold))
 
     # menu showing functions
     @staticmethod
@@ -1264,7 +1467,7 @@ class KrySA(App):
     properties themselves.
     '''
     path = op.dirname(op.abspath(__file__))
-    icon = path + '/data/icon.png'
+    icon = op.join(path, 'data', 'icon.png')
     project_exists = BooleanProperty(False)
     project_name = ''
     project_dir = ''

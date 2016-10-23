@@ -71,6 +71,7 @@ with open(op.join(sourcedir, 'mod_index.rst'), 'w') as f:
     f.write('.. toctree::\n')
     f.write('   mod_krysa\n')
     f.write('   mod_krysa_tasks\n')
+    f.write('   mod_krysa_utils\n')
     f.write('   mod_krysa_tests\n')
 
 print('Full docs done...')

@@ -104,8 +104,10 @@
             height: root.height - dp(37)
             TabbedPanelItem:
                 text: 'Process Flow'
-                ProcessFlow:
-                    id: flow
+                ScrollView:
+                    bar_width: dp(5)
+                    ProcessFlow:
+                        id: flow
 
         Splitter:
             id: resultspanel
@@ -165,6 +167,9 @@
     on_texture_size: root.correct_width()
 
 <ProcessFlow>:
+    size_hint: None, None
+    size: 2000, 1000
+    on_children: self.resize()
     canvas:
         Color:
             rgba: 1, 1, 1, 0.9
@@ -515,3 +520,22 @@
         Rectangle:
             size: self.size
             pos: self.pos
+
+<ProcessFlowSep>:
+    size_hint: None, None
+
+<ProcessFlowMain>:
+    orientation: 'vertical'
+    size_hint: None, None
+    width: dp(96)
+    on_children: self.height = sum([c.height for c in self.children])
+    Label:
+        size_hint_y: None
+        height: dp(30)
+        color: 0, 0, 0, 1
+        text: root.name
+
+    Image:
+        size_hint_y: None
+        height: root.width
+        source: root.source
