@@ -88,7 +88,7 @@ class Test(unittest.TestCase):
 
         app.stop()
 
-    def test_file_new(self):
+    def test_file_closeproject(self):
         self.path = op.dirname(op.abspath(__file__))
         if not op.exists(op.join(self.path, 'test_folder')):
             os.mkdir(op.join(self.path, 'test_folder'))

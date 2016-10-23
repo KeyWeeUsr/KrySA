@@ -111,3 +111,12 @@ At the end your environment might look similar to this screenshot:
 .. image:: _static/gallery/09_used_environment.png
    :align: center
    :target: _static/gallery/09_used_environment.png
+
+Process Flow
+------------
+
+A canvas representing a structure of the loaded :ref:`project`.
+
+.. image:: _static/gallery/11_processflow.png
+   :align: center
+   :target: _static/gallery/11_processflow.png

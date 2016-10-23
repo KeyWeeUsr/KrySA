@@ -112,7 +112,7 @@ class Test(unittest.TestCase):
         self.assertEqual(results - 1 if skipone else results, 12)
         app.stop()
 
-    def test_tasks_basic_small(self):
+    def test_tasks_plot_lineplot(self):
         self.path = op.dirname(op.abspath(__file__))
         if not op.exists(op.join(self.path, 'test_folder')):
             os.mkdir(op.join(self.path, 'test_folder'))

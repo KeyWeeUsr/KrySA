@@ -31,6 +31,7 @@ class Test(unittest.TestCase):
         self.assertEqual(app.project_name, 'Test')
         data = op.join(test_project, 'data')
         results = op.join(test_project, 'results')
+        plots = op.join(test_project, 'plots')
 
         # set testing data
         newdata_values = [[0, u'', 0.0],
@@ -39,7 +40,9 @@ class Test(unittest.TestCase):
                           [0, u'', 1.1],
                           [1, u'', 0.0]]
         newdata2_values = [[1, u'text', 1.1]]
-        results_count = 2
+        results_count = 4
+        plots_count = 2
+        self.assertEqual(plots_count, len(os.listdir(plots)))
         self.assertEqual(results_count, len(os.listdir(results)))
 
         # get data from krysa table
@@ -94,10 +97,13 @@ class Test(unittest.TestCase):
             print v
 
         # test imported results
-        sources = []
         imported_results = 0
-        expected_files = ['000', '001']
+        expected_files = ['000', '001', '002', '003']
+        expected_plots = ['plot1', 'plot2']
+        sources = [op.splitext(f)[0] for f in sorted(os.listdir(plots))]
+        self.assertEqual(sources, expected_plots)
 
+        sources = []
         results = app.root.ids.results
         for child in reversed(results.children):
             if 'Page' in str(child):
