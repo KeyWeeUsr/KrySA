@@ -21,7 +21,10 @@ Builder.load_file(op.join(op.dirname(op.abspath(__file__)), 'tasks.kv'))
 
 
 class LinePlotLayout(BoxLayout):
-    '''Add docs!
+    '''A layout that consists of two main columns for input of X and Y values
+    used to draw a plot and other inputs for setting plot's properties.
+
+    .. versionadded:: 0.4.3
     '''
 
 
