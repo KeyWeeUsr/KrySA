@@ -1,7 +1,15 @@
-language: python
-python:
-  - "2.7"
-dist: trusty
+matrix:
+  fast_finish: true
+  include:
+    - language: python
+      python: 2.7
+      os: linux
+      dist: trusty
+    - language: python
+      python: 3.5
+      os: linux
+      dist: trusty
+
 before_install:
   - sudo add-apt-repository ppa:zoogie/sdl2-snapshots -y
   - sudo apt-get update;
