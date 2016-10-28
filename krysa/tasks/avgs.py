@@ -95,7 +95,6 @@ class Avgs(object):
     @staticmethod
     def _avgs_median(task, address, *args):
         values = task.from_address(task.tablenum, address.text)
-        print values
         length = len(values)
         pos = int(round(length / 2.0))
         if length == 1:

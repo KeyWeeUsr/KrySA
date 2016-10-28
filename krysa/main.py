@@ -401,7 +401,7 @@ class Table(ScrollView):
                             if filter_val in ['int', 'float']:
                                 filter = filter_val
                         except IndexError:
-                            print 'values < space'
+                            Logger.info('KrySA: values < space')
                             val = '.'
 
                         if 'e+' in str(val) or 'e-' in str(val):
@@ -879,7 +879,7 @@ class Body(FloatLayout):
         # dump widgets' properties from process flow to dict, then to json
         with open(op.join(selection, fname), 'rb') as f:
             project = json.loads(f.read())
-        print project
+        # print project
 
         # import from project automatically
         self._import_data([op.join(data, 'data.sqlite')])
@@ -1162,7 +1162,7 @@ class Body(FloatLayout):
                 where = op.join(selection, str(i).zfill(3) + '.png')
                 result.children[2].children[0].export_to_png(where)
             except IndexError:
-                print 'No results available.'
+                Logger.info('KrySA: No results available.')
 
     def flow_reload(self):
         # get folders
@@ -1260,7 +1260,7 @@ class Body(FloatLayout):
 
     @staticmethod
     def test(*args):
-        print 'ping: ', args
+        Logger.info('KrySA: ping {}'.format(str(args)))
 
     # non-menu related functions
     @staticmethod
