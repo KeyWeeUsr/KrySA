@@ -18,6 +18,7 @@ import json
 import math
 import string
 import sqlite3
+from io import open
 import os.path as op
 from functools import partial
 from time import gmtime, strftime
@@ -964,8 +965,8 @@ class Body(FloatLayout):
         # (dummy for now)
         # dump widgets' properties from process flow to dict, then to json
         project = {u'test': u'blah'}
-        with open(op.join(selection, fname), 'wb') as f:
-            f.write(json.dumps(project, indent=4))
+        with open(op.join(selection, fname), 'w', encoding='utf8') as f:
+            f.write(json.dumps(project, indent=4).decode('utf8'))
 
         # let user set table columns, add to tab, then:
         self._export_data([data], 'data.sqlite')
