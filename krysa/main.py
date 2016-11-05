@@ -966,7 +966,12 @@ class Body(FloatLayout):
         # dump widgets' properties from process flow to dict, then to json
         project = {u'test': u'blah'}
         with open(op.join(selection, fname), 'w', encoding='utf8') as f:
-            f.write(json.dumps(project, indent=4).decode('utf8'))
+            dump = json.dumps(project, indent=4)
+            try:
+                dump = dump.decode('utf8')
+            except AttributeError:
+                pass
+            f.write(dump)
 
         # let user set table columns, add to tab, then:
         self._export_data([data], 'data.sqlite')
