@@ -69,7 +69,7 @@ class Test(unittest.TestCase):
             taskcls.basic_small()
 
             children = app.root_window.children
-            for c in children:
+            for c in reversed(children):
                 if 'Task' in str(c):
                     index = children.index(c)
             task = children[index]

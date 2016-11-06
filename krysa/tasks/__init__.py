@@ -34,6 +34,14 @@ class AddressLayout(BoxLayout):
     '''
 
 
+class CountIfLayout(BoxLayout):
+    '''A layout providing a way to create conditions for counting values from
+    used :ref:`Data`.
+
+    .. versionadded:: 0.5.1
+    '''
+
+
 class SmallLargeLayout(BoxLayout):
     '''A layout that consists of multiple restricted input widgets for address
     and `k` value.

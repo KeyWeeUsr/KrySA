@@ -3,7 +3,7 @@
 .. _b: http://docs.scipy.org/doc/numpy/reference/generated/numpy.histogram.html
 '''
 
-from . import Task, AddressLayout, SmallLargeLayout, FreqLayout
+from . import Task, AddressLayout, SmallLargeLayout, FreqLayout, CountIfLayout
 from functools import partial
 from numpy import histogram
 import math
@@ -35,9 +35,85 @@ class Basic(object):
         values = task.from_address(task.tablenum, address.text)
         task.set_page('Count', str(len(values)), 'text')
 
-    def basic_countifs(self, *args):
-        '''Not yet implemented.
+    def basic_countif(self, *args):
+        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.CountIfLayout` that
+        gets from user :ref:`Data` address and conditions for getting values.
+        Creates a result page with count.
+
+        This method uses Python's `eval()` and executing of boolean logic,
+        which means the order of executed conditions will be like this::
+
+            ((Cond and Cond) and Cond) or (Cond) or (Cond and Cond)
+              ^-- first   second --^       ^-- third   ^-- fourth
+
+        .. versionadded:: 0.5.1
         '''
+        widget = CountIfLayout()
+        task = Task(title='Count If', wdg=widget,
+                    call=['Count If', Basic.basic_countif])
+        container = task.ids.container.children[0]
+        task.run = partial(Basic._basic_countif,
+                           task,
+                           container.ids.name,
+                           container.ids.conditions)
+        task.open()
+
+    @staticmethod
+    def _basic_countif(task, address, conditions, *args):
+        values = task.from_address(task.tablenum, address.text)
+        result = ''
+        instruction = ''
+        count = 0
+
+        groups = []
+        grp = []
+        for child in reversed(conditions.children):
+            operation = child.children[-1].text
+            op_val = child.children[-2].text
+            logic = child.children[-3].text
+            if operation != '---' and op_val:
+                grp.append([operation, op_val])
+            if logic == '---':
+                groups.append(grp)
+                break
+            if logic == 'OR':
+                groups.append(grp)
+                grp = []
+
+        for i, grp in enumerate(groups):
+            for g in grp:
+                vals = []
+                operation = g[0]
+                op_val = g[1]
+                last_op = instruction[-5:]
+                if last_op != ' and ' and ' or ' not in last_op and last_op:
+                    instruction += ' and '
+                if operation == 'Less than':
+                    instruction += 'val < '
+                elif operation == 'Less than or equal':
+                    instruction += 'val <= '
+                elif operation == 'Greater than':
+                    instruction += 'val > '
+                elif operation == 'Greater than or equal':
+                    instruction += 'val >= '
+                elif operation == 'Equal to':
+                    instruction += 'val == '
+                elif operation == 'Not equal to':
+                    instruction += 'val != '
+                instruction += op_val
+                result += operation + ' ' + op_val + '\n'
+            try:
+                groups[i + 1]
+                instruction += ' or '
+            except IndexError:
+                pass
+
+        for val in values:
+            if eval(instruction):
+                count += 1
+
+        result += '\nCount: ' + str(count)
+        task.set_page('Count If', result, 'text')
 
     def basic_min(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
@@ -316,7 +392,7 @@ class Basic(object):
                       result, 'table{}'.format(cols))
 
     names = (('Count', basic_count),
-             ('_Count ifs', basic_countifs),
+             ('Count If', basic_countif),
              ('Minimum', basic_min),
              ('Maximum', basic_max),
              ('Small', basic_small),

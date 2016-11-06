@@ -56,6 +56,55 @@
     SingleTI:
         id: name
 
+<CountIfOption@BoxLayout>:
+    size_hint_y: None
+    height: dp(60)
+    Spinner:
+        values:
+            ['Less than',
+            'Less than or equal',
+            'Greater than',
+            'Greater than or equal',
+            'Equal to',
+            'Not equal to']
+        text: '---'
+
+    FloatInput:
+
+    Spinner:
+        values: ['---', 'AND', 'OR']
+        text: '---'
+
+    Button:
+        text: 'X'
+        on_release: root.parent.remove_widget(root)
+
+<CountIfLayout>:
+    orientation: 'vertical'
+    size_hint_y: None
+    height: dp(200)
+    BoxLayout:
+        size_hint_y: 0.2
+        Label:
+            text: 'Address'
+
+        SingleTI:
+            id: name
+
+        Button:
+            text: '+'
+            size_hint_x: None
+            width: self.height
+            on_release: conditions.add_widget(Factory.CountIfOption())
+
+    ScrollView:
+        size_hint_y: 0.8
+        GridLayout:
+            cols: 1
+            id: conditions
+            size_hint_y: None
+            height: self.minimum_height
+
 <SmallLargeLayout>:
     orientation: 'vertical'
     BoxLayout:

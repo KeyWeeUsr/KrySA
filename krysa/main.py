@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.5.0
+# Version: 0.5.1
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -119,10 +119,10 @@ class NewDataValue(BoxLayout):
 
     .. versionadded:: 0.1.4
     '''
-    def __init__(self, **kw):
+    def __init__(self, filter=None, **kwargs):
         self.app = App.get_running_app()
-        super(NewDataValue, self).__init__(**kw)
-        self.filter = kw['filter']
+        super(NewDataValue, self).__init__(**kwargs)
+        self.filter = filter
 
 
 class NewDataColumn(BoxLayout):
@@ -248,10 +248,9 @@ class CreateWizard(Popup):
     '''
     run = ObjectProperty(None)
 
-    def __init__(self, **kw):
-        super(CreateWizard, self).__init__(**kw)
-        self.run = kw.get('run')
-        wdg = kw.get('wdg')
+    def __init__(self, wdg=None, run=None, **kwargs):
+        super(CreateWizard, self).__init__(**kwargs)
+        self.run = run
         if wdg:
             self.ids.container.add_widget(wdg)
 
@@ -343,7 +342,8 @@ class Table(ScrollView):
     number_size = (30, 30)
     default_size = (100, 30)
 
-    def __init__(self, **kw):
+    def __init__(self, max_rows=1, max_cols=1, values=[], labels=None,
+                 types=None, **kwargs):
         app = App.get_running_app()
         self.rv = RecycleView(bar_width='10dp',
                               scroll_type=['bars', 'content'])
@@ -351,13 +351,13 @@ class Table(ScrollView):
         container.viewclass = TableItem
         container.bind(minimum_size=container.setter('size'))
 
-        self.max_rows = kw.get('max_rows', 1)
+        self.max_rows = max_rows
         self.rows = self.max_rows + 1
-        self.max_cols = kw.get('max_cols', 1)
+        self.max_cols = max_cols
         self.cols = self.max_cols + 1
-        self.values = kw.get('values', [])
-        self.labels = kw.get('labels')
-        self.types = kw.get('types')
+        self.values = values
+        self.labels = labels
+        self.types = types
 
         container.rows = self.rows
         container.cols = self.cols
@@ -365,9 +365,9 @@ class Table(ScrollView):
         ltr = [' (' + letter + ')' for letter in self.get_letters()]
         self.rv.add_widget(container)
 
-        if 'item_size' not in kw:
+        if 'item_size' not in kwargs:
             item_size = self.default_size
-        super(Table, self).__init__(**kw)
+        super(Table, self).__init__(**kwargs)
         for r in range(self.rows):
             for c in range(self.cols):
                 if r == 0:
@@ -482,9 +482,9 @@ class ProcessFlowSep(Widget):
 
     .. versionadded:: 0.5.0
     '''
-    def __init__(self, **kwargs):
+    def __init__(self, orientation='horizontal', **kwargs):
         super(ProcessFlowSep, self).__init__(**kwargs)
-        self.orientation = kwargs.get('orientation', 'horizontal')
+        self.orientation = orientation
         if self.orientation == 'vertical':
             self.height = dp(64)
             points = [self.pos[0],
@@ -511,11 +511,9 @@ class ProcessFlowMain(ButtonBehavior, BoxLayout):
     '''
     source = StringProperty('')
 
-    def __init__(self, **kwargs):
+    def __init__(self, link=None, source=None, **kwargs):
         self.name = kwargs.pop('name')
         app = App.get_running_app()
-        link = kwargs.get('link')
-        source = kwargs.get('source')
         super(ProcessFlowMain, self).__init__(**kwargs)
         if link:
             self.bind(on_release=link)
@@ -674,10 +672,10 @@ class MenuDrop(DropDown):
 
     .. versionadded:: 0.1.0
     '''
-    def __init__(self, **kw):
+    def __init__(self, **kwargs):
         app = App.get_running_app()
         app.drop = self
-        super(MenuDrop, self).__init__(**kw)
+        super(MenuDrop, self).__init__(**kwargs)
 
     def click(self, instance, values):
         for value in values:
@@ -697,7 +695,7 @@ class Body(FloatLayout):
 
     .. versionadded:: 0.1.0
     '''
-    def __init__(self, **kw):
+    def __init__(self, **kwargs):
         self.app = App.get_running_app()
         self.tables = []
         self.app.menu = {'file': (['New...', self.new],
@@ -726,7 +724,7 @@ class Body(FloatLayout):
                                   ['_Getting Started Tutorial', self.test],
                                   ['About KrySA', self.about],),
                          }
-        super(Body, self).__init__(**kw)
+        super(Body, self).__init__(**kwargs)
 
     def new(self, button, *args):
         '''Opens a submenu for ``New`` menu.

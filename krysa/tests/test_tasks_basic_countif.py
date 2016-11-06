@@ -12,7 +12,7 @@ from kivy.clock import Clock
 main_path = op.dirname(op.dirname(op.abspath(__file__)))
 sys.path.append(main_path)
 from main import KrySA, ErrorPop
-from tasks.plot import Plot
+from tasks.basic import Basic
 
 
 class Test(unittest.TestCase):
@@ -61,58 +61,73 @@ class Test(unittest.TestCase):
         new_data = app.root.wiz_newdata.run()
 
         # open Task's popup and get task
-        address = ['A1:D13', 'A1:B2', 'C1:D2',
-                   'A12:B13', 'C12:D13', 'B3:C10']
-        for addr in address:
-            for xonly in range(2):
-                taskcls = Plot()
-                taskcls.plot_line()
+        conditions = [
+            ['Equal to', '1'],
+            ['Not equal to', '13'],
+            ['Less than', '10.10'],
+            ['Less than or equal', '10'],
+            ['Greater than', '4.4'],
+            ['Greater than or equal', '5'],
+            ['Less than&,Greater than or equal|,Equal to', '13.13,10,1']
+        ]
 
-                children = app.root_window.children
-                for c in reversed(children):
-                    if 'Task' in str(c):
-                        index = children.index(c)
-                task = children[index]
+        for con in conditions:
+            taskcls = Basic()
+            taskcls.basic_countif()
 
-                # fill the task
-                body = task.children[0].children[0].children[0].children
-                body[-1].text = 'NewData'
-                body[-2].children[0].children[-1].text = 'Test Title'
+            children = app.root_window.children
+            for c in reversed(children):
+                if 'Task' in str(c):
+                    index = children.index(c)
+            task = children[index]
 
-                # fetching addresses and axes labels
-                box_values = body[-2].children[0].children[-2]
-                box_values.children[-1].children[-2].text = addr
-                body[-2].children[0].children[-3].children[0].active = True
-                if not xonly:
-                    box_values.children[-2].children[-2].text = addr
+            # fill the task
+            body = task.children[0].children[0].children[0].children
+            add_cond = body[-2].children[0].children[-1].children[0]
+            conds = body[-2].children[0].children[-2].children[0]
+            body[-1].text = 'NewData'
+            body[-2].children[0].children[-1].children[-2].text = 'A1:D13'
 
-                # set axes limits
-                box_values = body[-2].children[0].children[-5]
-                box_values.children[-1].children[-1].text = '-20'
-                box_values.children[-1].children[0].text = '20'
+            # if multiple conditions
+            if ',' in con[0]:
+                cs = con[0].split(',')
+                vs = con[1].split(',')
+                for i in range(len(cs)):
+                    add_cond.dispatch('on_release')
+                    conds.children[0].children[-2].text = vs[i]
+                    if '&' in cs[i]:
+                        conds.children[0].children[-3].text = 'AND'
+                        conds.children[0].children[-1].text = cs[i][:-1]
+                    elif '|' in cs[i]:
+                        conds.children[0].children[-3].text = 'OR'
+                        conds.children[0].children[-1].text = cs[i][:-1]
+                    else:
+                        conds.children[0].children[-1].text = cs[i]
 
-                # set line options
-                box_values.children[-2].children[-3].text = 'g'
-                box_values.children[-2].children[-4].text = 's'
-                box_values.children[-3].children[0].active = True
-                body[-3].children[0].dispatch('on_release')
+            else:
+                add_cond.dispatch('on_release')
+                conds.children[0].children[-1].text = con[0]
+                conds.children[0].children[-2].text = con[1]
+
+            body[-3].children[0].dispatch('on_release')
 
         # get results and test
-        res_dir = op.join(app.project_dir, 'plots')
-        result = len([f for f in os.listdir(res_dir) if f.startswith('plot')])
-        self.assertEqual(result, 12)
-
+        expected = reversed([2, 50, 38, 38, 36, 36, 16])
         results = app.root.ids.results
         skipone = False  # if top padding with widget present
-        for c in reversed(results.children):
+        for c in results.children:
             if 'Widget' in str(c):
                 skipone = True
                 break
-        results = len(results.children)
-        self.assertEqual(results - 1 if skipone else results, 12)
+
+        for i, exp in enumerate(expected):
+            i = i + 1 if skipone else i
+            # Result -> Page -> container -> result
+            result = int(results.children[i].ids.page.children[1].text[-2:])
+            self.assertEqual(result, exp)
         app.stop()
 
-    def test_tasks_plot_lineplot(self):
+    def test_tasks_basic_countif(self):
         self.path = op.dirname(op.abspath(__file__))
         if not op.exists(op.join(self.path, 'test_folder')):
             os.mkdir(op.join(self.path, 'test_folder'))
