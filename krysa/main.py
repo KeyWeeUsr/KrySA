@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.5.1
+# Version: 0.5.2
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -57,6 +57,13 @@ from tasks.avgs import Avgs
 from tasks.manipulate import Manipulate
 from tasks.plot import Plot
 
+# Py3 fixes
+import sys
+if sys.version_info[0] >= 3:
+    unicode = str
+    str = bytes
+    xrange = range
+
 
 class ResultGrid(GridLayout):
     '''A black gridlayout, together with :mod:`main.Wrap` makes a table
@@ -108,9 +115,9 @@ class ErrorPop(Popup):
     '''
     message = StringProperty('')
 
-    def __init__(self, **kw):
-        self.message = kw.get('msg', '')
-        super(ErrorPop, self).__init__(**kw)
+    def __init__(self, msg='', **kwargs):
+        self.message = msg
+        super(ErrorPop, self).__init__(**kwargs)
 
 
 class NewDataValue(BoxLayout):
@@ -381,7 +388,7 @@ class Table(ScrollView):
                                 'text': self.labels[c - 1] + ltr[c - 1],
                                 '_text': self.labels[c - 1],
                                 'disabled': True,
-                                'cell': 'label' + str(c - 1),
+                                'cell': 'label' + unicode(c - 1),
                                 'type': type(u''),
                                 'size': self.default_size,
                                 'origin': self.rv
@@ -405,7 +412,7 @@ class Table(ScrollView):
                             Logger.info('KrySA: values < space')
                             val = '.'
 
-                        if 'e+' in str(val) or 'e-' in str(val):
+                        if 'e+' in unicode(val) or 'e-' in unicode(val):
                             val = '{0:.10f}'.format(val)
                         if self.types:
                             if self.types[c - 1] == 'INTEGER':
@@ -419,7 +426,7 @@ class Table(ScrollView):
                                 'text': unicode(val),
                                 'old_text': unicode(val),
                                 'disabled': False,
-                                'cell': self.labels[c - 1] + str(r),
+                                'cell': self.labels[c - 1] + unicode(r),
                                 'r': r,
                                 'rows': self.rows,
                                 'c': c,
@@ -1095,7 +1102,8 @@ class Body(FloatLayout):
 
         .. versionadded:: 0.1.1
         '''
-        col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL'}
+        col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL',
+                     "<class 'int'>": 'INTEGER', "<class 'float'>": 'REAL'}
         if not selection:
             return
         else:
@@ -1163,7 +1171,7 @@ class Body(FloatLayout):
         result_wdg = self.ids.results
         for i, result in enumerate(reversed(self.ids.results.children)):
             try:
-                where = op.join(selection, str(i).zfill(3) + '.png')
+                where = op.join(selection, unicode(i).zfill(3) + '.png')
                 result.children[2].children[0].export_to_png(where)
             except IndexError:
                 Logger.info('KrySA: No results available.')
@@ -1381,7 +1389,7 @@ class Body(FloatLayout):
         head = PaperLabel(text=task, size_hint_y=None, height='30dp')
 
         if result_type == 'text':
-            content = PaperLabel(text=result)
+            content = PaperLabel(text=unicode(result))
         elif result_type in ['image', 'import']:
             content = Image(source=result)
         elif 'table' in result_type:
@@ -1396,7 +1404,7 @@ class Body(FloatLayout):
                 if isinstance(value, (float, int)):
                     val = repr(value)
                 else:
-                    val = str(value)
+                    val = unicode(value)
                 grid.add_widget(Wrap(text=val, color=[0, 0, 0, 1],
                                      background_color=[1, 1, 1, 1],
                                      padding_x=3))

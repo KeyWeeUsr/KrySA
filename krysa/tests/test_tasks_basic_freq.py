@@ -15,6 +15,14 @@ from main import KrySA, ErrorPop
 from tasks.basic import Basic
 
 
+# Py3 fixes
+import sys
+if sys.version_info[0] >= 3:
+    unicode = str
+    str = bytes
+    xrange = range
+
+
 class Test(unittest.TestCase):
     def pause(*args):
         time.sleep(0.000001)
@@ -39,40 +47,40 @@ class Test(unittest.TestCase):
         # set columns for new data
         range_vals = range(1, 31)
         new_data.ids.columnadd.dispatch('on_release')
-        cols[0].ids.colname.text += str(len(cols))
+        cols[0].ids.colname.text += unicode(len(cols))
         cols[0].ids.coltype.text = 'INTEGER'
         vals = cols[0].ids.vals.children
 
         for i in range_vals:  # -13 to -390
             cols[0].ids.valadd.dispatch('on_release')
-            vals[0].ids.value.text = str(i * -13)
+            vals[0].ids.value.text = unicode(i * -13)
 
         new_data.ids.columnadd.dispatch('on_release')
-        cols[0].ids.colname.text += str(len(cols))
+        cols[0].ids.colname.text += unicode(len(cols))
         cols[0].ids.coltype.text = 'REAL'
         vals = cols[0].ids.vals.children
 
         for i in range_vals:  # 0.318.. to 9.554..
             cols[0].ids.valadd.dispatch('on_release')
-            vals[0].ids.value.text = str(i / 3.14)
+            vals[0].ids.value.text = unicode(i / 3.14)
 
         new_data.ids.columnadd.dispatch('on_release')
-        cols[0].ids.colname.text += str(len(cols))
+        cols[0].ids.colname.text += unicode(len(cols))
         cols[0].ids.coltype.text = 'INTEGER'
         vals = cols[0].ids.vals.children
 
         for i in range_vals:  # 7 to 210
             cols[0].ids.valadd.dispatch('on_release')
-            vals[0].ids.value.text = str(i * 7)
+            vals[0].ids.value.text = unicode(i * 7)
 
         new_data.ids.columnadd.dispatch('on_release')
-        cols[0].ids.colname.text += str(len(cols))
+        cols[0].ids.colname.text += unicode(len(cols))
         cols[0].ids.coltype.text = 'REAL'
         vals = cols[0].ids.vals.children
 
         for i in range_vals:  # 10.10 to 213.213
             cols[0].ids.valadd.dispatch('on_release')
-            num = str(i * 7 + 3)
+            num = unicode(i * 7 + 3)
             vals[0].ids.value.text = num + '.' + num
         # create new data
         new_data = app.root.wiz_newdata.run()
@@ -88,7 +96,7 @@ class Test(unittest.TestCase):
 
                     children = app.root_window.children
                     for c in reversed(children):
-                        if 'Task' in str(c):
+                        if 'Task' in unicode(c):
                             index = children.index(c)
                     task = children[index]
 
@@ -125,7 +133,7 @@ class Test(unittest.TestCase):
                         button = screen.children[0].children[-2]
                         for j in range(10):
                             button.dispatch('on_release')
-                            grid.children[0].text = str(-100.14 + j * 100)
+                            grid.children[0].text = unicode(-100.14 + j * 100)
 
                     elif bintype == 'Calculate':
                         screen.children[0].children[-1].text = 'Scott'
@@ -249,7 +257,7 @@ class Test(unittest.TestCase):
         results = app.root.ids.results
         skipone = False  # if top padding with widget present
         for c in reversed(results.children):
-            if 'Widget' in str(c):
+            if 'Widget' in unicode(c):
                 skipone = True
                 break
 

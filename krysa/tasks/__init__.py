@@ -156,12 +156,11 @@ class Task(Popup):
     '''
     run = ObjectProperty(None)
 
-    def __init__(self, **kw):
-        super(Task, self).__init__(**kw)
+    def __init__(self, call=None, wdg=None, run=None, **kwargs):
+        super(Task, self).__init__(**kwargs)
         self.app = App.get_running_app()
-        self.run = kw.get('run')
-        wdg = kw.get('wdg')
-        self.call = kw.get('call')
+        self.run = run
+        self.call = call
         self.from_address = self.app.root.from_address
         self.set_page = self.app.root.set_page
         if wdg:

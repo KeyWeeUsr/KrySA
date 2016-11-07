@@ -9,6 +9,14 @@ from numpy import histogram
 import math
 
 
+# Py3 fixes
+import sys
+if sys.version_info[0] >= 3:
+    unicode = str
+    str = bytes
+    xrange = range
+
+
 class Basic(object):
     '''All :ref:`Task` s categorized as `basic` under one roof.
 
@@ -33,7 +41,7 @@ class Basic(object):
     @staticmethod
     def _basic_count(task, address, *args):
         values = task.from_address(task.tablenum, address.text)
-        task.set_page('Count', str(len(values)), 'text')
+        task.set_page('Count', unicode(len(values)), 'text')
 
     def basic_countif(self, *args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.CountIfLayout` that
@@ -112,7 +120,7 @@ class Basic(object):
             if eval(instruction):
                 count += 1
 
-        result += '\nCount: ' + str(count)
+        result += '\nCount: ' + unicode(count)
         task.set_page('Count If', result, 'text')
 
     def basic_min(*args):
@@ -133,7 +141,7 @@ class Basic(object):
     @staticmethod
     def _basic_min(task, address, *args):
         values = task.from_address(task.tablenum, address.text)
-        task.set_page('Minimum', str(min(list(set(values)))), 'text')
+        task.set_page('Minimum', unicode(min(list(set(values)))), 'text')
 
     def basic_max(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
@@ -153,7 +161,7 @@ class Basic(object):
     @staticmethod
     def _basic_max(task, address, *args):
         values = task.from_address(task.tablenum, address.text)
-        task.set_page('Maximum', str(max(list(set(values)))), 'text')
+        task.set_page('Maximum', unicode(max(list(set(values)))), 'text')
 
     def basic_small(*args):
         '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
@@ -179,7 +187,8 @@ class Basic(object):
         values = sorted(list(set(values)))
         k = int(k.text) - 1
         try:
-            task.set_page('Small ({}.)'.format(k + 1), str(values[k]), 'text')
+            task.set_page('Small ({}.)'.format(k + 1),
+                          unicode(values[k]), 'text')
         except IndexError:
             pass
 
@@ -207,7 +216,8 @@ class Basic(object):
         values = sorted(list(set(values)), reverse=True)
         k = int(k.text) - 1
         try:
-            task.set_page('Large ({}.)'.format(k + 1), str(values[k]), 'text')
+            task.set_page('Large ({}.)'.format(k + 1),
+                          unicode(values[k]), 'text')
         except IndexError:
             pass  # throw error k out of len(values) bounds, same for *_small
 
@@ -386,7 +396,7 @@ class Basic(object):
 
         result = [r for items in zipped for r in items]
         bin_type = binstr.text if 'Calc' in bin_type else bin_type
-        bins = ', bins=' + str(bins) if 'Count' in bin_type else ''
+        bins = ', bins=' + unicode(bins) if 'Count' in bin_type else ''
         params = '{}{}'.format(bin_type, bins)
         task.set_page('Frequency({})'.format(params),
                       result, 'table{}'.format(cols))
