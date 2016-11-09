@@ -7,6 +7,7 @@
 '''
 
 from kivy.app import App
+from kivy.metrics import dp
 from kivy.lang import Builder
 from kivy.logger import Logger
 from kivy.uix.popup import Popup
@@ -115,6 +116,48 @@ class AppendLayout(BoxLayout):
     and a restricted input that allows only integers.
 
     .. versionadded:: 0.3.6
+    .. versionchanged:: 0.5.3
+        Added layout for column input
+    '''
+    def __init__(self, **kwargs):
+        super(AppendLayout, self).__init__(**kwargs)
+        self._old_height = None
+
+    def change_ctx(self, text, *args):
+        popup = self.parent.parent.parent.parent.parent
+        container = self.ids.cols_container
+        amount = self.ids.amount
+
+        if not self._old_height:
+            self._old_height = self.height
+
+        if text == 'Columns':
+            # hide amount
+            amount.size_hint_x = 0
+            amount.width = 0
+            amount.background_color = (0, 0, 0, 0)
+
+            # add layout for columns
+            container.add_widget(AppendColsLayout())
+            self.height = self.height + dp(90)
+            container.height = dp(90)
+        else:
+            # show amount
+            amount.size_hint_x = 1
+            amount.background_color = (1, 1, 1, 1)
+
+            self.height = self._old_height
+            container.height = 0
+
+            if container.children:
+                container.clear_widgets()
+
+        popup.recalc_height(popup.ids.taskbody, self.parent)
+
+class AppendColsLayout(BoxLayout):
+    '''A layout for adding columns into :mod:`tasks.AppendLayout`.
+
+    .. versionadded:: 0.5.3
     '''
 
 

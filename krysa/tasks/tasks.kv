@@ -303,6 +303,7 @@
             id: what
             text: 'Append type'
             values: ['Rows', 'Columns']
+            on_text: root.change_ctx(self.text)
 
         SingleTI:
             id: amount
@@ -310,11 +311,61 @@
             input_filter: 'int'
 
     BoxLayout:
+        id: cols_container
+        size_hint_y: None
+        height: 0
+
+    BoxLayout:
         Label:
             text: 'Overwrite'
 
         CheckBox:
             id: overwrite
+
+<AppendColsLayout>:
+    BoxLayout:
+        orientation: 'vertical'
+        Button:
+            size_hint_y: None
+            height: dp(30)
+            id: columnadd
+            size_hint_x: None
+            width: dp(30)
+            text: '+'
+            on_release: columns.add_widget(Factory.AppendCols())
+
+        ScrollView:
+            GridLayout:
+                rows: 1
+                size_hint_x: None
+                width: self.minimum_width
+                id: columns
+
+<AppendCols@BoxLayout>:
+    size_hint_x: None
+    width: dp(180)
+    orientation: 'vertical'
+    BoxLayout:
+        size_hint_y: None
+        height: dp(30)
+        TextInput:
+            id: colname
+            text: 'Data'
+            input_filter: app.root.simple_chars
+
+        Button:
+            id: colX
+            size_hint_x: None
+            width: dp(30)
+            text: 'X'
+            on_release: root.parent.remove_widget(root)
+
+    Spinner:
+        size_hint_y: None
+        height: dp(30)
+        id: coltype
+        text: 'TEXT'
+        values: ['TEXT', 'INTEGER', 'REAL']
 
 <LinePlotLayout>:
     orientation: 'vertical'
