@@ -87,26 +87,31 @@ class Manipulate(object):
                            task,
                            container.ids.what,
                            container.ids.amount,
+                           container.ids.cols_container,
                            container.ids.overwrite)
         task.open()
 
     @staticmethod
-    def _manip_append(task, append_type, amount, overwrite, *args):
+    def _manip_append(task, append_type, amount, container, overwrite, *args):
         append_type = append_type.text
         overwrite = overwrite.active
         amount = int(amount.text) if amount.text else 0
 
+        if append_type == 'Append type':
+            raise Exception('No append type was chosen!')
+
         # Stop the task if no amount (or =0) is specified
-        if not amount:
-            return
+        # or if no column is available
+        if not amount and not container.children:
+            raise Exception('No amount was specified!')
 
         from_address = task.from_address(task.tablenum, ':all',
                                          extended=True)
         values, cols, rows, labels = from_address
 
         if append_type == 'Columns':
-            cols += amount
             return
+
         elif append_type == 'Rows':
             # get columns
             chunks = []
@@ -124,40 +129,49 @@ class Manipulate(object):
                     else:
                         chunk.append(u'')
 
-            # add Table
-            tab_pos = 0
-            table = task.ids.tablesel.text
-            tabletab = TabbedPanelItem(text=table)
-            if overwrite:
-                tab_pos = task.tablenum + 1
-                old_tab = task.app.root.ids.tabpanel.tab_list[tab_pos]
-                task.app.root.ids.tabpanel.remove_widget(old_tab)
-            else:
-                table += ' (append {})'.format(str(amount))
-            task.app.root.ids.tabpanel.add_widget(tabletab, tab_pos)
-
-            # zip chunks to values, flatten values
-            values = zip(*chunks)
-            values = [v for vals in values for v in vals]
-
-            # increase row count by new rows, make new table
+            # increase row count by new rows
             rows += amount
-            new_table = (
-                table, task.tablecls(max_cols=cols, max_rows=rows,
-                                     pos=task.app.root.pos,
-                                     size=task.app.root.size,
-                                     values=values, labels=labels)
-            )
 
-            # place newly created table into tab's content
-            if overwrite:
-                task.app.root.tables[tab_pos - 1] = new_table
-                tabletab.content = task.app.root.tables[tab_pos - 1][1]
-            else:
-                task.app.root.tables.append(new_table)
-                tabletab.content = task.app.root.tables[-1][1]
+        # add Table
+        tab_pos = 0
+        table = task.ids.tablesel.text
+        tabpanel = task.app.root.ids.tabpanel
+        tabpanel_len = len(tabpanel.children)
+        if overwrite:
+            tab_pos = task.tablenum
+            # list of available tabs in Task is 0 -> n (from tables),
+            # but tab_list order is reversed in Kivy, therefore
+            # reverse the index by going backwards with -1
+            # and increase tab_pos, which is only index of
+            # value order in spinner
+            old_tab = tabpanel.tab_list[-1 - (tab_pos + 1)]
+            tabpanel.remove_widget(old_tab)
+            tabletab = TabbedPanelItem(text=table)
+            tabpanel.add_widget(tabletab, -tabpanel_len + 1 - tab_pos)
         else:
-            return
+            table += ' (append {})'.format(str(amount))
+            tabletab = TabbedPanelItem(text=table)
+            tabpanel.add_widget(tabletab, 0)
+
+        # zip chunks to values, flatten values
+        values = zip(*chunks)
+        values = [v for vals in values for v in vals]
+
+        # make new table
+        new_table = (
+            table, task.tablecls(max_cols=cols, max_rows=rows,
+                                 pos=task.app.root.pos,
+                                 size=task.app.root.size,
+                                 values=values, labels=labels)
+        )
+
+        # place newly created table into tab's content
+        if overwrite:
+            task.app.root.tables[tab_pos] = new_table
+            tabletab.content = task.app.root.tables[tab_pos][1]
+        else:
+            task.app.root.tables.append(new_table)
+            tabletab.content = task.app.root.tables[-1][1]
 
     def manip_split(*args):
         '''(Not yet implemented)

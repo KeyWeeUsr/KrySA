@@ -154,6 +154,7 @@ class AppendLayout(BoxLayout):
 
         popup.recalc_height(popup.ids.taskbody, self.parent)
 
+
 class AppendColsLayout(BoxLayout):
     '''A layout for adding columns into :mod:`tasks.AppendLayout`.
 
