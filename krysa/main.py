@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.5.4
+# Version: 0.5.5
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -920,6 +920,7 @@ class Body(FloatLayout):
         # make some output if unsaved changes available(e.g. * before name)
         if self.app.project_exists:
             self._save_project()
+            Logger.info('KrySA: Opened project exists, rewriting.')
             return
         self.savedlg = Dialog(title='New Project',
                               confirm='Save',
@@ -934,6 +935,7 @@ class Body(FloatLayout):
 
         .. versionadded:: 0.1.2
         '''
+        Logger.info('KrySA: Saving project.')
         if not selection:
             if not self.app.project_exists:
                 return
@@ -986,6 +988,7 @@ class Body(FloatLayout):
 
         # load items to ProcessFlow
         self.flow_reload()
+        Logger.info('KrySA: Project successfully saved.')
 
     def import_data(self, *args):
         self.opendlg = Dialog(title='Import Data',
@@ -1004,6 +1007,7 @@ class Body(FloatLayout):
         # CREATE TABLE test(
         #                   Column INTEGER NOT NULL CHECK(
         #                               typeof(Column) = 'integer'))
+        Logger.info('KrySA: Importing data from {}.'.format(selection))
         if not selection:
             return
         else:
@@ -1070,6 +1074,7 @@ class Body(FloatLayout):
 
         .. versionadded:: 0.1.0
         '''
+        Logger.info('KrySA: Extracting rows.')
         rows = []
         for item in data:
             try:
@@ -1104,6 +1109,7 @@ class Body(FloatLayout):
         '''
         col_types = {"<type 'int'>": 'INTEGER', "<type 'float'>": 'REAL',
                      "<class 'int'>": 'INTEGER', "<class 'float'>": 'REAL'}
+        Logger.info('KrySA: Exporting data to {}, {}'.format(selection, fname))
         if not selection:
             return
         else:
@@ -1134,6 +1140,8 @@ class Body(FloatLayout):
 
             if col_string.endswith(','):
                 col_string = col_string[:-1]
+            Logger.info(
+                'KrySA: SQL export - creating table {}.'.format(table[0]))
             c.execute(
                 "CREATE TABLE " + table[0] + "(" + col_string + ")"
             )
@@ -1142,6 +1150,7 @@ class Body(FloatLayout):
             cnks = []
             for x in xrange(0, len(rows), max_cols):
                 cnks.append(rows[x:x + max_cols])
+            Logger.info('KrySA: SQL export - inserting values.')
             for chunk in cnks:
                 _chunk = []
                 for cnk in chunk:
@@ -1164,6 +1173,7 @@ class Body(FloatLayout):
             pass
 
     def _export_results(self, selection, *args):
+        Logger.info('KrySA: Exporting results to {}.'.format(selection))
         if not selection:
             return
         for file in os.listdir(selection):

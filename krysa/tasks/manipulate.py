@@ -2,6 +2,13 @@ from . import Task, SortLayout, AppendLayout, StandLayout
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from functools import partial
 
+# Py3 fixes
+import sys
+if sys.version_info[0] >= 3:
+    unicode = str
+    str = bytes
+    xrange = range
+
 
 class Manipulate(object):
     '''All :ref:`Task` s categorized as being able to `manipulate` data.
@@ -71,12 +78,11 @@ class Manipulate(object):
         The function either returns a new, altered :mod:`main.Table` of
         selected one, or appends directly to the selected :class:`main.Table`.
 
-        .. note:: Appending new columns doesn't work for now. When such
-           an action is possible, this note will be removed.
-
         .. versionadded:: 0.3.6
         .. versionchanged:: 0.3.7
             Added overwriting of selected :mod:`main.Table`
+        .. versionchanged:: 0.5.5
+            Added append for new columns
         '''
         widget = AppendLayout()
         task = Task(title='Append', wdg=widget,
@@ -108,16 +114,27 @@ class Manipulate(object):
         from_address = task.from_address(task.tablenum, ':all',
                                          extended=True)
         values, cols, rows, labels = from_address
+        rows = int(rows)
 
+        # get columns
+        chunks = []
+        for x in xrange(0, len(values), rows):
+            chunks.append(values[x:x + rows])
         if append_type == 'Columns':
-            return
+            _cols = container.children[0].ids.columns.children
+            for c in reversed(_cols):
+                labels.append(c.ids.colname.text)
+                _type = c.ids.coltype.text
+                if _type == 'INTEGER':
+                    chunks.extend([[0 for _ in range(rows)]])
+                elif _type == 'REAL':
+                    chunks.extend([[0.0 for _ in range(rows)]])
+                else:
+                    chunks.extend([[u'' for _ in range(rows)]])
+                amount += 1
+                cols += 1
 
         elif append_type == 'Rows':
-            # get columns
-            chunks = []
-            for x in xrange(0, len(values), rows):
-                chunks.append(values[x:x + rows])
-
             # append to columns a zero value according
             # to their type int(amount)-times
             for r in range(amount):
@@ -132,11 +149,15 @@ class Manipulate(object):
             # increase row count by new rows
             rows += amount
 
+        # zip chunks to values, flatten values
+        values = zip(*chunks)
+        values = [v for vals in values for v in vals]
+
         # add Table
         tab_pos = 0
         table = task.ids.tablesel.text
         tabpanel = task.app.root.ids.tabpanel
-        tabpanel_len = len(tabpanel.children)
+        tabpanel_len = len(tabpanel.tab_list)
         if overwrite:
             tab_pos = task.tablenum
             # list of available tabs in Task is 0 -> n (from tables),
@@ -147,15 +168,15 @@ class Manipulate(object):
             old_tab = tabpanel.tab_list[-1 - (tab_pos + 1)]
             tabpanel.remove_widget(old_tab)
             tabletab = TabbedPanelItem(text=table)
-            tabpanel.add_widget(tabletab, -tabpanel_len + 1 - tab_pos)
+            tabpanel.add_widget(tabletab, tabpanel_len - 1 - (tab_pos + 1))
         else:
-            table += ' (append {})'.format(str(amount))
+            # if space in name, sql save boom
+            if append_type == 'Columns':
+                table += u'_append_{}_cols'.format(unicode(amount))
+            elif append_type == 'Rows':
+                table += u'_append_{}_rows'.format(unicode(amount))
             tabletab = TabbedPanelItem(text=table)
             tabpanel.add_widget(tabletab, 0)
-
-        # zip chunks to values, flatten values
-        values = zip(*chunks)
-        values = [v for vals in values for v in vals]
 
         # make new table
         new_table = (
