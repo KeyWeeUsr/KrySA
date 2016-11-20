@@ -211,7 +211,7 @@ class Task(Popup):
             self.ids.container.add_widget(wdg)
 
     def recalc_height(self, body, content):
-        '''Recalculates the height of :mod:`tasks.Task` after a layout is
+        '''Recalculate the height of :mod:`tasks.Task` after a layout is
         added, so that the children are clearly visible without any stretching.
 
         .. versionadded:: 0.3.2
@@ -223,7 +223,7 @@ class Task(Popup):
 
     @staticmethod
     def get_table_pos(text, values, *args):
-        '''Returns an index of selected :mod:`main.Table` from all available
+        '''Return an index of selected :mod:`main.Table` from all available
         in the list.
 
         .. versionadded:: 0.1.0
@@ -233,8 +233,8 @@ class Task(Popup):
             return i
 
     def try_run(self, *args):
-        '''Tries to run a :ref:`task` from the input a user specified and
-        closes the popup. If no such an action is possible, it'll show a popup
+        '''Try to run a :ref:`task` from the input a user specified and
+        closes the popup. If no such an action is possible, show a popup
         with an error and leave :mod:`tasks.Task` opened.
 
         .. versionadded:: 0.2.0

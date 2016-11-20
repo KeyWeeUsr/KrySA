@@ -24,8 +24,8 @@ class Basic(object):
     '''
 
     def basic_count(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address. Creates a result page with count.
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
+        gets from user :ref:`Data` address. Create a result page with count.
 
         .. versionadded:: 0.1.0
         '''
@@ -44,9 +44,9 @@ class Basic(object):
         task.set_page('Count', unicode(len(values)), 'text')
 
     def basic_countif(self, *args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.CountIfLayout` that
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.CountIfLayout` that
         gets from user :ref:`Data` address and conditions for getting values.
-        Creates a result page with count.
+        Create a result page with count and conditions.
 
         This method uses Python's `eval()` and executing of boolean logic,
         which means the order of executed conditions will be like this::
@@ -124,8 +124,8 @@ class Basic(object):
         task.set_page('Count If', result, 'text')
 
     def basic_min(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address. Creates a result page with minimum.
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
+        gets from user :ref:`Data` address. Create a result page with minimum.
 
         .. versionadded:: 0.1.0
         '''
@@ -144,8 +144,8 @@ class Basic(object):
         task.set_page('Minimum', unicode(min(list(set(values)))), 'text')
 
     def basic_max(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
-        gets from user :ref:`Data` address. Creates a result page with maximum.
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.AddressLayout` that
+        gets from user :ref:`Data` address. Create a result page with maximum.
 
         .. versionadded:: 0.1.0
         '''
@@ -164,9 +164,9 @@ class Basic(object):
         task.set_page('Maximum', unicode(max(list(set(values)))), 'text')
 
     def basic_small(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
-        `k`-th value from the :ref:`Task` s output. Creates a result page with
+        `k`-th value from the :ref:`Task` s output. Create a result page with
         the `k`-th value.
 
         .. versionadded:: 0.1.0
@@ -193,9 +193,9 @@ class Basic(object):
             pass
 
     def basic_large(self, *args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.SmallLargeLayout` that
         gets from user :ref:`Data` address and `k` variable representing the
-        `k`-th value from the :ref:`Task` s output. Creates a result page with
+        `k`-th value from the :ref:`Task` s output. Create a result page with
         `k`-th value.
 
         .. versionadded:: 0.1.0
@@ -222,7 +222,7 @@ class Basic(object):
             pass  # throw error k out of len(values) bounds, same for *_small
 
     def basic_freq(self, *args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.FreqLayout` that
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.FreqLayout` that
         gets from user:
 
         * :ref:`data` address

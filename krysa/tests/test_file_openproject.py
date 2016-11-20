@@ -1,3 +1,4 @@
+from __future__ import print_function
 import unittest
 
 import os
@@ -12,6 +13,10 @@ from kivy.clock import Clock
 main_path = op.dirname(op.dirname(op.abspath(__file__)))
 sys.path.append(main_path)
 from main import KrySA
+
+# Py3 fixes
+if sys.version_info[0] >= 3:
+    xrange = range
 
 
 class Test(unittest.TestCase):
@@ -76,13 +81,13 @@ class Test(unittest.TestCase):
         values = [item for sublist in c.fetchall() for item in sublist]
         values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
         conn.close()
-        print 'NewData:'
+        print('NewData:')
         for i, v in enumerate(values):
             # values == sql values
             self.assertEqual(v, newdata_values[i])
             # values == KrySA values
             self.assertEqual(ndv[i], newdata_values[i])
-            print v
+            print(v)
 
         conn = sqlite3.connect(op.join(data, 'data.sqlite'))
         c = conn.cursor()
@@ -90,11 +95,11 @@ class Test(unittest.TestCase):
         values = [item for sublist in c.fetchall() for item in sublist]
         values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
         conn.close()
-        print '\nNewData2:'
+        print('\nNewData2:')
         for i, v in enumerate(values):
             self.assertEqual(v, newdata2_values[i])
             self.assertEqual(ndv2[i], newdata2_values[i])
-            print v
+            print(v)
 
         # test imported results
         imported_results = 0

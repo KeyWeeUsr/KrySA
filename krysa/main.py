@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.5.5
+# Version: 0.6.0
 # Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
@@ -46,8 +46,12 @@ from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from kivy.uix.treeview import TreeView, TreeViewLabel
 from kivy.uix.recyclegridlayout import RecycleGridLayout
-from kivy.properties import StringProperty, ObjectProperty, \
-    BooleanProperty, ListProperty
+from kivy.properties import (
+    StringProperty,
+    ObjectProperty,
+    BooleanProperty,
+    ListProperty
+)
 
 # KrySA packages
 import utils
@@ -144,7 +148,7 @@ class NewDataColumn(BoxLayout):
 
     @staticmethod
     def free(items):
-        '''Frees all locked cells in the column except a column type. If
+        '''Free all locked cells in the column except a column type. If
         a wrong type is used, removing the whole column is necessary.
         (protection against corrupting :ref:`sqlite`)
 
@@ -167,7 +171,7 @@ class NewDataColumn(BoxLayout):
                         i.disabled = False
 
     def checklock(self, disable, coltype, check, *args):
-        '''Disables all cells in the column, then check them against a list
+        '''Disable all cells in the column, then check them against a list
         of strings that could be used to corrupt :ref:`sqlite` . If the check
         is done without an error, another check is made to protect against
         using an empty string ``''`` as a value, which if used inappropriately
@@ -288,13 +292,6 @@ class Dialog(Popup):
             self.filter = [lambda folder, fname: fname.endswith('.sqlite')]
 
 
-class SideItem(BoxLayout):
-    '''Supposed to be a part of settings, most likely will be removed/replaced.
-
-    .. versionadded:: 0.1.0
-    '''
-
-
 class TableItem(TextInput):
     '''An item handling the behavior or each separate value in the
     :mod:`main.Table` such as updating/editing values in :ref:`data`.
@@ -306,15 +303,15 @@ class TableItem(TextInput):
         self.bind(focus=self.on_focus)
 
     def on_focus(self, widget, focused):
-        '''Makes sure the unconfirmed value is discarded e.g. when clicked
+        '''Make sure the unconfirmed value is discarded e.g. when clicked
         outside of the widget.
         '''
         if not focused:
             self.text = self.old_text
 
     def update_value(self, txt, *args):
-        '''On ``<enter>`` (``return``) key updates the values
-        :mod:`main.TableItem.text` and :mod:`main.TableItem.old_text` in
+        '''Update a value in :mod:`main.TableItem.text` on ``<enter>``
+        (``<return>``) and change :mod:`main.TableItem.old_text` in
         :mod:`main.Table`.
 
         .. versionadded:: 0.1.0
@@ -443,7 +440,7 @@ class Table(ScrollView):
         self.add_widget(self.rv)
 
     def get_letters(self):
-        '''Gets a list of letters the same length as :ref:`data`'s columns.
+        '''Get a list of letters the same length as :ref:`data`'s columns.
 
         .. versionadded:: 0.1.0
         '''
@@ -461,7 +458,8 @@ class Table(ScrollView):
         return result
 
     def lock(self, disabled=True):
-        '''docs
+        '''Disable cells in :mod:`main.Table` which can't be accessed
+        with the letter-number style (e.g. ``A1:B2``).
 
         .. versionadded:: 0.1.0
         '''
@@ -471,7 +469,7 @@ class Table(ScrollView):
         self.rv.refresh_from_data()
 
     def clean(self, *args):
-        '''Removes all data from :mod:`main.Table`
+        '''Remove all data from :mod:`main.Table`
 
         .. versionadded:: 0.1.0
         '''
@@ -550,7 +548,7 @@ class ProcessFlow(FloatLayout, StencilView):
         self.boxes = {}
 
     def add_project(self):
-        '''Adds a root item for the other items on the :mod:`main.ProcessFlow`.
+        '''Add a root item for the other items on the :mod:`main.ProcessFlow`.
 
         .. versionadded:: 0.5.0
         '''
@@ -560,7 +558,7 @@ class ProcessFlow(FloatLayout, StencilView):
         self.add_widget(project(name=self.app.project_name, pos=pos))
 
     def add_mainitem(self, name, link):
-        '''Adds a main item on the same level as the :ref:`project`.
+        '''Add a main item on the same level as the :ref:`project`.
 
         :Parameters:
            `name`: string
@@ -597,7 +595,7 @@ class ProcessFlow(FloatLayout, StencilView):
                                  link=link, source=image))
 
     def add_subitem(self, name, link, parent):
-        '''Adds a subitem under an existing :mod:`main.ProcessFlowMain`.
+        '''Add a subitem under an existing :mod:`main.ProcessFlowMain`.
 
         :Parameters:
            `name`: string
@@ -635,7 +633,7 @@ class ProcessFlow(FloatLayout, StencilView):
         self.add_widget(mainitem(name=name, pos=pos, link=link))
 
     def resize(self, *args):
-        '''Resizes the :mod:`main.ProcessFlow` to encapsulate its children.
+        '''Resize the :mod:`main.ProcessFlow` to encapsulate its children.
 
         .. versionadded:: 0.5.0
         '''
@@ -645,8 +643,8 @@ class ProcessFlow(FloatLayout, StencilView):
             self.width = width
 
     def flush(self):
-        '''Removes every item previously added to :mod:`main.ProcessFlow`
-        and cleans all stored positions.
+        '''Remove every item previously added to :mod:`main.ProcessFlow`
+        and clean all stored positions.
 
         .. versionadded:: 0.5.0
         '''
@@ -711,7 +709,7 @@ class Body(FloatLayout):
                                   ['Save Project', self.save_project],
                                   ['Import Data', self.import_data],
                                   ['Export Data', self.export_data],
-                                  ['_Recent Projects', self.test],
+                                  ['Recent Projects', self.recent_projects],
                                   ['Exit', self.app.stop],),
                          'edit': (['_Undo', self.test],
                                   ['_Redo', self.test],
@@ -734,14 +732,8 @@ class Body(FloatLayout):
         super(Body, self).__init__(**kwargs)
 
     def new(self, button, *args):
-        '''Opens a submenu for ``New`` menu.
-
-        .. versionadded:: 0.1.0
-        '''
         d = DropDown(allow_sides=True, auto_width=False)
         buttons = []
-
-        # Project saving works, but implementing ProcessFlow is still ToDo
         buttons.append(SizedButton(text='Project'))
         buttons[0].bind(on_release=self._new_project)
         buttons.append(SizedButton(text='Data'))
@@ -751,7 +743,7 @@ class Body(FloatLayout):
         d.open(button)
 
     def _new_project(self, *args):
-        '''Closes already opened :ref:`project` if available and opens a dialog
+        '''Close already opened :ref:`project` if available and open a dialog
         for creating a new one.
 
         .. versionadded:: 0.1.2
@@ -765,8 +757,8 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _new_data(self, *args):
-        '''Opens a wizard for creating a new :ref:`data` if a :ref:`project` is
-        available or shows a warning if it doesn't exist.
+        '''Open a wizard for creating a new :ref:`data` if a :ref:`project` is
+        available or show a warning if it doesn't exist.
 
         .. versionadded:: 0.1.3
         '''
@@ -780,7 +772,7 @@ class Body(FloatLayout):
         self.wiz_newdata.open()
 
     def _save_data(self, wizard, *args):
-        '''Gets data from the wizard, puts them into :mod:`main.Table` and exports them
+        '''Get data from the wizard, put them into :mod:`main.Table` and export them
         into :ref:`sqlite`.
 
         .. versionadded:: 0.1.4
@@ -863,7 +855,7 @@ class Body(FloatLayout):
         self.opendlg.open()
 
     def _open_project(self, selection, *args):
-        '''Opens a :ref:`project` from path selected in ``Dialog`` and imports
+        '''Open a :ref:`project` from path selected in ``Dialog`` and import
         :ref:`sqlite`.
 
         .. versionadded:: 0.1.7
@@ -883,7 +875,7 @@ class Body(FloatLayout):
 
         # (dummy for now)
         # dump widgets' properties from process flow to dict, then to json
-        with open(op.join(selection, fname), 'rb') as f:
+        with open(op.join(selection, fname)) as f:
             project = json.loads(f.read())
         # print project
 
@@ -896,23 +888,35 @@ class Body(FloatLayout):
 
         # load items to ProcessFlow
         self.flow_reload()
+        Logger.info('KrySA: Opened project {}.'.format(self.app.project_name))
 
     def close_project(self, *args):
-        '''Clears all important variables, removes all :ref:`data` available in
-        :mod:`main.Table` and switches to :mod:`main.ProcessFlow`.
+        '''Clear all important variables, remove all :ref:`data` available in
+        :mod:`main.Table`, clear results and switch to :mod:`main.ProcessFlow`.
 
         .. versionadded:: 0.1.0
         '''
         # call this before a new project
+
+        # Clear variables
         self.app.project_exists = False
         self.app.project_dir = ''
         self.app.project_name = ''
+
+        # Clear tabs
         tp = self.ids.tabpanel
         while len(tp.tab_list) > 1:
             self.tables.pop()
             tp.remove_widget(tp.tab_list[0])
-        self.ids.flow.clear_widgets()
         tp.switch_to(tp.tab_list[0])
+
+        # Flush Flow
+        self.app.flow.flush()
+
+        # Remove old results
+        self.ids.results.clear_widgets()
+        spacer = Widget(size_hint_y=None, height='5dp')
+        self.ids.results.add_widget(spacer)
 
     def save_project(self, *args):
         # same as _new_project + export data & results
@@ -930,7 +934,7 @@ class Body(FloatLayout):
         self.savedlg.open()
 
     def _save_project(self, selection=None, fname=None, *args):
-        '''Saves a :ref:`project` to path selected in ``Dialog`` and exports
+        '''Save a :ref:`project` to path selected in ``Dialog`` and export
         :ref:`sqlite`.
 
         .. versionadded:: 0.1.2
@@ -997,7 +1001,7 @@ class Body(FloatLayout):
         self.opendlg.open()
 
     def _import_data(self, selection, *args):
-        '''Imports :ref:`sqlite` from path selected in ``Dialog`` and puts it
+        '''Import :ref:`sqlite` from path selected in ``Dialog`` and put it
         to :mod:`main.Table`.
 
         .. versionadded:: 0.1.0
@@ -1102,7 +1106,7 @@ class Body(FloatLayout):
         return rows
 
     def _export_data(self, selection, fname, *args):
-        '''Exports all available :ref:`data` (visible as tabs) as :ref:`sqlite`
+        '''Export all available :ref:`data` (visible as tabs) as :ref:`sqlite`
         into path selected in ``Dialog``.
 
         .. versionadded:: 0.1.1
@@ -1203,6 +1207,7 @@ class Body(FloatLayout):
         # first create and place main items according
         # to the Project item position, then place
         # subitems according to the their parent's pos
+        Logger.info('KrySA: Initialising ProcessFlow.')
         for fold in folders:
             if op.isdir(fold):
                 self.app.flow.add_mainitem(name=op.basename(fold),
@@ -1211,6 +1216,60 @@ class Body(FloatLayout):
                 self.app.flow.add_subitem(name=op.basename(sub),
                                           link=op.join(fold, sub),
                                           parent=op.basename(fold))
+
+    def recent_projects(self, button, *args):
+        drop = DropDown(allow_sides=True, auto_width=False)
+        projects = self._recent_projects()
+        for proj in projects:
+            proj = proj.splitlines()
+            text = unicode(op.basename(proj[0]))
+            but = SizedButton(text=text.split('.')[0])
+            but.bind(on_release=partial(self._open_recent, proj))
+            drop.add_widget(but)
+        drop.open(button)
+
+    def _open_recent(self, selection, *args):
+        self.close_project()
+        self.open_project()
+        if not isinstance(selection, list):
+            selection = list([selection])
+        self._open_project(selection)
+
+    def _recent_projects(self):
+        '''Return a list of recently opened :ref:`project` s from a file.
+
+        .. versionadded:: 0.6.0
+        '''
+        names = []
+        user_data = self.app.user_data_dir
+        project_dir = self.app.project_dir
+        project_name = self.app.project_name
+        project = op.join(project_dir, project_name + '.krysa')
+        recent = op.join(user_data, 'recent_projects.krysa')
+
+        if op.exists(recent):
+            with open(recent, 'r') as f:
+                names = f.readlines()
+            names = [n.splitlines()[0] for n in names]
+
+            # append if there's open project
+            if project not in names and project != '.krysa':
+                names.append(project)
+
+            while len(names) > 5:
+                names.pop(0)
+
+        with open(recent, 'w', encoding='utf8') as f:
+            dump = '\n'.join([unicode(n) for n in names])
+            try:
+                dump = dump.decode('utf8')
+            except AttributeError:
+                pass
+            f.write(dump)
+        Logger.info('KrySA: Fetched recent projects: {}.'.format(names))
+        names = [unicode(n) for n in names]
+        names = [n[2:-1] if "b'" in n else n for n in names]
+        return names
 
     # menu showing functions
     @staticmethod
@@ -1251,7 +1310,7 @@ class Body(FloatLayout):
 
     @staticmethod
     def about(*args):
-        '''Displays `about` page of the app and includes other credits.
+        '''Display `about` page of the app and include other credits.
 
         .. versionadded:: 0.1.0
         '''
@@ -1294,7 +1353,7 @@ class Body(FloatLayout):
         return col
 
     def from_address(self, table, address, extended=False, *args):
-        '''Gets value(s) from :mod:`main.Table` according to the address such as
+        '''Get value(s) from :mod:`main.Table` according to the address such as
         ``A1`` or ``A1:B2``. Values are fetched in the way that the final list
         contains even empty (``u''``) values. It is not expected of user to use
         :ref:`task` for strings and most of them won't even run. To get
@@ -1377,7 +1436,7 @@ class Body(FloatLayout):
             return values
 
     def set_page(self, task, result, result_type='text', footer='time'):
-        '''Creates a :mod:`main.PageBox` for a result. The header consists of the
+        '''Create a :mod:`main.PageBox` for a result. The header consists of the
         :ref:`task`'s name, the footer is by default the time when the result
         was created and the content depends on `result_type` which can be -
         text, image(path to image) or widget. If `result_type == 'widget'`,
@@ -1491,8 +1550,8 @@ class KrySA(App):
     path = op.dirname(op.abspath(__file__))
     icon = op.join(path, 'data', 'icon.png')
     project_exists = BooleanProperty(False)
-    project_name = ''
-    project_dir = ''
+    project_name = StringProperty('')
+    project_dir = StringProperty('')
     title = 'KrySA'
     errorcls = ErrorPop
     tablecls = Table
@@ -1500,8 +1559,8 @@ class KrySA(App):
                      'INSERT', 'JOIN', '=', '"', "'", ';']
 
     def on_project_exists(self, instance, exists):
-        '''Checks change of :mod:`main.KrySA.project_exists` and if
-        :ref:`project` exists, schedules updating of its tree to 5 second
+        '''Check change of :mod:`main.KrySA.project_exists` and if
+        :ref:`project` exists, schedule updating of its tree to 5 second
         interval.
 
         .. versionadded:: 0.3.0

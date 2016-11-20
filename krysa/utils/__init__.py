@@ -14,7 +14,7 @@ image_ext = ['.png', '.jpg', '.gif', '.tiff']
 
 # linux & mac need testing
 def create_bind(path):
-    '''Creates a partial for opening a file in system's default program
+    '''Create a partial for opening a file in system's default program
     for such file extensions.
 
     .. versionadded:: 0.5.0
@@ -37,8 +37,8 @@ def win_system(arg, *args):
 
 
 def isimage(image):
-    '''Compares a file from path with the explicitly listed extensions
-    for images, such as `.png`.
+    '''Compare a file from path with the explicitly listed extensions
+    for images: `['.png', '.jpg', '.gif', '.tiff']`.
 
     :Returns:
        `boolean`

@@ -18,10 +18,9 @@ class Manipulate(object):
     '''
 
     def manip_sort(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.SortLayout` that gets
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.SortLayout` that gets
         from user the table which will be sorted and the type of sorting
-        (`Ascending` or `Descending`). The function creates a new
-        :mod:`main.Table`
+        (`Ascending` or `Descending`). Create a new :mod:`main.Table`.
 
         .. versionadded:: 0.3.5
         '''
@@ -71,7 +70,7 @@ class Manipulate(object):
         '''
 
     def manip_append(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.AppendLayout` that gets
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.AppendLayout` that gets
         from user :mod:`main.Table`, type of append and an amount of empty
         rows / cols to append.
 

@@ -1,3 +1,7 @@
+code {
+    padding: 1px 2px !important;
+}
+
 code.xref {
     font-family: 'goudy old style', 'minion pro', 'bell mt', 'Georgia', 'Hiragino Mincho Pro', 'serif';
     background-color: transparent !important;
@@ -10,6 +14,10 @@ pre {
 dl dl pre {
     margin-left: 0;
     padding-left: 30px;
+}
+
+li pre {
+    padding-left: 10px;
 }
 
 dd div.admonition {

@@ -12,7 +12,7 @@ class Avgs(object):
     '''
 
     def avgs_gen(*args):
-        '''Gets the values from address and depending on `p` (power) value
+        '''Get the values from address and depending on `p` (power) value
         returns either exceptional case for `p == 0` (geometric mean), or
         a value from the generalized mean's formula:
 
@@ -106,7 +106,7 @@ class Avgs(object):
         task.set_page('Median', str(result), 'text')
 
     def avgs_mode(*args):
-        '''Mode returns the most common value from the list of values.
+        '''Return the most common value from the list of values.
         If there's more than a single value with the same amount of
         occurency, all values with the same occurency are returned.
 

@@ -74,8 +74,8 @@ function takes two arguments - index of :ref:`data` (returned in
 
     values = task.from_address(task.tablenum, address.text)
 
-Values are returned as a simple list of everything selected no matter what the
-type it is. Example::
+Values are returned as a simple list of everything selected no matter what type
+it is. Example::
 
     values = [0, 1.0, u'hi']
     max(values)

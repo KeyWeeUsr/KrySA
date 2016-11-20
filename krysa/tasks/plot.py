@@ -24,8 +24,8 @@ class Plot(object):
     '''
 
     def plot_line(*args):
-        '''Opens a :mod:`tasks.Task` with a :mod:`tasks.LinePlotLayout` that
-        gets from user :ref:`Data` address. Creates a result page with a plot.
+        '''Open a :mod:`tasks.Task` with a :mod:`tasks.LinePlotLayout` that
+        gets from user :ref:`Data` address. Create a result page with a plot.
 
         .. versionadded:: 0.4.3
         '''

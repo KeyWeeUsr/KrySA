@@ -16,7 +16,8 @@ Select ``File -> New -> Project``, navigate to a folder you want to save it to
 and KrySA will create a ``<Project name>`` folder there. Project's name
 |charlimit|.
 
-.. warning:: Please do not manually edit any of the files, |crash|
+.. warning::
+   Please, do not manually edit any of the :ref:`project` files, |crash|
 
 .. _osproject:
 
@@ -138,4 +139,19 @@ Results are by default `.png` files in a resolution of 72DPI A4 page
 Process Flow
 ------------
 
-Nothing yet.
+A canvas representing a structure of the loaded :ref:`project`. Each of the
+buttons (except the project one) is a clickable and can open any file or folder
+it points to.
+
+For example `results` button will open the folder with all saved results in it.
+Each of the buttons going out from the folder button represent a file in that
+folder. By clicking on that button the file opens.
+
+.. image:: _static/gallery/11_processflow.png
+   :align: center
+   :target: _static/gallery/11_processflow.png
+
+The opening of a file or a folder is handled by the default system application
+for that, which means: if you open an image with GIMP and a folder with File
+Explorer or Nautilus, then the particular file/folder will be opened by one
+of them.
