@@ -1,4 +1,3 @@
-from __future__ import print_function
 import unittest
 
 import os
@@ -14,12 +13,9 @@ main_path = op.dirname(op.dirname(op.abspath(__file__)))
 sys.path.append(main_path)
 from main import KrySA
 
-# Py3 fixes
-if sys.version_info[0] >= 3:
-    xrange = range
-
 
 class Test(unittest.TestCase):
+
     def pause(*args):
         time.sleep(0.000001)
 
@@ -100,7 +96,7 @@ class Test(unittest.TestCase):
                     ndv.append(d['text'])
             if not end_pos and d['text'] == u'end':
                 end_pos = app.root.tables[0][1].rv.data.index(d)
-        ndv = [ndv[x:x + 3] for x in xrange(0, len(ndv), 3)]
+        ndv = [ndv[x:x + 3] for x in range(0, len(ndv), 3)]
         self.assertEqual(len(app.root.tables), 1)
 
         # test data
@@ -109,7 +105,7 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in range(0, len(values), 3)]
         try:
             c.execute('SELECT * FROM NewData2')
         except sqlite3.OperationalError:
@@ -134,7 +130,7 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in range(0, len(values), 3)]
         conn.close()
         print('NewData:')
         for i, v in enumerate(values):
@@ -160,6 +156,7 @@ class Test(unittest.TestCase):
         Clock.schedule_once(p, .000001)
         app.run()
         rmtree(self.folder)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,13 +2,6 @@ from . import Task, SortLayout, AppendLayout, StandLayout
 from kivy.uix.tabbedpanel import TabbedPanelItem
 from functools import partial
 
-# Py3 fixes
-import sys
-if sys.version_info[0] >= 3:
-    unicode = str
-    str = bytes
-    xrange = range
-
 
 class Manipulate(object):
     '''All :ref:`Task` s categorized as being able to `manipulate` data.
@@ -42,7 +35,7 @@ class Manipulate(object):
 
         # get separated cols to sort
         chunks = []
-        for x in xrange(0, len(values), rows):
+        for x in range(0, len(values), rows):
             chunks.append(values[x:x + rows])
 
         values = []
@@ -117,7 +110,7 @@ class Manipulate(object):
 
         # get columns
         chunks = []
-        for x in xrange(0, len(values), rows):
+        for x in range(0, len(values), rows):
             chunks.append(values[x:x + rows])
         if append_type == 'Columns':
             _cols = container.children[0].ids.columns.children
@@ -171,9 +164,9 @@ class Manipulate(object):
         else:
             # if space in name, sql save boom
             if append_type == 'Columns':
-                table += u'_append_{}_cols'.format(unicode(amount))
+                table += u'_append_{}_cols'.format(str(amount))
             elif append_type == 'Rows':
-                table += u'_append_{}_rows'.format(unicode(amount))
+                table += u'_append_{}_rows'.format(str(amount))
             tabletab = TabbedPanelItem(text=table)
             tabpanel.add_widget(tabletab, 0)
 

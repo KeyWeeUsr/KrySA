@@ -13,13 +13,6 @@ sys.path.append(main_path)
 from main import KrySA, ErrorPop
 from tasks.manipulate import Manipulate
 
-# Py3 fixes
-import sys
-if sys.version_info[0] >= 3:
-    unicode = str
-    str = bytes
-    xrange = range
-
 
 class Test(unittest.TestCase):
     def pause(*args):
@@ -41,29 +34,29 @@ class Test(unittest.TestCase):
             # open New -> Data popup, set inputs
             app.root._new_data()
             new_data = app.root.wiz_newdata.ids.container.children[0]
-            new_data.ids.table_name.text = u'NewData' + unicode(x)
+            new_data.ids.table_name.text = u'NewData' + str(x)
             cols = new_data.ids.columns.children
 
             # set columns for new data
             range_vals = range(13)
             for _ in range(2):
                 new_data.ids.columnadd.dispatch('on_release')
-                cols[0].ids.colname.text += unicode(len(cols))
+                cols[0].ids.colname.text += str(len(cols))
                 cols[0].ids.coltype.text = 'INTEGER'
                 vals = cols[0].ids.vals.children
 
                 for i in range_vals:
                     cols[0].ids.valadd.dispatch('on_release')
-                    vals[0].ids.value.text = unicode(i + 1)
+                    vals[0].ids.value.text = str(i + 1)
 
                 new_data.ids.columnadd.dispatch('on_release')
-                cols[0].ids.colname.text += unicode(len(cols))
+                cols[0].ids.colname.text += str(len(cols))
                 cols[0].ids.coltype.text = 'REAL'
                 vals = cols[0].ids.vals.children
 
                 for i in range_vals:
                     cols[0].ids.valadd.dispatch('on_release')
-                    num = unicode(i + 1)
+                    num = str(i + 1)
                     vals[0].ids.value.text = num + '.' + num * x
             new_data = app.root.wiz_newdata.run()
 
@@ -81,7 +74,7 @@ class Test(unittest.TestCase):
 
             children = app.root_window.children
             for c in reversed(children):
-                if 'Task' in unicode(c):
+                if 'Task' in str(c):
                     index = children.index(c)
             task = children[index]
 
@@ -93,14 +86,14 @@ class Test(unittest.TestCase):
             col_con = body[-2].children[0].ids.cols_container
 
             if opt[0] == 'Rows':
-                body[-2].children[0].ids.amount.text = unicode(amount)
+                body[-2].children[0].ids.amount.text = str(amount)
             elif opt[0] == 'Columns':
                 col_con = col_con.children[0]
                 addcol = col_con.ids.columnadd
                 for z in range(amount):
                     addcol.dispatch('on_release')
                     _col = col_con.ids.columns.children[0]
-                    _col.ids.colname.text = 'Column' + unicode(z)
+                    _col.ids.colname.text = 'Column' + str(z)
                     _col.ids.coltype.text = _col.ids.coltype.values[-z]
 
             amount += 1
@@ -118,7 +111,7 @@ class Test(unittest.TestCase):
 
         children = app.root_window.children
         for c in reversed(children):
-            if 'Task' in unicode(c):
+            if 'Task' in str(c):
                 index = children.index(c)
         task = children[index]
         body = task.children[0].children[0].children[0].children
@@ -168,6 +161,7 @@ class Test(unittest.TestCase):
         Clock.schedule_once(p, .000001)
         app.run()
         rmtree(self.folder)
+
 
 if __name__ == '__main__':
     unittest.main()

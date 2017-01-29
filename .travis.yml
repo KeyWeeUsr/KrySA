@@ -2,27 +2,22 @@ matrix:
   fast_finish: true
   include:
     - language: python
-      python: 2.7
-      env: RUN=pep8
-      os: linux
-      dist: trusty
-    - language: python
       python: 3.5
       env: RUN=pep8
       os: linux
       dist: trusty
     - language: python
-      python: 2.7
+      python: 3.5
       env: RUN=docs
       os: linux
       dist: trusty
     - language: python
-      python: 2.7
+      python: 3.5
       env: RUN=unit
       os: linux
       dist: trusty
     - language: python
-      python: 3.5
+      python: 3.4
       env: RUN=unit
       os: linux
       dist: trusty
@@ -50,12 +45,12 @@ install:
             pip install -r docs/docs-requirements.txt;
         fi;
     else
-        pip install --upgrade pep8;
+        pip install --upgrade pycodestyle;
     fi;
 
 script:
   - if [ "${RUN}" == "pep8" ]; then
-        python -m pep8;
+        python -m pycodestyle;
     fi;
   - if [ "${RUN}" == "unit" ]; then
         pip install .;

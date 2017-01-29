@@ -8,7 +8,7 @@ include_exts = ('.py',)
 exclude_dirs = ('test_Project',)
 exclude_files = ('dropdown.py', '__main__.py', 'test_file_', 'test_tasks_')
 
-mod_sep = u' » '
+mod_sep = ' > '
 
 paths = []
 rootdir = op.join(op.dirname(op.dirname(op.abspath(__file__))), 'krysa')
@@ -59,7 +59,7 @@ print('Writing output...')
 for mod in mods:
     mod_name = mod[0].replace(mod_sep, '_').lower()
     with open(op.join(sourcedir, 'mod_{}.rst'.format(mod_name)), 'w') as f:
-        f.write('{}\n'.format(mod[0].encode('utf-8')))
+        f.write('{}\n'.format(mod[0]))
         f.write('=' * len(mod[0]))
         f.write('\n\n.. automodule:: {}\n'.format(mod[1]))
         f.write('   :members:')

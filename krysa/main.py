@@ -61,13 +61,6 @@ from tasks.avgs import Avgs
 from tasks.manipulate import Manipulate
 from tasks.plot import Plot
 
-# Py3 fixes
-import sys
-if sys.version_info[0] >= 3:
-    unicode = str
-    str = bytes
-    xrange = range
-
 
 class ResultGrid(GridLayout):
     '''A black gridlayout, together with :mod:`main.Wrap` makes a table
@@ -322,7 +315,7 @@ class TableItem(TextInput):
         for i in self.origin.data:
             if 'cell' in i:
                 data.append(i)
-        chunks = [data[x:x + cols] for x in xrange(0, len(data), cols)]
+        chunks = [data[x:x + cols] for x in range(0, len(data), cols)]
 
         orig_type = type(chunks[self.r][self.c - 1])
         place = self.cols * (self.r + 1) - (self.cols - self.c)
@@ -385,7 +378,7 @@ class Table(ScrollView):
                                 'text': self.labels[c - 1] + ltr[c - 1],
                                 '_text': self.labels[c - 1],
                                 'disabled': True,
-                                'cell': 'label' + unicode(c - 1),
+                                'cell': 'label' + str(c - 1),
                                 'type': type(u''),
                                 'size': self.default_size,
                                 'origin': self.rv
@@ -393,7 +386,7 @@ class Table(ScrollView):
                         )
                 else:
                     if c == 0:
-                        self.rv.data.append({'text': unicode(r),
+                        self.rv.data.append({'text': str(r),
                                              'disabled': True,
                                              'size': self.number_size,
                                              'origin': self.rv})
@@ -409,7 +402,7 @@ class Table(ScrollView):
                             Logger.info('KrySA: values < space')
                             val = '.'
 
-                        if 'e+' in unicode(val) or 'e-' in unicode(val):
+                        if 'e+' in str(val) or 'e-' in str(val):
                             val = '{0:.10f}'.format(val)
                         if self.types:
                             if self.types[c - 1] == 'INTEGER':
@@ -420,10 +413,10 @@ class Table(ScrollView):
                                 text_type = type(1.1)
                         self.rv.data.append(
                             {
-                                'text': unicode(val),
-                                'old_text': unicode(val),
+                                'text': str(val),
+                                'old_text': str(val),
                                 'disabled': False,
-                                'cell': self.labels[c - 1] + unicode(r),
+                                'cell': self.labels[c - 1] + str(r),
                                 'r': r,
                                 'rows': self.rows,
                                 'c': c,
@@ -1152,14 +1145,14 @@ class Body(FloatLayout):
             rows = self._extract_rows(table[1].rv.data)[max_cols:]
 
             cnks = []
-            for x in xrange(0, len(rows), max_cols):
+            for x in range(0, len(rows), max_cols):
                 cnks.append(rows[x:x + max_cols])
             Logger.info('KrySA: SQL export - inserting values.')
             for chunk in cnks:
                 _chunk = []
                 for cnk in chunk:
-                    if not isinstance(cnk, (str, unicode)):
-                        _chunk.append(unicode(cnk))
+                    if not isinstance(cnk, str):
+                        _chunk.append(str(cnk))
                     else:
                         _chunk.append('\'' + cnk + '\'')
                 values = ','.join(_chunk)
@@ -1185,7 +1178,7 @@ class Body(FloatLayout):
         result_wdg = self.ids.results
         for i, result in enumerate(reversed(self.ids.results.children)):
             try:
-                where = op.join(selection, unicode(i).zfill(3) + '.png')
+                where = op.join(selection, str(i).zfill(3) + '.png')
                 result.children[2].children[0].export_to_png(where)
             except IndexError:
                 Logger.info('KrySA: No results available.')
@@ -1222,7 +1215,7 @@ class Body(FloatLayout):
         projects = self._recent_projects()
         for proj in projects:
             proj = proj.splitlines()
-            text = unicode(op.basename(proj[0]))
+            text = str(op.basename(proj[0]))
             but = SizedButton(text=text.split('.')[0])
             but.bind(on_release=partial(self._open_recent, proj))
             drop.add_widget(but)
@@ -1260,14 +1253,14 @@ class Body(FloatLayout):
                 names.pop(0)
 
         with open(recent, 'w', encoding='utf8') as f:
-            dump = '\n'.join([unicode(n) for n in names])
+            dump = '\n'.join([str(n) for n in names])
             try:
                 dump = dump.decode('utf8')
             except AttributeError:
                 pass
             f.write(dump)
         Logger.info('KrySA: Fetched recent projects: {}.'.format(names))
-        names = [unicode(n) for n in names]
+        names = [str(n) for n in names]
         names = [n[2:-1] if "b'" in n else n for n in names]
         return names
 
@@ -1458,7 +1451,7 @@ class Body(FloatLayout):
         head = PaperLabel(text=task, size_hint_y=None, height='30dp')
 
         if result_type == 'text':
-            content = PaperLabel(text=unicode(result))
+            content = PaperLabel(text=str(result))
         elif result_type in ['image', 'import']:
             content = Image(source=result)
         elif 'table' in result_type:
@@ -1473,7 +1466,7 @@ class Body(FloatLayout):
                 if isinstance(value, (float, int)):
                     val = repr(value)
                 else:
-                    val = unicode(value)
+                    val = str(value)
                 grid.add_widget(Wrap(text=val, color=[0, 0, 0, 1],
                                      background_color=[1, 1, 1, 1],
                                      padding_x=3))
@@ -1576,6 +1569,7 @@ class KrySA(App):
         # read MenuDrop if an idea of removing it comes up
         MenuDrop()
         return Body()
+
 
 if __name__ == '__main__':
     KrySA().run()

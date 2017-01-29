@@ -1,4 +1,3 @@
-from __future__ import print_function
 import unittest
 
 import os
@@ -12,10 +11,6 @@ from kivy.clock import Clock
 main_path = op.dirname(op.dirname(op.abspath(__file__)))
 sys.path.append(main_path)
 from main import KrySA
-
-# Py3 fixes
-if sys.version_info[0] >= 3:
-    xrange = range
 
 
 class Test(unittest.TestCase):
@@ -47,7 +42,7 @@ class Test(unittest.TestCase):
                     ndv.append(float(d['text']))
                 else:
                     ndv.append(d['text'])
-        ndv = [ndv[x:x + 3] for x in xrange(0, len(ndv), 3)]
+        ndv = [ndv[x:x + 3] for x in range(0, len(ndv), 3)]
 
         ndv2 = []
         for d in app.root.tables[1][1].rv.data:
@@ -58,7 +53,7 @@ class Test(unittest.TestCase):
                     ndv2.append(float(d['text']))
                 else:
                     ndv2.append(d['text'])
-        ndv2 = [ndv2[x:x + 3] for x in xrange(0, len(ndv2), 3)]
+        ndv2 = [ndv2[x:x + 3] for x in range(0, len(ndv2), 3)]
 
         # test data
         self.assertTrue(op.exists(op.join(self.path, 'test_Project',
@@ -68,7 +63,7 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in range(0, len(values), 3)]
         conn.close()
         print('NewData:')
         for i, v in enumerate(values):
@@ -83,7 +78,7 @@ class Test(unittest.TestCase):
         c = conn.cursor()
         c.execute('SELECT * FROM NewData2')
         values = [item for sublist in c.fetchall() for item in sublist]
-        values = [values[x:x + 3] for x in xrange(0, len(values), 3)]
+        values = [values[x:x + 3] for x in range(0, len(values), 3)]
         conn.close()
         print('\nNewData2:')
         for i, v in enumerate(values):
@@ -100,6 +95,7 @@ class Test(unittest.TestCase):
         p = partial(self.run_test, app)
         Clock.schedule_once(p, .000001)
         app.run()
+
 
 if __name__ == '__main__':
     unittest.main()

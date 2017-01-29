@@ -21,10 +21,10 @@ The idea behind KrySA is to make statistical software available even for the
 "rats" - people who can't or don't want to buy a commercial tool for statistics
 for whatever reason. KrySA is a free, open-source tool that anyone can afford!
 
-KrySA is written in [Python 2.7](https://python.org) with a passive support
-for Python 3.4 and higher using [Kivy](https://kivy.org) framework together
-with [packages](http://krysa.readthedocs.io/en/latest/gettingstarted.html).
-To run it you have to have all of them installed.
+KrySA is written in [Python 3.5](https://python.org) and higher using
+[Kivy](https://kivy.org) framework together with
+[packages](http://badida.sk/krysa/gettingstarted.html). To run it you have to
+have all of them installed.
 
 You can find more about KrySA, source documentation and screenshots
 [here](http://badida.sk/krysa).
@@ -38,4 +38,4 @@ Licenses
   CC0 licensed image.
 
 For more info about KrySA's license and licenses of used packages, please visit
-the [documentation](http://krysa.readthedocs.io/en/latest/license.html).
+the [documentation](http://badida.sk/krysa/license.html).

@@ -12,12 +12,6 @@ main_path = op.dirname(op.dirname(op.abspath(__file__)))
 sys.path.append(main_path)
 from main import KrySA
 
-# Py3 fixes
-if sys.version_info[0] >= 3:
-    unicode = str
-    str = bytes
-    xrange = range
-
 
 class Test(unittest.TestCase):
     def pause(*args):
@@ -81,6 +75,7 @@ class Test(unittest.TestCase):
         app.run()
         rmtree(app.user_data_dir)
         rmtree(self.folder)
+
 
 if __name__ == '__main__':
     unittest.main()

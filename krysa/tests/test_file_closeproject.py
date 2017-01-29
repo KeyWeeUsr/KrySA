@@ -103,5 +103,6 @@ class Test(unittest.TestCase):
         app.run()
         rmtree(self.folder)
 
+
 if __name__ == '__main__':
     unittest.main()
