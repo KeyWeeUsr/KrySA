@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # KrySA - Statistical analysis for rats
-# Version: 0.6.0
-# Copyright (C) 2016, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
+# Version: 0.6.1
+# Copyright (C) 2016 - 2017, KeyWeeUsr(Peter Badida) <keyweeusr@gmail.com>
 # License: GNU GPL v3.0, More info in LICENSE.txt
 
 # Setting maximized Window
@@ -1309,7 +1309,7 @@ class Body(FloatLayout):
         '''
         aboutdlg = Popup(title='About')
         text = (
-            'Copyright (C) 2016, KeyWeeUsr(Peter Badida)\n'
+            'Copyright (C) 2016 - 2017, KeyWeeUsr(Peter Badida)\n'
             'License: GNU GPL v3.0\n'
             'Find me @ https://github.com/KeyWeeUsr\n\n'
             'Used Software:\n\n'
